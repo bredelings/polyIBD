@@ -4,13 +4,13 @@
 \alias{dummy1}
 \title{Dummy function}
 \usage{
-dummy1()
+dummy1(n = 10)
 }
 \arguments{
-\item{x}{Some parameter}
+\item{n}{number of random draws}
 }
 \description{
-This is a dummy function
+Simple dummy function used to demonstrate linking between R and C++. Returns vector of draws from standard normal distribution.
 }
 \examples{
 dummy1()

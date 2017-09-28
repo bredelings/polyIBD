@@ -2,4 +2,5 @@
 
 export(dummy1)
 importFrom(Rcpp,evalCpp)
+importFrom(RcppParallel,RcppParallelLibs)
 useDynLib(polyIBD)
