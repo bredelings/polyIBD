@@ -16,9 +16,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MCMC_VarMean_cpp
+Rcpp::List MCMC_VarMean_cpp(Rcpp::List args);
+RcppExport SEXP _polyIBD_MCMC_VarMean_cpp(SEXP argsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
+    rcpp_result_gen = Rcpp::wrap(MCMC_VarMean_cpp(args));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_polyIBD_dummy1_cpp", (DL_FUNC) &_polyIBD_dummy1_cpp, 1},
+    {"_polyIBD_MCMC_VarMean_cpp", (DL_FUNC) &_polyIBD_MCMC_VarMean_cpp, 1},
     {NULL, NULL, 0}
 };
 
