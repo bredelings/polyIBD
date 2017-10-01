@@ -42,3 +42,36 @@ dummy1 <- function(n=10) {
     
     return(ret)
 }
+
+
+
+#------------------------------------------------
+#' MCMC_VarMean function
+#'
+#' MCMC_VarMean function. return a markov chain
+#'
+#' @param input a vector of numbers
+#'
+#' @export
+#' @examples
+#' MCMC_VarMean()
+
+MCMC_VarMean <- function(input) {
+  
+  cat("R code working\n")
+  
+  # NOTES
+  # one of the nice things about linking together R and C++ is that we can play to the strengths of both coding languages. For example, C++ is very fast and efficient, but it's a pain to import data and do simple checks on format etc. So the general plan here will be to do pre-processing in R, then send a clean list of arguments to the Rcpp function which does the heavy lifting, then finally tidy things up again in R.
+  
+  # example: check that n is positive
+  stopifnot(length(input)>0)
+  
+  # create a final set of arguments as a list, and pass these to the Rcpp function
+  args <- list(input=input)
+  output_raw <- MCMC_VarMean_cpp(args)
+  
+  # optionally do some post-processing of the raw output
+  ret <- output_raw$x
+  
+  return(ret)
+}
