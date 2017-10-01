@@ -1,2 +1,3 @@
 CXX_STD = CXX11
+CXXFLAGS += -O3  # optimization level 3, https://stackoverflow.com/questions/21341106/overriding-system-defaults-for-c-compilation-flags-from-r
 PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
