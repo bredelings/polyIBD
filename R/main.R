@@ -18,28 +18,28 @@ NULL
 #' dummy1()
 
 dummy1 <- function(n=10) {
-    
+
     cat("R code working\n")
-    
+
     # NOTES
     # one of the nice things about linking together R and C++ is that we can play to the strengths of both coding languages. For example, C++ is very fast and efficient, but it's a pain to import data and do simple checks on format etc. So the general plan here will be to do pre-processing in R, then send a clean list of arguments to the Rcpp function which does the heavy lifting, then finally tidy things up again in R.
-    
+
     # example: check that n is positive
     stopifnot(n>0)
-    
+
     # define mean and standard deviation of normal distribution
     mu <- 5
     sigma <- 1
-    
+
     # create a final set of arguments as a list, and pass these to the Rcpp function
     args <- list(n=n,
                 mu=mu,
                 sigma=sigma)
     output_raw <- dummy1_cpp(args)
-    
+
     # optionally do some post-processing of the raw output
     ret <- output_raw$x
-    
+
     return(ret)
 }
 
@@ -57,21 +57,23 @@ dummy1 <- function(n=10) {
 #' MCMC_VarMean()
 
 MCMC_VarMean <- function(input) {
-  
+
   cat("R code working\n")
-  
-  # NOTES
-  # one of the nice things about linking together R and C++ is that we can play to the strengths of both coding languages. For example, C++ is very fast and efficient, but it's a pain to import data and do simple checks on format etc. So the general plan here will be to do pre-processing in R, then send a clean list of arguments to the Rcpp function which does the heavy lifting, then finally tidy things up again in R.
-  
+
+  # stop if no input
+  if(missing(input)){
+    stop("No input provided")
+  }
+
   # example: check that n is positive
   stopifnot(length(input)>0)
-  
+
   # create a final set of arguments as a list, and pass these to the Rcpp function
   args <- list(input=input)
   output_raw <- MCMC_VarMean_cpp(args)
-  
+
   # optionally do some post-processing of the raw output
-  ret <- output_raw$x
-  
+  ret <- output_raw$chain # need to be consistent with what Cpp returns (this is how they are linking)
+
   return(ret)
 }
