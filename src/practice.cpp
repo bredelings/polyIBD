@@ -7,7 +7,7 @@
 using namespace std;
 
 // [[Rcpp::export]]
-Rcpp::List MCMC_VarMean(Rcpp::List args) {
+Rcpp::List MCMC_VarMean_cpp(Rcpp::List args) {
 
     print("C code working");
 

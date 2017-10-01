@@ -29,7 +29,7 @@ double mean(std::vector<TYPE> &x) {
 //------------------------------------------------
 // min of vector (templated for different data types)
 template<class TYPE>
-TYPE min(std::vector<TYPE> x) {
+TYPE min(const std::vector<TYPE> & x) {
     return(*min_element(x.begin(), x.end()));
 }
 
