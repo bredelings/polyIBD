@@ -13,17 +13,24 @@ Rcpp::List MCMC_VarMean_cpp(Rcpp::List args) {
 
 
 
-    // at this point we have all inputs as standard C++ objects, and we can proceed with the main logic of the code.
-
-    // I like to keep track of execution time
+    // Start Time
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 
+    // Input from R
     std::vector<double> inputFromR = Rcpp_to_vector_double(args["input"]);
 
+    // Define Prior Distribution
+    int priordistributioner (int mu, int sigma)
+    {
+    	int muprior
+		int sigmaprior
 
-    //starting to code
-    Rcpp::Rcout << rnorm1(0, 1) << std::endl;;
-    Rcpp::Rcout << rnorm1(0, 1) << std::endl;;
+
+    }
+
+
+
+
 
 
     // end timer
