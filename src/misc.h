@@ -5,7 +5,7 @@
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
 const int  OVERFLO   = 1e100;
-const int UNDERFLO   = 1e-100
+const int UNDERFLO   = 1e-100;
 
 //------------------------------------------------
 // basic sum over elements in a vector (templated for different data types).
