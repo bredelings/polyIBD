@@ -4,6 +4,8 @@
 
 #include <random>
 
+namespace polyibd{
+
 //------------------------------------------------
 // draw from continuous uniform distribution on interval [0,1)
 double runif_0_1();
@@ -56,5 +58,5 @@ double dnbinom1(int n, double lambda, double gamma, bool returnLog=true);
 // draw from symmetric dichlet(alpha) distribution of length n
 std::vector<double> rdirichlet1(double alpha, int n);
 
-
+}
 #endif
