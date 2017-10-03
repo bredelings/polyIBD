@@ -58,5 +58,5 @@ double dnbinom1(int n, double lambda, double gamma, bool returnLog=true);
 // draw from symmetric dichlet(alpha) distribution of length n
 std::vector<double> rdirichlet1(double alpha, int n);
 
-}
+} // namespace polyibd
 #endif

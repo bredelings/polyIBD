@@ -1,15 +1,18 @@
 
 #include <Rcpp.h>
 #include <RcppParallel.h>
+#include <chrono>
 #include "misc.h"
 #include "probability.h"
 
 using namespace std;
-namespace polyibd {
+using namespace polyibd;
+
+
 // [[Rcpp::export]]
 Rcpp::List dummy1_cpp(Rcpp::List args) {
     
-    print("C code working");
+		print("C code working");
     
     // NOTES
     // At the moment all our input arguments are in the form of an Rcpp::List. This is one of a special class of Rcpp objects, others include vectors and matrices. Although we could work directly with these Rcpp objects, I like to convert input arguments to standard C++ objects first (I'm just more familiar with how to use these). The overhead of converting objects should usually be small, but if not we might want to revisit this.
@@ -21,6 +24,7 @@ Rcpp::List dummy1_cpp(Rcpp::List args) {
     
     // at this point we have all inputs as standard C++ objects, and we can proceed with the main logic of the code.
     
+
     // I like to keep track of execution time
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
     
@@ -38,4 +42,5 @@ Rcpp::List dummy1_cpp(Rcpp::List args) {
     // return values back to R
     return Rcpp::List::create(Rcpp::Named("x")=x);
 }
-} // end of name space polyibd
+
+

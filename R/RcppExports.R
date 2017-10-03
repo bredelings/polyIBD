@@ -5,7 +5,3 @@ dummy1_cpp <- function(args) {
     .Call('_polyIBD_dummy1_cpp', PACKAGE = 'polyIBD', args)
 }
 
-MCMC_VarMean_cpp <- function(args) {
-    .Call('_polyIBD_MCMC_VarMean_cpp', PACKAGE = 'polyIBD', args)
-}
-

@@ -2,6 +2,11 @@
 
 #include <Rcpp.h>
 
+namespace polyibd {
+
+
+
+
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
 const double  OVERFLO   = 1e100;
@@ -168,3 +173,5 @@ std::vector< std::vector< std::vector<double> > > Rcpp_to_array_double(Rcpp::Lis
 // converts input from Rcpp::List format to vector<vector<vector<int>>> format.
 std::vector< std::vector< std::vector<int> > > Rcpp_to_array_int(Rcpp::List x);
 
+
+}  // namespace polyibd
