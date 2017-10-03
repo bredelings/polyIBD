@@ -4,8 +4,8 @@
 
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
-const int  OVERFLO   = 1e100;
-const int UNDERFLO   = 1e-100;
+const double  OVERFLO   = 1e100;
+const double UNDERFLO   = 1e-100;
 
 //------------------------------------------------
 // basic sum over elements in a vector (templated for different data types).
@@ -85,7 +85,7 @@ void printVector(const std::vector<TYPE> &x) {
 // helper function for printing contents of a matrix (templated for different data types)
 template<class TYPE>
 void printMatrix(const std::vector< std::vector<TYPE>> &M) {
-	for(const auto & row: m ){
+	for(const auto & row: M ){
 		for(const auto & col : row){
 			Rcpp::Rcout << col << " ";
 		}
