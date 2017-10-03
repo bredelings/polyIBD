@@ -1,6 +1,6 @@
 
 #include <Rcpp.h>
-#include <math.h>
+#include <cmath>
 #include "probability.h"
 #include "misc.h"
 
@@ -8,6 +8,8 @@ using namespace std;
 
 // comment this line out to use R default random functions
 //#define USE_MY_RANDOM
+namespace polyibd {
+
 
 
 //-- set random seed --
@@ -206,4 +208,8 @@ vector<double> rdirichlet1(double alpha, int n) {
     }
     return(ret);
 }
+
+}  // namespace polyibd
+
+
 

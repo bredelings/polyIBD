@@ -2,7 +2,7 @@
 #include "misc.h"
 
 using namespace std;
-
+namespace polyibd {
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
 // OVERFLO
@@ -43,7 +43,7 @@ double logSum(double logA, double logB) {
         return(logB);
     }
     double output = (logA<logB) ? logB + log(1+exp(logA-logB)) : logA + log(1+exp(logB-logA));
-    return(output);
+    return output;
 }
 
 //------------------------------------------------
@@ -86,7 +86,7 @@ vector<int> seq_int(int from, int to, int by) {
         from += by;
         ret[i] = from;
     }
-    return(ret);
+    return ret;
 }
 
 //------------------------------------------------
@@ -195,3 +195,5 @@ vector< vector< vector<double> > > Rcpp_to_array_double(Rcpp::List x) {
     }
     return(ret);
 }
+
+} // end of name space polyibd

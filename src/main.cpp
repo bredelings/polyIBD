@@ -5,7 +5,7 @@
 #include "probability.h"
 
 using namespace std;
-
+namespace polyibd {
 // [[Rcpp::export]]
 Rcpp::List dummy1_cpp(Rcpp::List args) {
     
@@ -26,7 +26,7 @@ Rcpp::List dummy1_cpp(Rcpp::List args) {
     
     // in this example we will create a vector of normal random variables.
     vector<double> x(n);
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; ++i) {
         x[i] = rnorm1(mu,sigma);
     }
     
@@ -38,3 +38,4 @@ Rcpp::List dummy1_cpp(Rcpp::List args) {
     // return values back to R
     return Rcpp::List::create(Rcpp::Named("x")=x);
 }
+} // end of name space polyibd

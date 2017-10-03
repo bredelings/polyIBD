@@ -1,43 +1,44 @@
-
-#ifndef __polyIBD__misc__
-#define __polyIBD__misc__
+#pragma once
 
 #include <Rcpp.h>
 
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
-#define OVERFLO   1e100
-#define UNDERFLO   1e-100
+const int  OVERFLO   = 1e100;
+const int UNDERFLO   = 1e-100
 
 //------------------------------------------------
 // basic sum over elements in a vector (templated for different data types).
 template<class TYPE>
-TYPE sum(std::vector<TYPE> &x) {
+TYPE sum(const std::vector<TYPE> &xVec) {
     TYPE output = 0;
-    for (int i=0; i<int(x.size()); i++)
-        output += x[i];
-    return(output);
+    for( const auto & x : xVec){
+    	output += x;
+    }
+    return output;
 }
 
 //------------------------------------------------
 // mean of vector (templated for different data types)
 template<class TYPE>
-double mean(std::vector<TYPE> &x) {
-    return(sum(x)/double(x.size()));
+double mean(const std::vector<TYPE> &x) {
+    return sum(x)/double(x.size());
 }
+
+
 
 //------------------------------------------------
 // min of vector (templated for different data types)
 template<class TYPE>
 TYPE min(const std::vector<TYPE> & x) {
-    return(*min_element(x.begin(), x.end()));
+    return *min_element(x.begin(), x.end());
 }
 
 //------------------------------------------------
 // max of vector (templated for different data types)
 template<class TYPE>
 TYPE max(std::vector<TYPE> x) {
-    return(*max_element(x.begin(), x.end()));
+    return *max_element(x.begin(), x.end());
 }
 
 //------------------------------------------------
@@ -53,7 +54,7 @@ double logSum(double logA, double logB);
 
 //------------------------------------------------
 // helper function for printing a single value (templated for different data types)
-template<class TYPE>
+template<typename TYPE>
 void print(TYPE x) {
     Rcpp::Rcout << x << "\n";
     R_FlushConsole();
@@ -72,10 +73,10 @@ void print(TYPE1 x1, TYPE2 x2, TYPE3 x3) {
 //------------------------------------------------
 // helper function for printing contents of a vector (templated for different data types)
 template<class TYPE>
-void printVector(std::vector<TYPE> &x) {
-    for (int i=0; i<x.size(); i++) {
-        Rcpp::Rcout << x[i] << " ";
-    }
+void printVector(const std::vector<TYPE> &x) {
+	for(const auto & v : x){
+		Rcpp::Rcout << v  << " ";
+	}
     Rcpp::Rcout << "\n";
     R_FlushConsole();
 }
@@ -83,13 +84,13 @@ void printVector(std::vector<TYPE> &x) {
 //------------------------------------------------
 // helper function for printing contents of a matrix (templated for different data types)
 template<class TYPE>
-void printMatrix(std::vector< std::vector<TYPE> > &M) {
-    for (int i=0; i<M.size(); i++) {
-        for (int j=0; j<M[i].size(); j++) {
-            Rcpp::Rcout << M[i][j] << " ";
-        }
-        Rcpp::Rcout << "\n";
-    }
+void printMatrix(const std::vector< std::vector<TYPE>> &M) {
+	for(const auto & row: m ){
+		for(const auto & col : row){
+			Rcpp::Rcout << col << " ";
+		}
+		Rcpp::Rcout << "\n";
+	}
     Rcpp::Rcout << "\n";
     R_FlushConsole();
 }
@@ -167,4 +168,3 @@ std::vector< std::vector< std::vector<double> > > Rcpp_to_array_double(Rcpp::Lis
 // converts input from Rcpp::List format to vector<vector<vector<int>>> format.
 std::vector< std::vector< std::vector<int> > > Rcpp_to_array_int(Rcpp::List x);
 
-#endif
