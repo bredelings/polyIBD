@@ -43,37 +43,3 @@ dummy1 <- function(n=10) {
     return(ret)
 }
 
-
-
-#------------------------------------------------
-#' MCMC_VarMean function
-#'
-#' MCMC_VarMean function. return a markov chain
-#'
-#' @param input a vector of numbers
-#'
-#' @export
-#' @examples
-#' MCMC_VarMean()
-
-MCMC_VarMean <- function(input) {
-
-  cat("R code working\n")
-
-  # stop if no input
-  if(missing(input)){
-    stop("No input provided")
-  }
-
-  # example: check that n is positive
-  stopifnot(length(input)>0)
-
-  # create a final set of arguments as a list, and pass these to the Rcpp function
-  args <- list(input=input)
-  output_raw <- MCMC_VarMean_cpp(args)
-
-  # optionally do some post-processing of the raw output
-  ret <- output_raw$chain # need to be consistent with what Cpp returns (this is how they are linking)
-
-  return(ret)
-}
