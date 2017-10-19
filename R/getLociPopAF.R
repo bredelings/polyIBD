@@ -36,7 +36,7 @@ getLociPopAF <- function(snpmatrix_rc_samploci){
   ##################################
   popAF <- matrix(rep(NA, 2*ncol(snpmatrix_rc_samploci)), nrow=2) # init the matrix
   
-  popAF[1,] <- apply(snpmatrix_rc_samploci[2:nrow(snpmatrix_rc_samploci),], 2, function(x){(2*(length(which(x==0))) + length(which(x==1)))/(2*length(x))}) # since we know homozygous ref is 0, so this counts as 2 As, and then we count hets and then divide by 2*possible alleles. Doing this roundabout way because we aren't in HWE
+  popAF[1,] <- apply(snpmatrix_rc_samploci[,2:ncol(snpmatrix_rc_samploci)], 2, function(x){(2*(length(which(x==0))) + length(which(x==1)))/(2*length(x))}) # since we know homozygous ref is 0, so this counts as 2 As, and then we count hets and then divide by 2*possible alleles. Doing this roundabout way because we aren't in HWE
   popAF[2,] <- 1-popAF[1,] # now we have q
   
   return(popAF)
