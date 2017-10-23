@@ -50,18 +50,18 @@ vcf2infSNPmatrix <- function(vcffile, biallelic=T, diploid=T) {
   snpmatrix[snpmatrix == "0/1"] <- 1
   snpmatrix[snpmatrix == "1/1"] <- 2
   snpmatrix <- apply(snpmatrix, 2, function(x){as.numeric(x)})
-  uninformativeloci <- apply(snpmatrix, 1, function(x){
-    sum(x, na.rm=T) != 0 }) # find segregating sites
-  snpmatrix_inform <- snpmatrix[uninformativeloci,] # subset to only sites with some variation
+  informativeloci <- apply(snpmatrix, 1, function(x){sum(x, na.rm=T) != 0 }) # find segregating sites
+  snpmatrix_inform <- snpmatrix[informativeloci,] # subset to only segregating sites (i.e. site with some variation)
   
   
   #############################################################
   ##### Attach Positions to the VCF GT Informative Loci #######
   #############################################################
-  POS <- data.frame(datvcf@fix, stringsAsFactors = F)
-  POS <- POS[uninformativeloci,]
-  POS <- as.numeric(POS$POS) # taking char to num -- fine in R, maybe not in Cpp
-  snpmatrix_inform <- cbind(POS, snpmatrix_inform)
+  REG <- data.frame(datvcf@fix, stringsAsFactors = F)
+  REG <- REG[informativeloci,]
+  REG <- REG[,colnames(REG) %in% c("CHROM", "POS")] #vcf format it is first two columns but to be explicit
+  REG$POS <- as.numeric(REG$POS) # taking char to num -- fine in R, maybe not in Cpp
+  snpmatrix_inform <- cbind(REG, snpmatrix_inform)
   return(snpmatrix_inform)
   
 }

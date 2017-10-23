@@ -8,7 +8,7 @@
 # TO DO 
 #   This code is messy and needs tidying but works for now
 
-Getemmissionlookuptable <- function(m1max=5, m2max=5, popaffile){
+Getemmissionlookuptable <- function(m1max=5, m2max=5, popaf){
       
       
       ## Create Emission Probability Look-Up Tables

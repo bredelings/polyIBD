@@ -28,11 +28,11 @@ getLocigeneticdist <- function(snpmatrix_rc_samploci){
   #####################################################
   #####      CODE for Genetic Distance by Loci #######
   ####################################################
-  locigendist <- matrix(rep(NA, ncol(snpmatrix_rc_samploci)), nrow=1) # init the matrix
+  locigendist <- matrix(rep(NA, ncol(snpmatrix_rc_samploci)-2), nrow=1) # init the matrix, -2 for the chromosome and position columns
   locigendist[1] <- NA # redundant but to be explicit
   
   for(i in 2:nrow(snpmatrix_rc_samploci)){
-    locigendist[i] <- snpmatrix_rc_samploci[i,1] - snpmatrix_rc_samploci[i-1,1]
+    locigendist[i] <- snpmatrix_rc_samploci[i,2] - snpmatrix_rc_samploci[i-1,2] # column 2 contains chromosome position
   }
   
   return(locigendist)
