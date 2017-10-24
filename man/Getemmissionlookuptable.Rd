@@ -4,7 +4,7 @@
 \alias{Getemmissionlookuptable}
 \title{polyIBD Emission Calculation Look-up Table}
 \usage{
-Getemmissionlookuptable(m1max = 5, m2max = 5, popaffile)
+Getemmissionlookuptable(m1max = 5, m2max = 5, popaf)
 }
 \description{
 .....

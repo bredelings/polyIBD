@@ -49,7 +49,7 @@ vcf2infSNPmatrix <- function(vcffile, biallelic=T, diploid=T) {
   snpmatrix[snpmatrix == "0/0"] <- 0
   snpmatrix[snpmatrix == "0/1"] <- 1
   snpmatrix[snpmatrix == "1/1"] <- 2
-  snpmatrix <- apply(snpmatrix, 2, function(x){as.numeric(x)})
+  snpmatrix <- apply(snpmatrix, 2, function(x){as.numeric(x)}) # need to do this as columns for structure
   informativeloci <- apply(snpmatrix, 1, function(x){sum(x, na.rm=T) != 0 }) # find segregating sites
   snpmatrix_inform <- snpmatrix[informativeloci,] # subset to only segregating sites (i.e. site with some variation)
   

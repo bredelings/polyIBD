@@ -15,19 +15,19 @@ LikelihoodRowDeterminer <- function(snpmatrixcolumn){
            as.numeric(1) # level of the row we want -- for AA which is row 1 in the likelihood function
          },
          "02" = {
-           as.numeric(2) # level of the row we want -- for Aa which is row 1 in the likelihood function
+           as.numeric(2) # level of the row we want -- for Aa which is row 2 in the likelihood function
          },
          "12" = {
-           as.numeric(3) # level of the row we want -- for AAa which is row 1 in the likelihood function
+           as.numeric(3) # level of the row we want -- for AAa which is row 3 in the likelihood function
          },
          "00" = {
-           as.numeric(4) # level of the row we want -- for aa which is row 1 in the likelihood function
+           as.numeric(4) # level of the row we want -- for aa which is row 4 in the likelihood function
          },
          "01" = {
-           as.numeric(5) # level of the row we want -- for aAa which is row 1 in the likelihood function
+           as.numeric(5) # level of the row we want -- for aAa which is row 5 in the likelihood function
          },
          "11" = {
-           as.numeric(6) # level of the row we want -- for AaAa which is row 1 in the likelihood function
+           as.numeric(6) # level of the row we want -- for AaAa which is row 6 in the likelihood function
          }
   )
 }

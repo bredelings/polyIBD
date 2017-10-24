@@ -1,4 +1,4 @@
-#' @title polyIBD object
+#' @title From VCF, setup the polyIBD MCMC
 #' @description .....
 #' @param file
 #' @export
@@ -18,34 +18,17 @@
 
 
 getpolyIBDsetup <- function(vcfile, m1max, m2max){
-  
-  #--------------------------------------------------------------
+
   # PART 1:  Read VCF and Go to SNP Matrix of Informative Sites
-  #--------------------------------------------------------------
   snpmatrix_inform <- polyIBD::vcf2infSNPmatrix(vcfile)
-    
-    
-    
-  #-----------------------------------------------
+
   # PART 2: Calculate Pop AF per Loci 
-  #----------------------------------------------
   popAF <- polyIBD::getLociPopAF(snpmatrix_inform)
-    
-  
-  #-----------------------------------------------
+
   # PART 3: Calculate Genetic Distance
-  #----------------------------------------------
   locigendist <- polyIBD::getLocigeneticdist(snpmatrix_inform)
-  
-  #-------------------------------------------------------------------
-  # PART 4: Determine Row for likelihood function calcuations 
-  #-------------------------------------------------------------------
-  emmprobPROC <- apply(snpmatrix_inform[,3:ncol(snpmatrix_inform)], 2, LikelihoodRowDeterminer) #exclude first two columns with chrom and position
-  
-  #-------------------------------------------------------------------
-  # PART 5: Complete Lookup for Emission Tables
-  #-------------------------------------------------------------------
-  
+
+  # PART 4: Complete Lookup for Emission Tables
   EmmissionTable <- Getemmissionlookuptable(m1max = m1max, m2max = m2max, popaffile = popAF)
   
       
@@ -55,8 +38,7 @@ getpolyIBDsetup <- function(vcfile, m1max, m2max){
       polyIBDlists <- list(snpmatrix=snpmatrix_inform, # part 1
                            popAF=popAF, # part 2
                            locigendist=locigendist, #part 3
-                           emmprobPROC = emmprobPROC, #part 4
-                           EmmissionTable = EmmissionTable # part 5
-                             )
+                           EmmissionTable = EmmissionTable # part 4
+                        )
 }
 

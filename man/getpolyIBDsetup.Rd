@@ -2,7 +2,7 @@
 % Please edit documentation in R/getpolyIBDsetup.R
 \name{getpolyIBDsetup}
 \alias{getpolyIBDsetup}
-\title{polyIBD object}
+\title{From VCF, setup the polyIBD MCMC}
 \usage{
 getpolyIBDsetup(vcfile, m1max, m2max)
 }
