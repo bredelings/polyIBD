@@ -1,5 +1,5 @@
-#' @title Generate Sim Data for polyIBD
-#' @description .....
+#' @title Generate Sim Data for polyIBD 
+#' @description This is a very simple case that is too simple for real life...and is not what our model is estimating in expectation
 #' @param file
 #' @export
 #' 

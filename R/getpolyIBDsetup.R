@@ -29,7 +29,7 @@ getpolyIBDsetup <- function(vcfile, m1max, m2max){
   locigendist <- polyIBD::getLocigeneticdist(snpmatrix_inform)
 
   # PART 4: Complete Lookup for Emission Tables
-  EmmissionTable <- Getemmissionlookuptable(m1max = m1max, m2max = m2max, popaffile = popAF)
+  EmmissionTable <- Getemmissionlookuptable(m1max = m1max, m2max = m2max, popaf = popAF)
   
       
       #-----------------------------------------------
