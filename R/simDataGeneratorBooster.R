@@ -4,7 +4,7 @@
 #' @export
 #' 
 
-simDatGenerator <- function(n, MOI1=2, MOI2=2, m1max=5, m2max=5, IBD, Contigs){
+simDatGeneratorBooster <- function(n, MOI1=2, MOI2=2, m1max=5, m2max=5, IBD, Contigs){
   # Generate SimData for polyIBD
   #
   # Args:

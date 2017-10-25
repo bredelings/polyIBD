@@ -4,7 +4,7 @@
 \alias{runMCMC}
 \title{Run the MCMC}
 \usage{
-runMCMC(reps = 1000, finit, rho, m = c(1, 1), samplecomparisonsnpmatrix,
+runMCMC(reps = 1000, finit, rho, m = c(5, 5), samplecomparisonsnpmatrix,
   EmissionLookUpTableDict, m1max = 5, m2max = 5)
 }
 \description{

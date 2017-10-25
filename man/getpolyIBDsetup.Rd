@@ -4,7 +4,7 @@
 \alias{getpolyIBDsetup}
 \title{From VCF, setup the polyIBD MCMC}
 \usage{
-getpolyIBDsetup(vcfile, m1max, m2max)
+getpolyIBDsetup(vcfile = NULL, snpdf = NULL, m1max, m2max)
 }
 \description{
 .....

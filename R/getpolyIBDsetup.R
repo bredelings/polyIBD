@@ -17,11 +17,18 @@
 
 
 
-getpolyIBDsetup <- function(vcfile, m1max, m2max){
+getpolyIBDsetup <- function(vcfile=NULL, snpdf=NULL, m1max, m2max){
+  
+  if(!is.null(vcfile)){
+    # PART 1:  Read VCF and Go to SNP Matrix of Informative Sites
+    snpmatrix_inform <- polyIBD::vcf2infSNPmatrix(vcfile)
+  } else if(!is.null(snpdf)){
+    snpmatrix_inform <- snpdf
+  } else{
+    stop("Must Supply Input File in vcf format")
+  }
 
-  # PART 1:  Read VCF and Go to SNP Matrix of Informative Sites
-  snpmatrix_inform <- polyIBD::vcf2infSNPmatrix(vcfile)
-
+  
   # PART 2: Calculate Pop AF per Loci 
   popAF <- polyIBD::getLociPopAF(snpmatrix_inform)
 

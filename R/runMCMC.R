@@ -6,7 +6,7 @@
 
 # samplestocompare=c("mat1", "mat2") put this part in later
 
-runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, EmissionLookUpTableDict, m1max=5, m2max=5){
+runMCMC <- function(reps=1e3, finit, rho, m=c(5,5), samplecomparisonsnpmatrix, EmissionLookUpTableDict, m1max=5, m2max=5){
   # Run the MCMC for polyIBD
   #
   # Args:
@@ -88,9 +88,11 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, E
   # create objects for storing results of MCMC Below
   ######################################################
   f_chain <- rep(finit,reps)
+  f_proposedchain <- rep(finit, reps)
   m_chain <- matrix(NA, 2, reps)
   like_store <- rep(like_old,reps)
   IBD_store <- matrix(NA,reps,n)
+  AcceptanceRatio <- 0
   
   # add in first observations
   IBD_store[1,] <- IBD
@@ -116,7 +118,7 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, E
     ##########################################################################
     f_proposed_logged <- rnorm(1, mean=log(finit/(1-finit)), sd=1)
     f_proposed <- 1/(1+exp(-f_proposed_logged))
-    print(f_proposed)
+    f_proposedchain[rep] <- f_proposed
     
     
     ###########################################################################
@@ -170,9 +172,10 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, E
     #sqrt((0.5*0.5)/((0.5+0.5+1)))
     
     # need to add metropolis-hastings term because asymmetric prob distribution
-    backwardmove <- dnorm(logit(finit)*(1/(finit*(1-finit))), mean=f_proposed, sd=0.3535534) # do logit norm 
-    forwardmove <- dnorm(logit(f_proposed)*(1/(f_proposed*(1-f_proposed))), mean=finit, sd=0.3535534) # do logit norm 
-    
+    backwardmove <- dnorm(logit(finit)*(1/(finit*(1-finit)))) # do logit norm -- , mean=f_proposed, sd=0.3535534 --ask bob if agrees with using the beta to inform the SD of the normal logit here 
+    forwardmove <- dnorm(logit(f_proposed)*(1/(f_proposed*(1-f_proposed)))) # do logit norm 
+    print(paste("backwardmove:", backwardmove))
+    print(paste("forwardmove:", forwardmove))
     metropolistop <- joint_new*forwardmove
     metropolisbottom <- joint_old*backwardmove
     
@@ -200,6 +203,9 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, E
       like_old <- like_new
       finit <- f_proposed
       m <- c(m1_proposed, m2_proposed) 
+      
+      # update acceptance ratio
+      AcceptanceRatio <- AcceptanceRatio + 1
       
       # Tune lambda from Robbins-Monro Algorith (pmove was accepted here) for m1
       lambdam1[2] <- lambdam1[2]+1
@@ -229,8 +235,10 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(1,1), samplecomparisonsnpmatrix, E
   
   
   MCMCresult <- list(fchain = f_chain,
+                     fproposedchain = f_proposedchain,
                      mchain = m_chain,
-                     IBD_store= IBD_store)
+                     IBD_store= IBD_store,
+                     acceptratio=(AcceptanceRatio/reps))
   
   return(MCMCresult)
   
