@@ -58,7 +58,7 @@ gtplotter <- function(simdataobj){
   
   # call ggplot
   gtplot <- ggplot(data = vcfallelecharssorted) + geom_tile(aes(x = POS, y = Sample, fill = GT), colour = "grey")
-  gtplot <- gtplot +  scale_fill_manual(values=c("#005AC8", "#AA0A3C", "#0AB45A", "#cccccc"))
+  gtplot <- gtplot +  scale_fill_manual(values=c("#fc8d59", "#AA0A3C", "#ffffbf", "#91bfdb"))
   gtplot <- gtplot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
   
   return(gtplot)

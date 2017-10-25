@@ -5,7 +5,7 @@
 \title{polyIBD Empirical Simulator}
 \usage{
 IBDsimulator2smplvcf(n = 100, alpha = 0.1, beta = 0.1, MOIsmpl1 = 3,
-  MOIsmpl2 = 4, m1max = 5, m2max = 5, f = 0.3, rho = 0.1, d = 1,
+  MOIsmpl2 = 4, m1max = 5, m2max = 5, fsim, rhosim, dsim = 1,
   contigs = "contig1")
 }
 \description{

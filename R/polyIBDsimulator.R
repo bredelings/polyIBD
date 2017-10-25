@@ -17,7 +17,7 @@
 IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
                          MOIsmpl1=3, MOIsmpl2=4,
                          m1max=5, m2max=5,
-                         f=0.3, rho=0.1, d=1, contigs="contig1"){
+                         fsim, rhosim, dsim=1, contigs="contig1"){
 
 
 
@@ -76,10 +76,10 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   #--------------------------------------------------------------------
   # convert new value of f to transmission probabilities 
   transProbsSim <- matrix(NA, 2, 2)
-  transProbsSim[1,1] <- polyIBD::UUstateTransProb(rho = rho, d=d, f=f)
-  transProbsSim[1,2] <- polyIBD::UIstateTransProb(rho = rho, d=d, f=f)
-  transProbsSim[2,1] <- polyIBD::IUstateTransProb(rho = rho, d=d, f=f)
-  transProbsSim[2,2] <- polyIBD::IIstateTransProb(rho = rho, d=d, f=f)
+  transProbsSim[1,1] <- polyIBD::UUstateTransProb(rho = rhosim, d=dsim, f=fsim)
+  transProbsSim[1,2] <- polyIBD::UIstateTransProb(rho = rhosim, d=dsim, f=fsim)
+  transProbsSim[2,1] <- polyIBD::IUstateTransProb(rho = rhosim, d=dsim, f=fsim)
+  transProbsSim[2,2] <- polyIBD::IIstateTransProb(rho = rhosim, d=dsim, f=fsim)
   
   
   
@@ -164,7 +164,8 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   
   simDataproduced <- list(simvcf=simvcf, 
                           popAF = popAF,
-                          EmmissionTable=EmmissionTable)
+                          EmmissionTable=EmmissionTable,
+                          strainIBD=strainIBDness)
   
   return(simDataproduced)
 }
