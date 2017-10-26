@@ -17,19 +17,19 @@ Getemmissionlookuptable <- function(m1max=5, m2max=5, popaf){
       ## The one for shared is going to be a layered matrix (i.e. R list object) with levels of Z = [1,5]
       ## THE emission functions must be sourced before this can be run.
       
-      NoShareFunctionlist <- list(NoShareAAEmission, 
-                                  NoShareAaEmission, 
-                                  NoShareAAaEmission, 
-                                  NoShareaaEmission, 
-                                  NoShareaAaEmission, 
-                                  NoShareAaAaEmission)
+      noshareFunctionlist <- list(noshare_AA_emission, 
+                                  noshare_Aa_emission, 
+                                  noshare_AAa_emission, 
+                                  noshare_aa_emission, 
+                                  noshare_aAa_emission, 
+                                  noshare_AaAa_emission)
       
-      IBDShareFunctionlist <- list(ShareAAEmission,
-                                   ShareAaEmission,
-                                   ShareAAaEmission,
-                                   ShareaaEmission,
-                                   ShareaAaEmission,
-                                   ShareAaAaEmission)
+      IBDShareFunctionlist <- list(share_AA_emission,
+                                   share_Aa_emission,
+                                   share_AAa_emission,
+                                   share_aa_emission,
+                                   share_aAa_emission,
+                                   share_AaAa_emission)
       
       
       #------------------------------------------------
@@ -57,7 +57,7 @@ Getemmissionlookuptable <- function(m1max=5, m2max=5, popaf){
             #  print(zlvl)
             if(zlvl == 0){
               for(EMProbEq in 1:6){
-                EmissionLookUpTableDict[[m1i]][[m2j]][[1]][EMProbEq,] <- NoShareFunctionlist[[EMProbEq]](p=popaf[1,], q=popaf[2,], m1=m1i,m2=m2j) # We are going for level m1,m2 and then we know we must be when Z=0, and are iterating through our list of six Emission Probability Functions
+                EmissionLookUpTableDict[[m1i]][[m2j]][[1]][EMProbEq,] <- noshareFunctionlist[[EMProbEq]](p=popaf[1,], q=popaf[2,], m1=m1i,m2=m2j) # We are going for level m1,m2 and then we know we must be when Z=0, and are iterating through our list of six Emission Probability Functions
               }
             } else{
               for(EMProbEq in 1:6){

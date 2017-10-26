@@ -4,10 +4,10 @@
 \alias{IBDSIMplotter}
 \title{polyIBD SIM Plotter}
 \usage{
-IBDSIMplotter(simdataobj, IBD_store)
+IBDSIMplotter(simData, IBD_store)
 }
 \arguments{
-\item{IBDdf}{}
+\item{IBD_store}{}
 }
 \description{
 .....

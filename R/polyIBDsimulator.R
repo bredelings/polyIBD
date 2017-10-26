@@ -1,23 +1,38 @@
+#' @title polyIBD Empirical markovchainIBD simulator
+#' @description Going off of empirical solution of model
+#' @param file
+#' @export
+#' 
+####################################################################################
+# Make Markov Chain for Transition Probs that will be used by simulator below
+#####################################################################################
+markovchainIBDsim <- function(transprobs, n=n, fsim){# n is from loci above
+  IBDintervals <- rep(NA, n)
+  IBDintervals[1] <- sample(c("U", "I"), size = 1, prob = c(1-fsim, fsim))
+  
+  for(i in 2:length(IBDintervals)){
+    IBDintervals[i] <- sample(c("U", "I"), size = 1, 
+                              prob = transprobs[ifelse(IBDintervals[i-1] == "U", 1, 2),]) #ifelse statement determines which row we are in for the transprob calculation
+  }
+  
+  return(IBDintervals)
+} #function inspired by Deonier's Computational Genomic Textbook
+
+
+
+
+
+
+
 #' @title polyIBD Empirical Simulator
 #' @description Going off of empirical solution of model
 #' @param file
 #' @export
 #' 
 
-
-#####################################################
-#################       TO DO       #################
-#####################################################
-# let user specify shape parameters for beta distribution
-#hist(rbeta(1000, 0.1,0.1))
-# figure out d
-# Population allele freq have 100% and 0% per alleles. not what we want for variable sites...
-# Figure out contig and pos 
-
-IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
-                         MOIsmpl1=3, MOIsmpl2=4,
-                         m1max=5, m2max=5,
-                         fsim, rhosim, dsim=1, contigs="contig1"){
+IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
+                         MOIsmpl1=1, MOIsmpl2=1,
+                         fsim=0.3, rhosim=0.1, dsim=1, contigs="contig1"){
 
 
 
@@ -28,7 +43,7 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   popp <- rep(NA, n)
   i <- 1
   while(c(TRUE %in% is.na(popp))){
-    est <- round(rbeta(n=1, shape1=alpha, shape2=beta), 2)
+    est <- round(rbeta(n=1, shape1=shape1, shape2=shape2), 2)
     if(est >= 0.05 & est <= 0.95){
       popp[i] <- est
       i <- i+1
@@ -42,23 +57,15 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   #--------------------------------------------------------------------
   # assuming individuals strains contribute to overall HWE that gave us our sim pop allele freq
   p <- popp
-  q <- 1-popp
-  alleleprob <- cbind(p,q)
+  popAF <- rbind(p,(1-p)) # this is to be consistent with how we are using popAF in teh emissioncalculationlookuptable
   
   
-  #------------------------------------------------------
-  # sloppy but will need this later
-  popAF <- matrix(NA,2,n)
-  popAF[1,] <- p
-  popAF[2,] <- q
-  
-  EmmissionTable <- polyIBD::Getemmissionlookuptable(m1max = m1max, m2max = m2max, popaf = popAF)
   #------------------------------------------------------ 
   # sample 1 strains as random draws from pop allele freq -- these are haploid
   smpl1strains <- matrix(NA, n, MOIsmpl1)
   for(loci in 1:n){ # for each loci
     for(strain in 1:ncol(smpl1strains)){ #for each strain sample an allele
-      smpl1strains[loci, strain] <- sample(x=c(0,2), size=1, prob = c(alleleprob[loci,]))
+      smpl1strains[loci, strain] <- sample(x=c(0,2), size=1, prob = c(popAF[,loci])) #loci prob are now in columns
     }
   }
   
@@ -66,7 +73,7 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   smpl2strains <- matrix(NA, n, MOIsmpl2)
   for(loci in 1:n){ # for each loci
     for(strain in 1:ncol(smpl2strains)){ #for each strain sample an allele
-      smpl2strains[loci, strain] <- sample(x=c(0,2), size=1, prob = c(alleleprob[loci,]))
+      smpl2strains[loci, strain] <- sample(x=c(0,2), size=1, prob = c(popAF[,loci]))
     }
   }
   
@@ -86,24 +93,9 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   #-----------------------------------------------------------------------------------
   # STEP 4: Match Strains -- Walk along Loci to Determine IBD State w/ TransProb Markov Chain
   #-----------------------------------------------------------------------------------
-  
-  ######################################################
-  # Part A: Make Markov Chain for Transition Probs
-  #######################################################
-  markovchainIBDsim <- function(transprobs, n=n){# n is from loci above
-    IBDintervals <- c(rep(NA, n))
-    IBDintervals[1] <- sample(c("U", "I"), size = 1, prob = c(0.5, 0.5))
-    
-    for(i in 2:length(IBDintervals)){
-      IBDintervals[i] <- sample(c("U", "I"), size = 1, 
-                                prob = transprobs[ifelse(IBDintervals[i-1] == "U", 1, 2),]) #ifelse statement determines which row we are in for the transprob calculation
-    }
-    
-    return(IBDintervals)
-  } #function inspired by Deonier's Computational Genomic Textbook
 
   ######################################################
-  # Part B: Identify pairs between sample1 and sample2
+  # Part A-B: Identify pairs between sample1 and sample2
   #######################################################
   minstrainstomatch <- min(ncol(smpl1strains), ncol(smpl2strains))
   
@@ -113,9 +105,9 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   strainIBDness <- matrix(NA, n, minstrainstomatch)
   
   for(i in 1:minstrainstomatch){
-    strainIBDness[,i] <- markovchainIBDsim(transprobs = transProbsSim, n=n) # for each strain decide which intervals IBD
-    
+    strainIBDness[,i] <- markovchainIBDsim(transprobs = transProbsSim, n=n, fsim=fsim) # for each strain decide which intervals IBD
   }
+  
   
   ######################################################
   # Part D: Apply IBD Pairings
@@ -164,7 +156,6 @@ IBDsimulator2smplvcf <- function(n=100, alpha=0.1, beta=0.1,
   
   simDataproduced <- list(simvcf=simvcf, 
                           popAF = popAF,
-                          EmmissionTable=EmmissionTable,
                           strainIBD=strainIBDness)
   
   return(simDataproduced)
