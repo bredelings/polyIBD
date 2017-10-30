@@ -27,9 +27,12 @@ vcf2infSNPmatrix <- function(vcffile, biallelic=T, diploid=T) {
   ############################
   # Check to see if vcfR, TidyVerse, and DT are loaded
   # following this stackoverflow https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
-  list.of.packages <- c("vcfR", "tidyverse", "adegenet")
+  list.of.packages <- c("vcfR", "tidyverse")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
+  
+  require(vcfR)
+  require(tidyverse)
   
   if (diploid != TRUE || biallelic != TRUE) {
     stop("This vcf must be biallelic and have heterozygote calls (i.e. called with a ploidy of 2")

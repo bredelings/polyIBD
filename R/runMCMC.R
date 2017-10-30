@@ -6,7 +6,11 @@
 
 # samplestocompare=c("mat1", "mat2") put this part in later
 
-runMCMC <- function(reps=1e3, finit, rho, m=c(5,5), samplecomparisonsnpmatrix, EmissionLookUpTableDict, m1max=5, m2max=5){
+runMCMC <- function(reps=1e3, finit, rho, m=c(5,5), 
+                    samplecomparisonsnpmatrix, 
+                    EmissionLookUpTableDict, 
+                    POS=POS, 
+                    m1max=5, m2max=5){
   # Run the MCMC for polyIBD
   #
   # Args:
@@ -153,7 +157,7 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(5,5), samplecomparisonsnpmatrix, E
     
     
     # convert new value of f to transmission probabilities 
-    transProbs <- getTransProbs(f_proposed, rho, k, d=1)
+    transProbs <- getTransProbs(f_proposed, rho, k, d=1) #d=POS[rep])
     
     # Calculate forward algorithm likelihood under new values 
     f_new <- ForwardAlg(GenotypeCompare = x, 

@@ -2,9 +2,9 @@
 % Please edit documentation in R/emissionprobabilityfunctions.R
 \name{noshare_AaAa_emission}
 \alias{noshare_AaAa_emission}
-\title{polyIBD uncorrelated emission probability for Aa/Aa}
+\title{polyIBD uncorrelated emission probability for A/A}
 \usage{
-noshare_AaAa_emission(p, q, m1, m2, z = 0, e1 = 0.01, e2 = 0.01)
+noshare_AaAa_emission(p, q, m1, m2, z = 0)
 }
 \description{
 .....
