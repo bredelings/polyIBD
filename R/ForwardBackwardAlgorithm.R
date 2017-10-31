@@ -1,8 +1,11 @@
+
+# ------------------------------------------------------------------
 #' @title Forward Algorithm for polyIBD
+#'
 #' @description .....
+#'
 #' @param file
 #' @export
-#' 
 
 #------------------------------------------------
 # Forward Algorithm
@@ -17,12 +20,13 @@ ForwardAlg <- function(GenotypeCompare, transProbs, EmissionLookUpTable, f) {
   
   # get simple parameters from inputs
   k <- nrow(transProbs)-1 # k is the maximum number of genotypes potentially shared between two samples 
-  n <- length(GenotypeCompare) # length of the pariwise comparison for figuring out which level of the emission probability table
+  n <- length(GenotypeCompare) # number of loci
   
   # initialise matrix
   frwrd <- matrix(NA,k+1,n) # matrix for the different IBD states
   
   # loop through all loci
+  logLike <- 0
   for (i in 1:n) {
     if (i==1) { # first hmm state
       for (j in 1:(k+1)) {
@@ -30,18 +34,26 @@ ForwardAlg <- function(GenotypeCompare, transProbs, EmissionLookUpTable, f) {
       }
     } else { # not first hmm state
       for (j in 1:(k+1)) {
-        frwrd[j,i] <- sum(frwrd[,i-1]*transProbs[,j])*EmissionLookUpTable[[j]][GenotypeCompare[i], i]
+          frwrd[j,i] <- sum(frwrd[,i-1]*transProbs[,j])*EmissionLookUpTable[[j]][GenotypeCompare[i], i]
       }
     }
+    frwrd[,i] <- abs(frwrd[,i]) # underflow sometimes creates tiny negative numbers that can cause problems
+    if (sum(frwrd[,i])==0) {    # another attemp to avoid severe underflow issues
+        frwrd[,i] <- frwrd[,i] + 1e-200
+    }
+    logLike <- logLike + log(sum(frwrd[,i]))    # add to running log-likelihood
+    frwrd[,i] <- frwrd[,i]/sum(frwrd[,i])       # store relative likelihoods in matrix
   }
-  return(frwrd)
+  return(list(logLike=logLike, mat=frwrd))
 }
 
+# ------------------------------------------------------------------
 #' @title Backward Algorithm for polyIBD
+#'
 #' @description .....
+#'
 #' @param file
 #' @export
-#' 
 
 #------------------------------------------------
 # Backward Algorithm
@@ -59,13 +71,13 @@ BackwardAlg <- function(GenotypeCompare, transProbs, EmissionLookUpTable) {
   # loop through loci backwards from penultimate
   for (i in (n-1):1) {
     for (j in 1:(k+1)) {
-      tmp <- 0
+      bkwrd[j,i] <- 0
       for (j2 in 1:(k+1)) {
-        tmp <- tmp + transProbs[j,j2]*bkwrd[j2,i+1]*EmissionLookUpTable[[j2]][GenotypeCompare[i+1], 1]
+        bkwrd[j,i] <- bkwrd[j,i] + transProbs[j,j2]*bkwrd[j2,i+1]*EmissionLookUpTable[[j2]][GenotypeCompare[i+1], i+1]
       }
-      bkwrd[j,i] <- tmp
     }
+    bkwrd[,i] <- bkwrd[,i]/sum(bkwrd[,i])
   }
-  return(bkwrd)
+  return(list(mat=bkwrd))
 }
 

@@ -1,28 +1,28 @@
-#' @title Run the MCMC
+
+# ------------------------------------------------------------------
+#' @title Run polyIBD MCMC
+#'
 #' @description .....
-#' @param file
+#'
+#' @param samplecomparisonsnpmatrix input data
+#' @param reps repetitions for MCMC
+#' @param shape1 first shape parameter of prior on population allele frequencies
+#' @param shape2 second shape parameter of prior on population allele frequencies
+#' @param finit initial estimate of f
+#' @param rho fixed value of rho
+#' @param m initial estimate of COI
+#' @param EmissionLookUpTableDict emmission probability lookup table
+#' @param POS ?
+#' @param m1max maximum possible value of m1
+#' @param m2max maximum possible value of m2
 #' @export
-#' 
 
 # samplestocompare=c("mat1", "mat2") put this part in later
 
-runMCMC <- function(reps=1e3, finit, rho, m=c(5,5), 
-                    samplecomparisonsnpmatrix, 
+runMCMC <- function(samplecomparisonsnpmatrix, reps=1e3, finit=0.5, rho=1, m=c(5,5),
                     EmissionLookUpTableDict, 
                     POS=POS, 
                     m1max=5, m2max=5){
-  # Run the MCMC for polyIBD
-  #
-  # Args:
-  # reps: repetitions for MCMC
-  # finit: Initial estimate of F
-  # rho: Initial estimate of rho
-  # m: vector of multiclonality
-  # GenotypeCompare: pairwise comparison of samples to determine which row of the likelihood table should be used
-  #
-  # Returns
-  #
-  
   
   #------------------------------------------------------
   # ERROR HANDLING
@@ -32,21 +32,15 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(5,5),
   #------------------------------------------------------
   # RUN SCRIPT
   #-----------------------------------------------------
-  ##############
-  # housekeeping
-  ##############
-  logit <- function(x){
-    log(x/(1-x))
-  }
   
   ##############
   # Organize m
   ##############
   # sort m and k for the emission look up table
-  m <- sort(m) # note, m must always be in increasing order
   m1 <- m[1]
   m2 <- m[2]
-  k <- min(m)
+  m_sort <- sort(m) # m, but always in increasing order
+  k <- min(m_sort)
   
   ## user specified their upper belief of M1 and M2 (maxes)
   moimax <- max(m1max, m2max)
@@ -64,7 +58,6 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(5,5),
   
   # Need to fix this ^^
   
-  
   ### set n as number of loci
   n <- length(x)
   
@@ -73,170 +66,132 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(5,5),
   #-------------------------------------------------------------
   
   # the forward algorithm gives us the likelihood. Remember that element f[1,i] is defined as Pr(x_1,x_2,...,x_i,S_i=1), therefore it follows that f[1,n]+f[2,n] is equal to the probability of the data, Pr(x_1,...,x_n).
-  f_old <- ForwardAlg(GenotypeCompare = x,
+  fwd <- ForwardAlg(GenotypeCompare = x,
                       transProbs = transProbs,
-                      EmissionLookUpTable = EmissionLookUpTableDict[[m1]][[m2]], finit)
+                      EmissionLookUpTable = EmissionLookUpTableDict[[m_sort[1]]][[m_sort[2]]], finit)
+  logLike_old <- fwd$logLike
   
-  like_old <- sum(f_old[,n])
-  
-  b <- BackwardAlg(GenotypeCompare = x,
+  # backward algorithm gives us posterior IBD
+  bwd <- BackwardAlg(GenotypeCompare = x,
                    transProbs = transProbs,
-                   EmissionLookUpTable = EmissionLookUpTableDict[[m1]][[m2]])
-  fb <- f_old*b
-  # need to have an ifelse statement for 
-  IBD <- colSums(fb[-1,,drop=FALSE])/colSums(fb)
+                   EmissionLookUpTable = EmissionLookUpTableDict[[m_sort[1]]][[m_sort[2]]])
   
+  fb <- fwd$mat * bwd$mat
+  IBD <- fb/matrix(colSums(fb), nrow(fb), ncol(fb), byrow=TRUE)
   
   ######################################################
   # create objects for storing results of MCMC Below
   ######################################################
-  f_chain <- rep(finit,reps)
-  f_proposedchain <- rep(finit, reps)
+  f_chain <- rep(NA,reps)
+  f_proposedchain <- rep(NA,reps)
   m_chain <- matrix(NA, 2, reps)
-  like_store <- rep(like_old,reps)
-  IBD_store <- matrix(NA,reps,n)
+  logLike_store <- rep(NA,reps)
+  IBD_store <- array(0, dim=c(reps, 1+max(m1max, m2max), ncol(fb)))
   AcceptanceRatio <- 0
   
+  
   # add in first observations
-  IBD_store[1,] <- IBD
-  m_chain[,1] <- m # doing this different from f_chain for error control atm
+  f_chain[1] <- finit
+  f_proposedchain[1] <- finit
+  m_chain[,1] <- m
+  logLike_store[1] <- logLike_old
+  IBD_store[1,1:nrow(IBD),] <- IBD
   
   #-------------------------------------------------------------
   # MCMC Run the Forward-Backward Algorithm 
   #-------------------------------------------------------------
   
-  ## Robin-Monroe algorithm init value for lambda for determing M values
-  lambdam1 = rep(1, 3)/3
-  lambdam2 = rep(1, 3)/3
+  ## Robbin-Monro algorithm init value for lambda for determing COI values
+  lambda = rep(1,3)
   
-  lambdam1 = c(0,1,0)
-  lambdam2 = c(0,1,0)
-  
-  # LOOP through MCMC iterations
+  # loop through MCMC iterations
   for (rep in 2:reps) {
+      
     # report current iteration
     if (rep%%100==0) {
       print(paste("iteration",rep,"of",reps))	
     }
     
-    ###########################################################################
-    # propose new value of f based on logit transformation to center on f
-    ##########################################################################
-    #f_proposed_logged <- rnorm(1, mean=logit(finit), sd=1)
-    #f_proposed <- 1/(1+exp(-f_proposed_logged))
-    #f_proposedchain[rep] <- f_proposed
-    
+    # propose new value of f from reflected normal distribution
     f_proposed <- rnorm_interval(finit, sd=1)
     f_proposedchain[rep] <- f_proposed
     
-    ###########################################################################
-    # propose new value of ms based on Robbins-Monro Algorithm
-    ##########################################################################
-    
-    ### PROPOSE NEW M1 as m+1 or m-1
-    m1move <- sample(c(-1,0,1), size=1, prob=lambdam1)
+    # propose new m1 as m+1 or m-1
+    m1move <- sample(c(-1,0,1), size=1, prob=lambda)
     m1_proposed <- (m[1] + m1move)
-    ### if m is 0 or >COI then skip and use old values of m
+    # if m is 0 or >COI then skip and use old values of m
     if(m1_proposed == 0 | m1_proposed > moimax){
       m1_proposed <- m[1] # just return m1 to previous value
     }
+    m1_proposed <- m[1] # TODO - remove
     
-    ### PROPOSE NEW M2 as m+1 or m-1
-    m2move <- sample(c(-1,0,1), size=1, prob=lambdam2)
+    # propose new m2 as m+1 or m-1
+    m2move <- sample(c(-1,0,1), size=1, prob=lambda)
     m2_proposed <- (m[2] + m2move)
-    ### if m is 0 or >COI then skip and use old values of m
+    # if m is 0 or >COI then skip and use old values of m
     if(m2_proposed == 0 | m2_proposed > moimax){
       m2_proposed <- m[2] # just return m2 to previous value
     }
+    m2_proposed <- m[2] # TODO - remove
+    m_sort <- sort(c(m1_proposed, m2_proposed))
     
     # sort m and k for the emission look up table
-    mprop <- sort(c(m1_proposed, m2_proposed)) # note, m must always be in increasing order
-    m1_proposed <- mprop[1] 
-    m2_proposed <- mprop[2]
-    k <- min(mprop)
-    
+    #mprop <- sort(c(m1_proposed, m2_proposed)) # note, m must always be in increasing order
+    k <- min(m_sort)
     
     # convert new value of f to transmission probabilities 
     transProbs <- getTransProbs(f_proposed, rho, k, d=1) #d=POS[rep])
     
     # Calculate forward algorithm likelihood under new values 
-    f_new <- ForwardAlg(GenotypeCompare = x, 
+    fwd_new <- ForwardAlg(GenotypeCompare = x,
                         transProbs = transProbs, 
-                        EmissionLookUpTable = EmissionLookUpTableDict[[m1_proposed]][[m2_proposed]], 
+                        EmissionLookUpTable = EmissionLookUpTableDict[[m_sort[1]]][[m_sort[2]]],
                         f_proposed)
-    
-    like_new <- sum(f_new[,n])
-  
+    logLike_new <- fwd_new$logLike
 
-    ## Calculate the Joint Probability
-    # for now assuming a diffuse exponential prior with increased probability at tails of the beta pdf (i.e. more emphasis to be no IBD or full IBD)
-    joint_old <- like_old #* dbeta(finit,0.5,0.5)
-    joint_new <- like_new #* dbeta(f_proposed,0.5,0.5)
-    
-    #sd of the beta distribution is: 
-    #sqrt((0.5*0.5)/(((0.5+0.5)^2)*(0.5+0.5+1)))
-    #sqrt((0.5*0.5)/((0.5+0.5+1)))
-    
-    # need to add metropolis-hastings term because asymmetric prob distribution
-    backwardmove <- dnorm(logit(finit), mean=logit(f_proposed)) *(1/(finit*(1-finit))) # do logit norm -- , mean=f_proposed, sd=0.3535534 --ask bob if agrees with using the beta to inform the SD of the normal logit here 
-    forwardmove <- dnorm(logit(f_proposed), mean=logit(finit)) *(1/(f_proposed*(1-f_proposed))) # do logit norm 
-    
-    #print(paste("backwardmove:", backwardmove))
-    #print(paste("forwardmove:", forwardmove))
-    
-    metropolistop <- joint_new #*forwardmove
-    metropolisbottom <- joint_old #*backwardmove
-    
-    #print(metropolistop/metropolisbottom)
+    # calculate joint probability by multiplying likelihood py priors
+    joint_old <- logLike_old #+ dbeta(finit, 1, 4, log=TRUE)
+    joint_new <- logLike_new #+ dbeta(f_proposed, 1, 4, log=TRUE)
     
     ## Metropolis-Hastings step
-    #using runif random number to see if we accept move-- must be between interval [0,1]
-#    if(runif(1) < (joint_new/joint_old)) {
-    if(runif(1) < (metropolistop/metropolisbottom)) {
+    if(log(runif(1)) < (joint_new - joint_old)) {
+        
       # recalculate IBD blocks
-      b <- BackwardAlg(GenotypeCompare = x, 
+      bwd_new <- BackwardAlg(GenotypeCompare = x,
                        transProbs = transProbs, 
-                       EmissionLookUpTable = EmissionLookUpTableDict[[m1_proposed]][[m2_proposed]])
+                       EmissionLookUpTable = EmissionLookUpTableDict[[m_sort[1]]][[m_sort[2]]])
       
-      fb <- f_new*b
+      fb <- fwd_new$mat * bwd_new$mat
+      IBD <- fb/matrix(colSums(fb), nrow(fb), ncol(fb), byrow=TRUE)
       
-      # need to have an ifelse statement for case where fb is only 2 rows
-      IBD <- colSums(fb[-1,,drop=FALSE])/colSums(fb)
-      
-      # update values of new acceptance
-      like_old <- like_new
+      # update parameter values
+      logLike_old <- logLike_new
       finit <- f_proposed
       m <- c(m1_proposed, m2_proposed) 
       
       # update acceptance ratio
       AcceptanceRatio <- AcceptanceRatio + 1
       
-      # # Tune lambda from Robbins-Monro Algorith (pmove was accepted here) for m1
-      # lambdam1[2] <- lambdam1[2]+1
-      # lambdam1 <- (lambdam1)/3
-      # # Tune lambda from Robbins-Monro Algorith (pmove was accepted here) for m2
-      # lambdam2[2] <- lambdam2[2]+1
-      # lambdam2 <- (lambdam2)/3
-      # 
-    } # MOVE WAS REJECT (so fine tune lambda from Robbins-Monro Algorithm to be wider)
+      # tune m1 and m2 proposal (lambda) using Robbins-Monro-like positive update step
+      #lambda[c(1,3)] <- lambda[c(1,3)]+1
+      
+    } else {
+        
+        # tune m1 and m2 proposal (lambda) using Robbins-Monro-like negative update step
+        #lambda[2] <- lambda[2]+1
+    }
     
-    # # Tune lambda from Robbins-Monro Algorith (pmove was accepted here) for m1 to be wider
-    # lambdam1 <- lambdam1+1
-    # lambdam1 <- (lambdam1)/3
-    # # Tune lambda from Robbins-Monro Algorith (pmove was accepted here) for m2 to wider
-    # lambdam2<- lambdam2+1
-    # lambdam2 <- (lambdam2)/3
-    # 
     
     ##############################
     # store values of MCMC Chain
     ##############################
     f_chain[rep] <- finit
     m_chain[,rep] <- m
-    IBD_store[rep,] <- IBD
+    IBD_store[rep,1:nrow(IBD),] <- IBD
     
   }	# end MCMC loop
   
+  print(lambda)
   
   MCMCresult <- list(fchain = f_chain,
                      fproposedchain = f_proposedchain,
@@ -245,7 +200,6 @@ runMCMC <- function(reps=1e3, finit, rho, m=c(5,5),
                      acceptratio=(AcceptanceRatio/reps))
   
   return(MCMCresult)
-  
 }
 
 

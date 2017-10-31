@@ -15,7 +15,7 @@ Getemmissionlookuptable <- function(m1max=5, m2max=5, popaf){
       ## We want this in a format where were we have two matrices -- one for no shared (Z=0) and for shared (Z>0)
       ## The one for no shared is easy
       ## The one for shared is going to be a layered matrix (i.e. R list object) with levels of Z = [1,5]
-      ## THE emission functions must be sourced before this can be run.
+      ## The emission functions must be sourced before this can be run.
       
       noshareFunctionlist <- list(noshare_AA_emission, 
                                   noshare_Aa_emission, 

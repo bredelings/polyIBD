@@ -2,10 +2,33 @@
 % Please edit documentation in R/runMCMC.R
 \name{runMCMC}
 \alias{runMCMC}
-\title{Run the MCMC}
+\title{Run polyIBD MCMC}
 \usage{
-runMCMC(reps = 1000, finit, rho, m = c(5, 5), samplecomparisonsnpmatrix,
-  EmissionLookUpTableDict, POS = POS, m1max = 5, m2max = 5)
+runMCMC(samplecomparisonsnpmatrix, reps = 1000, finit = 0.5, rho = 1,
+  m = c(5, 5), EmissionLookUpTableDict, POS = POS, m1max = 5, m2max = 5)
+}
+\arguments{
+\item{samplecomparisonsnpmatrix}{input data}
+
+\item{reps}{repetitions for MCMC}
+
+\item{finit}{initial estimate of f}
+
+\item{rho}{fixed value of rho}
+
+\item{m}{initial estimate of COI}
+
+\item{EmissionLookUpTableDict}{emmission probability lookup table}
+
+\item{POS}{?}
+
+\item{m1max}{maximum possible value of m1}
+
+\item{m2max}{maximum possible value of m2}
+
+\item{shape1}{first shape parameter of prior on population allele frequencies}
+
+\item{shape2}{second shape parameter of prior on population allele frequencies}
 }
 \description{
 .....

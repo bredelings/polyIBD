@@ -1,0 +1,109 @@
+
+# ------------------------------------------------------------------
+#' @title polyIBD Empirical markovchainIBD simulator
+#'
+#' @description Going off of empirical solution of model. Function inspired by Deonier's Computational Genomic Textbook?
+#'
+#' @param file
+#' @export
+
+markovchainIBDsim <- function(n, f, rho, d=1) {
+  # define parameters and output
+  alpha <- rho*f/(1-f)
+  ret <- rep(NA, n)
+  
+  # define transition probabilities
+  t11 <- (1-f) + f*exp(-d*(alpha+rho))
+  t12 <- 1 - t11
+  t22 <- f + (1-f)*exp(-d*(alpha+rho))
+  t21 <- 1 - t22
+  transProbs <- rbind(c(t11, t12), c(t21, t22))
+  
+  # draw IBD states
+  for (i in 1:n) {
+      if (i==1) {
+          ret[i] <- sample(c(0,1), size = 1, prob = c(1-f,f))
+      } else {
+          ret[i] <- sample(c(0,1), size = 1, prob = transProbs[ifelse(ret[i-1]==0, 1, 2),])
+      }
+  }
+  
+  return(ret)
+}
+
+# ------------------------------------------------------------------
+#' @title polyIBD Empirical Simulator
+#'
+#' @description Going off of empirical solution of model
+#'
+#' @param file
+#' @export
+
+IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
+                         m1=1, m2=1, f=0.5, rho=1, d=1, p=NULL, contigs="contig1") {
+  
+  # simulate the major allele of the population allele frequencies (unless fixed on input)
+  if (is.null(p)) {
+      p <- rbeta(n, shape1, shape2)
+  }
+  
+  # sample haploid genotypes for both individuals based on MOI and population allele frequencies
+  haploid1 <- replicate(m1, 2*rbinom(n,1,prob=p))
+  haploid2 <- replicate(m2, 2*rbinom(n,1,prob=p))
+  
+  # simulate IBD segments between individual haploid genotypes
+  zmax <- min(m1, m2)
+  IBD <- matrix(NA,n,zmax)
+  for (i in 1:zmax) {
+      IBD[,i] <- markovchainIBDsim(n, f, rho, d)
+      w <- which(IBD[,i]==1)
+      haploid1[w,i] <- haploid2[w,i]
+  }
+  
+  # make sim vcf based on haploid genotypes
+  simvcf <- matrix(1, n, 2)
+  colnames(simvcf) <- c("Sample1", "Sample2")
+  rownames(simvcf) <- c(paste0("Locus", seq(1:n)))
+  
+  simvcf[apply(haploid1, 1, function(x){all(x==0)}),1] <- 0
+  simvcf[apply(haploid1, 1, function(x){all(x==2)}),1] <- 2
+  
+  simvcf[apply(haploid2, 1, function(x){all(x==0)}),2] <- 0
+  simvcf[apply(haploid2, 1, function(x){all(x==2)}),2] <- 2
+  
+  # return output as list
+  retList <- list(p=p,
+                  haploid=list(haploid1,haploid2),
+                  IBD=IBD,
+                  vcf=simvcf)
+  
+  return(retList)
+  
+  # NICK TODO (carry on adding to vcf from here)
+  #-----------------------------------------------------------------------------------
+  # STEP 5: Add in position and chromosome information (under devo)
+  #-----------------------------------------------------------------------------------
+  POS <- rep(NA, n)
+  POS[1] <- floor(runif(n=1, min=100, max=100000))
+  for(d in 2:n){
+    POS[d] <- POS[d-1] + floor(runif(n=1, min=100, max=100000))
+  }
+  temp <- data.frame(CHROM=(rep(contigs, n)), 
+                     POS=POS,
+                     stringsAsFactors = F)
+  # bind chrom and pos
+  simvcf <- cbind(temp, simvcf)
+### this is the end of the function
+  
+  simDataproduced <- list(simvcf=simvcf, 
+                          popAF = popAF,
+                          strainIBD=strainIBDness)
+  
+  return(simDataproduced)
+}
+
+
+
+
+
+
