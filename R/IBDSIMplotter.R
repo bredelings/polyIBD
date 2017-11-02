@@ -1,116 +1,75 @@
-#' @title polyIBD SIM Plotter
-#' @description .....
-#' @param simData
-#' @param IBD_store 
+#' @title polyIBD Simulation Plotter -- IBD block plots
+#' @description This is a quick wrapper to plot the IBD block plot outputs from 
+#' @param simDatareturn
+#' @param ruMCMCreturn
 #' @export
 
 
-IBDSIMplotter <- function(simData, IBD_store){
-  require(tidyverse)
-# plot MCMC trace of F chain
-#plot(f_chain, type='l', ylim=c(0,1), xlab="iteration", ylab="F (Relatedness)", main="MCMC trace")
-
-# plot posterior distribution of f
-#hist(f_chain, probability=TRUE, col=grey(0.5), breaks=50, xlab="F (Relatedness)", ylab="posterior density", main="MCMC posterior")
 
 
-  IBDtruthplotter <- function(simdataobj){
-    #------------------------------------------------
-    # IBD TRUTH
-    #------------------------------------------------
-    
-    simdatatruth <- cbind(simdataobj$simvcf[,1:2], simdataobj$strainIBD)
-    
-    # switch pos to sort then factor so it plots reasonably
-    simdatatruthsorted <- simdatatruth[order(simdatatruth$POS),] 
-    simdatatruthsorted <- tidyr::gather(simdatatruth, key="pairwiseIBD", value="IBD", 3:ncol(simdatatruthsorted))
-    simdatatruthsorted$POS <- as.factor(simdatatruthsorted$POS)
-    
-    IBDtruthplot <- ggplot(data=simdatatruthsorted, aes(x=POS, y=pairwiseIBD, fill = IBD))
-    IBDtruthplot <- IBDtruthplot + geom_tile() + scale_fill_manual(values=c("#d8b365", "#5ab4ac"))
-    IBDtruthplot <- IBDtruthplot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
-    return(IBDtruthplot)  
-    
-  }
+IBDSIMplotter <- function(simDatareturn, runMCMCreturn){
+  # following this stackoverflow https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
+  list.of.packages <- c("tidyverse", "gtable", "grid")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+  if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
   
-  #------------------------------------------------
-  # VCF Call plot setup
-  #------------------------------------------------
-  gtplotter <- function(simdataobj){
-    snpmatrix <- simdataobj$simvcf
-    # transform snpmatrix
-    vcfallelechars <- cbind(snpmatrix[,1:2], # want to keep position rows but exclude from ifelse below in case of corner case of having a position of 1 or 2 (vcfs are 1-based)
-                            ifelse(snpmatrix[,c(3:ncol(snpmatrix))] == 0, "HomozygREF",
-                                   ifelse(snpmatrix[,c(3:ncol(snpmatrix))] == 1, "HET",
-                                          ifelse(snpmatrix[,c(3:ncol(snpmatrix))] == 2, "HomozygALT", NA))))
-    
-    # make long
-    vcfallelechars <- tidyr::gather(vcfallelechars, "Sample", "GT",  3:ncol(vcfallelechars))
-    
-    # switch pos to sort then factor so it plots reasonably
-    vcfallelecharssorted <- vcfallelechars[order(vcfallelechars$POS),] 
-    vcfallelecharssorted$POS <- as.factor(vcfallelecharssorted$POS)
-    
-    
-    # call ggplot
-    gtplot <- ggplot(data = vcfallelecharssorted) + geom_tile(aes(x = POS, y = Sample, fill = GT), colour = "grey")
-    gtplot <- gtplot +  scale_fill_manual(values=c("#fc8d59", "#ffffbf", "#91bfdb"))
-    gtplot <- gtplot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
-    
-    return(gtplot)
-    
-  }
-  
-  
-  
-  
-  
-  #------------------------------------------------
-  # IBD plot
-  #------------------------------------------------
-  IBDplotter <- function(IBD_store, simdataobj){
-    # get quantiles over IBD draws
-    IBD_quantiles <- apply(IBD_store, 2, function(x){quantile(x,probs=c(0.025,0.5, 0.975), na.rm=T)})
-    IBD_quantiles <- t(IBD_quantiles)
-    IBD_quantiles <- data.frame(est = IBD_quantiles[,2], lowercredI = IBD_quantiles[,1], uppercredI = IBD_quantiles[,3], stringsAsFactors = F)
-    IBD_quantiles <- cbind((simdataobj$simvcf[,colnames(simdataobj$simvcf) %in% c("CHROM", "POS")]), IBD_quantiles)
-    
-    
-    
-    # switch pos to sort then factor so it plots reasonably
-    IBD_quantilessorted <- IBD_quantiles[order(IBD_quantiles$POS),] 
-    IBD_quantilessorted$POS <- as.factor(IBD_quantilessorted$POS)
-    
-    # call ggplot
-    IBDplot <- ggplot(data = IBD_quantilessorted, aes(x=POS, y=est, group=1))
-    IBDplot <- IBDplot + geom_line(stat="identity", colour=c("#67000d"))
-    IBDplot <- IBDplot + geom_ribbon(aes(ymin=lowercredI, ymax=uppercredI, fill="95% CI"), alpha=0.6) + scale_fill_manual("", values = c("#de2d26"))
-    IBDplot <- IBDplot + guides(title="IBD 95% Credible Estimate", labels = paste("95% CI"))
-    IBDplot <- IBDplot + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))
-    IBDplot <- IBDplot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-    
-    return(IBDplot)
-  }
+  # extra work to get into a dataframe so it can be accepted by ggplot
+  # convert from matrix and wide format to LONG format for ggplot, convert to factor for easier plotting, convert to df
+  IBDtrueblocks <- cbind(simDatareturn$vcf$POS, simDatareturn$IBD) # df for plot 1
+  IBDtrueblocks <- as.data.frame(IBDtrueblocks[order(IBDtrueblocks[,1]),])
+  colnames(IBDtrueblocks) <- c("POS", paste0("StrainPair", 1:ncol(simDatareturn$IBD)))
+  IBDtrueblocks$POS <- as.factor(IBDtrueblocks$POS)
+  IBDtrueblockslong <- tidyr::gather(IBDtrueblocks, key="pairwiseIBD", value="IBD", 2:ncol(IBDtrueblocks))
+  IBDtrueblockslong$IBD <- factor(IBDtrueblockslong$IBD, levels = c(0,1), labels=c("No IBD", "IBD"))
+  IBDtrueblocks$IBDtotal <- rowSums(IBDtrueblocks[,2:ncol(IBDtrueblocks)])
 
-#------------------------------------------------
-# Call plots and align
-#------------------------------------------------
-# https://github.com/tidyverse/ggplot2/wiki/Align-two-plots-on-a-page following this
-IBDtruth <- IBDtruthplotter(simdataobj = simData)
-gtcalls <- gtplotter(simdataobj = simData)
-IBDCI <- IBDplotter(IBD_store = IBD_store, simdataobj=simData)
+  
+  VCFdf <- as.data.frame(simDatareturn$vcf[order(simDatareturn$vcf$POS),]) # df for plot 2
+  VCFdf$POS <- as.factor(VCFdf$POS)
+  VCFdflong <- tidyr::gather(VCFdf, key="Sample", value="GT", 3:ncol(VCFdf))
+  VCFdflong[VCFdflong == 0] <- "HomozygREF"
+  VCFdflong[VCFdflong == 1] <- "HET"
+  VCFdflong[VCFdflong == 2] <- "HomozygALT"
+
+
+  InferredIBD <- as.data.frame(cbind((simDatareturn$vcf$POS[order(simDatareturn$vcf$POS)]), runMCMCreturn$IBD_composite, t(runMCMCreturn$IBDcomposite_CI)), stringsAsFactors = F)
+  colnames(InferredIBD) <- c("POS", "IBDInferred", "LowerCI95", "CI50", "UpperCI95")
+  InferredIBD$POS <- as.factor(InferredIBD$POS)
+  InferredIBD[,2:ncol(InferredIBD)] <- apply(InferredIBD[,2:ncol(InferredIBD)], 2, function(x){as.numeric(x)})
+  
+  # start plotting
+  plot1 <- ggplot(data=IBDtrueblockslong, aes(x=POS, y=pairwiseIBD, fill = IBD)) +
+    geom_tile() + scale_fill_manual("", values=c("#d8b365", "#5ab4ac")) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+    guides(labels = paste("IBD", "No IBD"))
+
+
+  plot2 <- ggplot(data = VCFdflong) + geom_tile(aes(x = POS, y = Sample, fill = GT), colour = "grey") +
+    scale_fill_manual(values=c("#fc8d59", "#ffffbf", "#91bfdb")) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+  plot3 <- ggplot(data = InferredIBD, aes(x=POS, y=IBDInferred, group=1)) + 
+    geom_line(data=IBDtrueblocks, aes(x=POS, y=IBDtotal), stat = "identity", colour=c("#000000"), size=0.6) +
+    geom_line(stat="identity", colour=c("#67000d")) + 
+    geom_ribbon(aes(ymin=LowerCI95, ymax=UpperCI95, fill="95% CI"), alpha=0.6) + scale_fill_manual("", values = c("#de2d26")) + 
+    scale_y_continuous(breaks = (seq(0:ncol(runMCMCreturn$IBD_store)) - 1), limits=c(0, ncol(runMCMCreturn$IBD_store))) + 
+    guides(title="IBD 95% Credible Estimate", labels = paste("95% CI")) + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5, size=5)) + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_line(size = 1, linetype = 'solid', colour = "white"), 
+          panel.background = element_rect(fill = "#f0f0f0", colour = "#f0f0f0", size = 0.5, linetype = "solid"))
+  
 
 ## convert plots to gtable objects
-require(gtable)
-require(grid) 
+grob1 <- ggplot2::ggplotGrob(plot1)
+grob2 <- ggplot2::ggplotGrob(plot2)
+grob3 <- ggplot2::ggplotGrob(plot3)
 
-gIBDtruth <- ggplotGrob(IBDtruth)
-ggtcalls <- ggplotGrob(gtcalls)
-gIBDCI <- ggplotGrob(IBDCI)
-g <- rbind(gIBDtruth, ggtcalls, gIBDCI, size="first") # stack the two plots
-g$widths <- unit.pmax(gIBDtruth$widths, ggtcalls$widths, gIBDCI$widths) # use the largest widths
-#grid.newpage()
-#grid <- grid.draw(g)
+
+g <- list(IBDsamples = grob1,
+          vcfplot = grob2,
+          IBDplot = grob3)
+
 return(g)
 
 ## end script

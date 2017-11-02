@@ -71,17 +71,11 @@ IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
   simvcf[apply(haploid2, 1, function(x){all(x==0)}),2] <- 0
   simvcf[apply(haploid2, 1, function(x){all(x==2)}),2] <- 2
   
-  # return output as list
-  retList <- list(p=p,
-                  haploid=list(haploid1,haploid2),
-                  IBD=IBD,
-                  vcf=simvcf)
   
-  return(retList)
   
   # NICK TODO (carry on adding to vcf from here)
   #-----------------------------------------------------------------------------------
-  # STEP 5: Add in position and chromosome information (under devo)
+  # Add in position and chromosome information (under devo)
   #-----------------------------------------------------------------------------------
   POS <- rep(NA, n)
   POS[1] <- floor(runif(n=1, min=100, max=100000))
@@ -93,13 +87,16 @@ IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
                      stringsAsFactors = F)
   # bind chrom and pos
   simvcf <- cbind(temp, simvcf)
-### this is the end of the function
   
-  simDataproduced <- list(simvcf=simvcf, 
-                          popAF = popAF,
-                          strainIBD=strainIBDness)
   
-  return(simDataproduced)
+  # return output as list
+  retList <- list(p=p,
+                  haploid=list(haploid1,haploid2),
+                  IBD=IBD,
+                  vcf=simvcf)
+  
+  return(retList)
+  
 }
 
 

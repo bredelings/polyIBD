@@ -2,13 +2,10 @@
 % Please edit documentation in R/IBDSIMplotter.R
 \name{IBDSIMplotter}
 \alias{IBDSIMplotter}
-\title{polyIBD SIM Plotter}
+\title{polyIBD Simulation Plotter -- IBD block plots}
 \usage{
-IBDSIMplotter(simData, IBD_store)
-}
-\arguments{
-\item{IBD_store}{}
+IBDSIMplotter(simDatareturn, runMCMCreturn)
 }
 \description{
-.....
+This is a quick wrapper to plot the IBD block plot outputs from
 }

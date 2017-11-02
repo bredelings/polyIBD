@@ -190,14 +190,25 @@ runMCMC <- function(samplecomparisonsnpmatrix, reps=1e3, finit=0.5, rho=1, m=c(5
     IBD_store[rep,1:nrow(IBD),] <- IBD
     
   }	# end MCMC loop
+
+  ##############################
+  # Calculate IBD composite levels and credible intervals
+  ##############################
+  IBD_mean <- colMeans(IBD_store)
+  IBD_composite <- colSums(IBD_mean*outer(0:5, rep(1,n))) # scale by z-level 
+  IBDcomposite_mat <- t(apply(IBD_store, 1, function(x){colSums( x * outer( 1:nrow(x)-1, rep(1,ncol(x)) ) )})) # pull out each repetition, scale by z-level and sum for CI 
+  IBDcomposite_CI <- apply(IBDcomposite_mat, 2, function(x){quantile(x, probs=c(0.025,0.5,0.975))})
   
-  print(lambda)
+  
   
   MCMCresult <- list(fchain = f_chain,
                      fproposedchain = f_proposedchain,
                      mchain = m_chain,
                      IBD_store= IBD_store,
-                     acceptratio=(AcceptanceRatio/reps))
+                     IBD_composite = IBD_composite,
+                     IBDcomposite_CI = IBDcomposite_CI,
+                     acceptratio=(AcceptanceRatio/reps),
+                     robbinsmonrolambda=lambda)
   
   return(MCMCresult)
 }
