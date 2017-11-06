@@ -12,7 +12,7 @@
 #-----------------------------------------------------
 # Read VCF and Go to SNP Matrix of Informative Sites
 #------------------------------------------------------
-vcf2infSNPmatrix <- function(vcffile, biallelic=T, diploid=T) {
+vcf2infSNPmatrix <- function(vcffile, popAFcutoff=0.01, biallelic=T, diploid=T) {
   # Parses out the Format Field in a VCF file 
   #
   # Args:
@@ -53,10 +53,12 @@ vcf2infSNPmatrix <- function(vcffile, biallelic=T, diploid=T) {
   snpmatrix[snpmatrix == "0/1"] <- 1
   snpmatrix[snpmatrix == "1/1"] <- 2
   snpmatrix <- apply(snpmatrix, 2, function(x){as.numeric(x)}) # need to do this as columns for structure
-  informativeloci <- apply(snpmatrix, 1, function(x){sum(x, na.rm=T) != 0 }) # find segregating sites
+  popafsnpmatrix <- apply(snpmatrix, 1, 
+        function(x){(2*(length(which(x==0))) + length(which(x==1)))/(2*length(x))})
+  informativeloci <- which(popafsnpmatrix >= popAFcutoff & popafsnpmatrix <= (1-popAFcutoff)) # find segregating sites based on pop AF
   snpmatrix_inform <- snpmatrix[informativeloci,] # subset to only segregating sites (i.e. site with some variation)
   
-  
+  print(paste(nrow(snpmatrix_inform), "SNPs retained after applying Population Allele Frequency Cutoff"))
   #############################################################
   ##### Attach Positions to the VCF GT Informative Loci #######
   #############################################################

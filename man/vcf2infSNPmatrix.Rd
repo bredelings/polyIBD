@@ -4,7 +4,7 @@
 \alias{vcf2infSNPmatrix}
 \title{polyIBD vcf2SNPmatrix}
 \usage{
-vcf2infSNPmatrix(vcffile, biallelic = T, diploid = T)
+vcf2infSNPmatrix(vcffile, popAFcutoff = 0.01, biallelic = T, diploid = T)
 }
 \description{
 .....

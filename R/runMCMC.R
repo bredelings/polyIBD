@@ -197,13 +197,15 @@ runMCMC <- function(samplecomparisonsnpmatrix, reps=1e3, finit=0.5, rho=1, m=c(5
   IBD_mean <- colMeans(IBD_store)
   IBD_composite <- colSums(IBD_mean*outer(0:5, rep(1,n))) # scale by z-level 
   IBDcomposite_mat <- t(apply(IBD_store, 1, function(x){colSums( x * outer( 1:nrow(x)-1, rep(1,ncol(x)) ) )})) # pull out each repetition, scale by z-level and sum for CI 
-  IBDcomposite_CI <- apply(IBDcomposite_mat, 2, function(x){quantile(x, probs=c(0.025,0.5,0.975))})
+  IBDcomposite_CI <- apply(IBDcomposite_mat, 2, function(x){quantile(x, probs=c(0.025,0.5,0.975), na.rm=T)})
   
   
+  # TO DO -- decide which of composite/means to return
   
   MCMCresult <- list(fchain = f_chain,
                      fproposedchain = f_proposedchain,
                      mchain = m_chain,
+                     IBD_mean = IBD_mean,
                      IBD_store= IBD_store,
                      IBD_composite = IBD_composite,
                      IBDcomposite_CI = IBDcomposite_CI,
