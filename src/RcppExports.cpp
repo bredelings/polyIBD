@@ -5,20 +5,20 @@
 
 using namespace Rcpp;
 
-// dummy1_cpp
-Rcpp::List dummy1_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_dummy1_cpp(SEXP argsSEXP) {
+// runMCMC2_cpp
+Rcpp::List runMCMC2_cpp(Rcpp::List args);
+RcppExport SEXP _polyIBD_runMCMC2_cpp(SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(dummy1_cpp(args));
+    rcpp_result_gen = Rcpp::wrap(runMCMC2_cpp(args));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_polyIBD_dummy1_cpp", (DL_FUNC) &_polyIBD_dummy1_cpp, 1},
+    {"_polyIBD_runMCMC2_cpp", (DL_FUNC) &_polyIBD_runMCMC2_cpp, 1},
     {NULL, NULL, 0}
 };
 

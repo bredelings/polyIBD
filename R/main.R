@@ -7,39 +7,46 @@
 NULL
 
 #------------------------------------------------
-#' Dummy function
+#' Run polyIBD MCMC using Rcpp functions
 #'
-#' Simple dummy function used to demonstrate linking between R and C++. Returns vector of draws from standard normal distribution.
+#' Run polyIBD MCMC using Rcpp functions.
 #'
-#' @param n number of random draws
+#' @param dat TODO
 #'
 #' @export
 #' @examples
-#' dummy1()
+#' runMCMC2()
 
-dummy1 <- function(n=10) {
+runMCMC2 <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3) {
+    
+    # TODO - input parameter checks
+    # note - vcf must have 4 columns, samples in final two columns
+    
+    # extract basic parameters
+    L <- nrow(vcf)  # number of loci
+    
+    # compare two samples and save comparison type in vector x
+    x <- 3*vcf[,3] + vcf[,4]
+    
+    # get distances between SNPs
+    # TODO - infinite distances between chromosomes
+    SNP_dist <- diff(vcf$POS)
+    
+    # define list of arguments
+    args <- list(x=x,
+                p=p,
+                SNP_dist=SNP_dist,
+                rho=rho,
+                m_max=m_max,
+                burnin=burnin,
+                samples=samples)
+    
+    # run efficient Rcpp function
+    output_raw <- runMCMC2_cpp(args)
 
-    cat("R code working\n")
-
-    # NOTES
-    # one of the nice things about linking together R and C++ is that we can play to the strengths of both coding languages. For example, C++ is very fast and efficient, but it's a pain to import data and do simple checks on format etc. So the general plan here will be to do pre-processing in R, then send a clean list of arguments to the Rcpp function which does the heavy lifting, then finally tidy things up again in R.
-
-    # example: check that n is positive
-    stopifnot(n>0)
-
-    # define mean and standard deviation of normal distribution
-    mu <- 5
-    sigma <- 1
-
-    # create a final set of arguments as a list, and pass these to the Rcpp function
-    args <- list(n=n,
-                mu=mu,
-                sigma=sigma)
-    output_raw <- dummy1_cpp(args)
-
-    # optionally do some post-processing of the raw output
+    # post-processing of the raw output
     ret <- output_raw$x
-
+    
     return(ret)
 }
 
