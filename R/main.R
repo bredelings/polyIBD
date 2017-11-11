@@ -17,7 +17,7 @@ NULL
 #' @examples
 #' runMCMC2()
 
-runMCMC2 <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3) {
+runMCMC2 <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2=0.05) {
     
     # TODO - input parameter checks
     # note - vcf must have 4 columns, samples in final two columns
@@ -39,13 +39,15 @@ runMCMC2 <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3) {
                 rho=rho,
                 m_max=m_max,
                 burnin=burnin,
-                samples=samples)
+                samples=samples,
+                e1=e1,
+                e2=e2)
     
     # run efficient Rcpp function
     output_raw <- runMCMC2_cpp(args)
 
     # post-processing of the raw output
-    ret <- output_raw$x
+    ret <- Rcpp_to_mat(output_raw$IBD_mat)
     
     return(ret)
 }

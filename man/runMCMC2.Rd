@@ -4,8 +4,8 @@
 \alias{runMCMC2}
 \title{Run polyIBD MCMC using Rcpp functions}
 \usage{
-runMCMC2(dat, SNP_dist, rho = 1, m_max = c(5, 5), burnin = 100,
-  reps = 1000)
+runMCMC2(vcf, p, rho = 1, m_max = 5, burnin = 100, samples = 1000,
+  e1 = 0.05, e2 = 0.05)
 }
 \arguments{
 \item{dat}{TODO}
