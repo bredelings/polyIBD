@@ -4,8 +4,8 @@
 \alias{IBDsimulatorparams}
 \title{polyIBD Empirical Simulator}
 \usage{
-IBDsimulatorparams(n = 100, shape1 = 0.1, shape2 = 0.1, m1 = 1,
-  m2 = 1, f = 0.5, rho = 1, d = 1, p = NULL, contigs = "contig1")
+IBDsimulatorparams(n = 100, m1 = 1, m2 = 1, f = 0.5, rho = 1,
+  p = NULL, p_shape1 = 0.1, p_shape2 = 0.1, pos = 1:n)
 }
 \description{
 Going off of empirical solution of model

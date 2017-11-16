@@ -7,24 +7,24 @@
 #' @param file
 #' @export
 
-markovchainIBDsim <- function(n, f, rho, d=1) {
-  # define parameters and output
+markovchainIBDsim <- function(n, f, rho, pos) {
+  
+  # define alpha from f and rho
   alpha <- rho*f/(1-f)
+  
+  # draw starting state
   ret <- rep(NA, n)
+  ret[1] <- sample(c(0,1), size = 1, prob = c(1-f,f))
   
-  # define transition probabilities
-  t11 <- (1-f) + f*exp(-d*(alpha+rho))
-  t12 <- 1 - t11
-  t22 <- f + (1-f)*exp(-d*(alpha+rho))
-  t21 <- 1 - t22
-  transProbs <- rbind(c(t11, t12), c(t21, t22))
-  
-  # draw IBD states
-  for (i in 1:n) {
-      if (i==1) {
-          ret[i] <- sample(c(0,1), size = 1, prob = c(1-f,f))
-      } else {
-          ret[i] <- sample(c(0,1), size = 1, prob = transProbs[ifelse(ret[i-1]==0, 1, 2),])
+  # draw subsequent states
+  for (i in 2:n) {
+      d <- pos[i]-pos[i-1]
+      if (ret[i-1]==0) {    # move from non-IBD state
+          t11 <- (1-f) + f*exp(-d*(alpha+rho))
+          ret[i] <- sample(c(0,1), size = 1, prob = c(t11, 1-t11))
+      } else {  # move from IBD state
+          t22 <- f + (1-f)*exp(-d*(alpha+rho))
+          ret[i] <- sample(c(0,1), size = 1, prob = c(1-t22, t22))
       }
   }
   
@@ -39,55 +39,39 @@ markovchainIBDsim <- function(n, f, rho, d=1) {
 #' @param file
 #' @export
 
-IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
-                         m1=1, m2=1, f=0.5, rho=1, d=1, p=NULL, contigs="contig1") {
+IBDsimulatorparams <- function(n=100, m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, pos=1:n) {
   
   # simulate the major allele of the population allele frequencies (unless fixed on input)
   if (is.null(p)) {
-      p <- rbeta(n, shape1, shape2)
+      p <- rbeta(n, p_shape1, p_shape2)
+  } else {
+      if (length(p)==1) {
+          p <- rep(p,n)
+      }
   }
   
-  # sample haploid genotypes for both individuals based on MOI and population allele frequencies
-  haploid1 <- replicate(m1, 2*rbinom(n,1,prob=p))
-  haploid2 <- replicate(m2, 2*rbinom(n,1,prob=p))
+  # generate haploid genotypes for both individuals based on MOI and population allele frequencies. Here the major allele is denoted 0 and the minor allele 2.
+  haploid1 <- replicate(m1, 2*rbinom(n,1,prob=1-p))
+  haploid2 <- replicate(m2, 2*rbinom(n,1,prob=1-p))
   
-  # simulate IBD segments between individual haploid genotypes
+  # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
   zmax <- min(m1, m2)
   IBD <- matrix(NA,n,zmax)
   for (i in 1:zmax) {
-      IBD[,i] <- markovchainIBDsim(n, f, rho, d)
+      IBD[,i] <- markovchainIBDsim(n, f, rho, pos)
       w <- which(IBD[,i]==1)
       haploid1[w,i] <- haploid2[w,i]
   }
   
   # make sim vcf based on haploid genotypes
-  simvcf <- matrix(1, n, 2)
-  colnames(simvcf) <- c("Sample1", "Sample2")
+  simvcf <- data.frame(CHROM="contig1", POS=pos, Sample1=1, Sample2=1)
   rownames(simvcf) <- c(paste0("Locus", seq(1:n)))
   
-  simvcf[apply(haploid1, 1, function(x){all(x==0)}),1] <- 0
-  simvcf[apply(haploid1, 1, function(x){all(x==2)}),1] <- 2
+  simvcf[apply(haploid1, 1, function(x){all(x==0)}),3] <- 0
+  simvcf[apply(haploid1, 1, function(x){all(x==2)}),3] <- 2
   
-  simvcf[apply(haploid2, 1, function(x){all(x==0)}),2] <- 0
-  simvcf[apply(haploid2, 1, function(x){all(x==2)}),2] <- 2
-  
-  
-  
-  # NICK TODO (carry on adding to vcf from here)
-  #-----------------------------------------------------------------------------------
-  # Add in position and chromosome information (under devo)
-  #-----------------------------------------------------------------------------------
-  POS <- rep(NA, n)
-  POS[1] <- floor(runif(n=1, min=100, max=100000))
-  for(d in 2:n){
-    POS[d] <- POS[d-1] + floor(runif(n=1, min=100, max=100000))
-  }
-  temp <- data.frame(CHROM=(rep(contigs, n)), 
-                     POS=POS,
-                     stringsAsFactors = F)
-  # bind chrom and pos
-  simvcf <- cbind(temp, simvcf)
-  
+  simvcf[apply(haploid2, 1, function(x){all(x==0)}),4] <- 0
+  simvcf[apply(haploid2, 1, function(x){all(x==2)}),4] <- 2
   
   # return output as list
   retList <- list(p=p,
@@ -96,11 +80,5 @@ IBDsimulatorparams <- function(n=100, shape1=0.1, shape2=0.1,
                   vcf=simvcf)
   
   return(retList)
-  
 }
-
-
-
-
-
 

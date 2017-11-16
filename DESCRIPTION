@@ -10,7 +10,9 @@ Description: One paragraph description of what the package does as one or more f
 License: GPL (>= 2)
 Imports:
     Rcpp (>= 0.12.12),
-    RcppParallel
+    RcppParallel,
+    coda,
+    viridis
 LinkingTo:
     Rcpp,
     RcppParallel

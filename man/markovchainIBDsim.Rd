@@ -4,7 +4,7 @@
 \alias{markovchainIBDsim}
 \title{polyIBD Empirical markovchainIBD simulator}
 \usage{
-markovchainIBDsim(n, f, rho, d = 1)
+markovchainIBDsim(n, f, rho, pos)
 }
 \description{
 Going off of empirical solution of model. Function inspired by Deonier's Computational Genomic Textbook?

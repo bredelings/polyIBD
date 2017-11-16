@@ -1,14 +1,26 @@
 
 # ------------------------------------------------------------------
-#' @title logit transform
-#'
-#' @description logit transform
-#'
-#' @param x value to be transformed
-#' @export
+# calculate transition probabilities
+# (not exported)
 
-logit <- function(x) {
-    log(x) - log(1-x)
+getTransProbs <- function(f, rho, zmax) {
+    
+    # define alpha from f and rho
+    alpha <- rho*f/(1-f)
+    
+    # generate rate matrix
+    z0 <- zmax
+    z1 <- zmax+1
+    rateMat <- matrix(0, z1, z1)
+    rateMat[cbind(1:z0, 1:z0 + 1)] <- (z0:1)*alpha
+    rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho
+    rateMat[cbind(1:z1, 1:z1)] <- -rowSums(rateMat)
+    
+    # obtain Eigen values
+    E <- eigen(t(rateMat))
+    Esolve <- solve(E$vectors)
+    
+    return(list(Evalues=E$values, Evectors=mat_to_Rcpp(E$vectors), Esolve=mat_to_Rcpp(Esolve)))
 }
 
 # -----------------------------------
