@@ -33,7 +33,7 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     x <- 3*vcf[,3] + vcf[,4]
     
     # get distances between SNPs
-    # TODO - infinite distances between chromosomes
+    # TODO - allow for multiple chromosomes, with infinite distances between chromosomes?
     SNP_dist <- diff(vcf$POS)
     
     # define list of arguments
@@ -57,18 +57,18 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     # ------------------------------
     
     # run efficient Rcpp function
-    output_raw <- runMCMC2_cpp(args, args_functions)
+    output_raw <- runMCMC_cpp(args, args_functions)
     
     # check for convergence
     conv <- c(output_raw$logLike_burnin, output_raw$logLike)
-    conv_z <- geweke.diag(mcmc(conv), frac1=burnin/(burnin+samples), frac2=samples/(burnin+samples))$z
+    conv_z <- coda::geweke.diag(coda::mcmc(conv), frac1=burnin/(burnin+samples), frac2=samples/(burnin+samples))$z
     conv_p <- 2*pnorm(abs(conv_z), lower.tail=FALSE)
     
     # report convergence
     if (conv_p>0.05) {
-        cat(paste0("convergence reached within set burn-in period (Geweke p=", round(conv_p,3), ")"))
+        cat(paste0("convergence reached within defined burn-in period (Geweke p=", round(conv_p,3), ")"))
     } else {
-        cat(paste0("WARNING: convergence not reached within set burn-in period (Geweke p=", round(conv_p,3), ")"))
+        cat(paste0("WARNING: convergence not reached within defined burn-in period (Geweke p=", round(conv_p,3), ")"))
     }
     
     # ------------------------------

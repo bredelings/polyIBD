@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_IBD}
 \alias{plot_IBD}
-\title{text}
+\title{Plot marginal IBD matrix}
 \usage{
 plot_IBD(z)
 }

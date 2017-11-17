@@ -1,5 +1,6 @@
 
 # ------------------------------------------------------------------
+# getTransProbs
 # calculate transition probabilities
 # (not exported)
 
@@ -16,7 +17,7 @@ getTransProbs <- function(f, rho, zmax) {
     rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho
     rateMat[cbind(1:z1, 1:z1)] <- -rowSums(rateMat)
     
-    # obtain Eigen values
+    # obtain Eigen values and vectors
     E <- eigen(t(rateMat))
     Esolve <- solve(E$vectors)
     

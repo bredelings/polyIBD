@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_m2}
 \alias{plot_m2}
-\title{text}
+\title{Trace plot of m2}
 \usage{
 plot_m2(z, ...)
 }

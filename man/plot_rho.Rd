@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_rho}
 \alias{plot_rho}
-\title{text}
+\title{Trace plot of rho}
 \usage{
 plot_rho(z)
 }

@@ -1,5 +1,9 @@
 
 #------------------------------------------------
+# plot_trace
+# simple MCMC trace plot
+# (not exported)
+
 plot_trace <- function(x, ...) {
     
     plot(x, pch=20, col="#00000020", xlab="iteration", ...)
@@ -7,7 +11,7 @@ plot_trace <- function(x, ...) {
 }
 
 #------------------------------------------------
-#' text
+#' Trace plot of m1
 #'
 #' text
 #'
@@ -23,7 +27,7 @@ plot_m1 <- function(z, ...) {
 }
 
 #------------------------------------------------
-#' text
+#' Trace plot of m2
 #'
 #' text
 #'
@@ -39,7 +43,7 @@ plot_m2 <- function(z, ...) {
 }
 
 #------------------------------------------------
-#' text
+#' Trace plot of f
 #'
 #' text
 #'
@@ -55,7 +59,7 @@ plot_f <- function(z) {
 }
 
 #------------------------------------------------
-#' text
+#' Trace plot of rho
 #'
 #' text
 #'
@@ -72,7 +76,7 @@ plot_rho <- function(z) {
 }
 
 #------------------------------------------------
-#' text
+#' Plot marginal IBD matrix
 #'
 #' text
 #'
@@ -85,6 +89,5 @@ plot_IBD <- function(z) {
     
     IBD <- unclass(z$summary$IBD_marginal)
     image(1:ncol(IBD), 0:(nrow(IBD)-1), t(IBD), col=viridis::plasma(100), xlab="SNP", ylab="IBD level")
-    
     
 }

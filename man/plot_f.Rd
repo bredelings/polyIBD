@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_f}
 \alias{plot_f}
-\title{text}
+\title{Trace plot of f}
 \usage{
 plot_f(z)
 }

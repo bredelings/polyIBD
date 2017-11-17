@@ -2,7 +2,6 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include <chrono>
-#include "main.h"
 #include "misc.h"
 #include "probability.h"
 #include "MCMC.h"
@@ -11,7 +10,7 @@ using namespace std;
 
 //------------------------------------------------
 // [[Rcpp::export]]
-Rcpp::List runMCMC2_cpp(Rcpp::List args, Rcpp::List args_functions) {
+Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
     
     // start timer
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
@@ -31,6 +30,25 @@ Rcpp::List runMCMC2_cpp(Rcpp::List args, Rcpp::List args_functions) {
     print("MCMC completed in", time_span.count(), "seconds");
     
     // return values back to R
-    return Rcpp::List::create(Rcpp::Named("logLike_burnin")=mainMCMC.logLike_burnin_store, Rcpp::Named("logLike")=mainMCMC.logLike_store, Rcpp::Named("m1")=mainMCMC.m1_store, Rcpp::Named("m2")=mainMCMC.m2_store, Rcpp::Named("f")=mainMCMC.f_store, Rcpp::Named("rho")=mainMCMC.rho_store, Rcpp::Named("IBD_marginal")=mainMCMC.IBD_marginal);
+    Rcpp::List ret;
+    ret.push_back(Rcpp::wrap( mainMCMC.logLike_burnin_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.logLike_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.m1_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.m2_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.f_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.rho_store ));
+    ret.push_back(Rcpp::wrap( mainMCMC.IBD_marginal ));
+    
+    Rcpp::StringVector ret_names;
+    ret_names.push_back("logLike_burnin");
+    ret_names.push_back("logLike");
+    ret_names.push_back("m1");
+    ret_names.push_back("m2");
+    ret_names.push_back("f");
+    ret_names.push_back("rho");
+    ret_names.push_back("IBD_marginal");
+    
+    ret.names() = ret_names;
+    return ret;
 }
 
