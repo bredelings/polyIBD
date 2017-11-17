@@ -1,8 +1,11 @@
 
 # ------------------------------------------------------------------
-# getTransProbs
-# calculate transition probabilities
-# (not exported)
+#' @title Get transition probabilities
+#'
+#' @description Takes values of f, rho, and zmax. Produces rate matrix and calculates eigen values and vectors.
+#'
+#' @param f TODO
+#' @export
 
 getTransProbs <- function(f, rho, zmax) {
     
