@@ -1,0 +1,38 @@
+---
+title: "Getting Started with _polyIBD_"
+author: "Nicholas F. Brazeau & Robert Verity"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{"Getting Started with _polyIBD_"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = F, echo=F}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+
+if(!c("polyIBD") %in% installed.packages()[,"Package"]){
+  devtools::install_github(repo="nickbrazeau/polyIBD", ref="devo") # need to change this to master once we make our final push
+}
+
+library(polyIBD)
+library(tidyverse)
+
+```
+
+
+## The Effects of MOI on Population Structure
+```{r, fig.show='hold', fig.cap = "Your figure caption."}
+
+# pca1
+# pca2
+
+```
