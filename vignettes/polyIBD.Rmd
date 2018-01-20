@@ -1,14 +1,16 @@
 ---
-title: "Getting Started with _polyIBD_"
+title: "Getting Started with `polyIBD`"
 author: "Nicholas F. Brazeau & Robert Verity"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  rmarkdown::html_vignette:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
     toc: true
     fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{"Getting Started with _polyIBD_"}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{prettydoc::html_pretty}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -28,11 +30,50 @@ library(tidyverse)
 
 ```
 
+# Overview 
+`polyIBD` is an R package that can be used to infer regions of identity by descent (IBD) from samples that are unphased and potentially polyclonal.   
+ 
+Recently, several programs have been written to address this problem, including Henden/Bahlo's [isorelate](https://github.com/bahlolab/isoRelate) and Schaffner/Neafsey's  [hmmIBD](https://github.com/glipsnort/hmmIBD). Here we extend upon these approaches and **assume that the multiplicity of infection (MOI) is unkown and is not limited to 2.**   
 
-## The Effects of MOI on Population Structure
-```{r, fig.show='hold', fig.cap = "Your figure caption."}
+Using a bayesian approach, the main strength of `polyIBD` is that MOI estimates are unbounded and can be inferred directly along with other model parameters. As such, `polyIBD` has the ability to infer:
 
-# pca1
-# pca2
+1.  Regions of IBD
+1.  MOI estimates for both samples  
+1.  Genetic Relatedness
+1.  Rate of Recombination
+
+
+## Description
+`polyIBD` is a first-order Hidden Markov Model (HMM) that uses the Metropolis-Hasting Algorithm to infer model parameters. Within the HMM framework, `polyIBD` assumes that the transition probabilities and emission probabilites can be described and uses the forward-backward algorithm to calculate the likelihood of the hidden state. For an extended description of the model, please view the [supplementary information]().
+
+# Getting Started with `polyIBD` 
+First you will need to have successfully installed `polyIBD` as described [previously in the README](https://github.com/nickbrazeau/polyIBD).  
+
+## Input 
+The input for `polyIBD` is a filtered^[Filtering will not be discussed here but resources include: [GATK Forums](https://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set), the [vcfR](https://cran.r-project.org/web/packages/vcfR/vignettes/intro_to_vcfR.html) tool, among others.] Variant Call File (VCF) that follows the [VCF specifciations](https://samtools.github.io/hts-specs/VCFv4.2.pdf) for the Genotype Filed and has a genotype (GT) value for each sample. In additon, VCFs must be unphased and called as a diploid. As such, acceptable GT values are: 0/0, 0/1, 1/1, and ".", for homozygous referent, heterozygous, homozygous alternative, and missing, respectively. Currently `polyIBD` does not handle missing data, which is a limitation that will be resolved shortly. 
+
+## Simulated Data 
+For the purpose of this vignette, we will simulate a VCF with two samples and use it to run `polyIBD`. First let's input some specifications for the number of loci, the genetic relatedness, and the recombination rate for these samples. 
+```{r, echo=T, eval=T}
+# setup
+n <- 1e3 # this is the number of loci we would like to simulate
+rho_true <- 5e-3 # this is the recombination rate we are trying to infer
+f_true <- 0.2 # this is the proportion of genetic relatedness we are trying to infer 
+m_true <- c(2,2) # this is the multiplicity of infection for sample1 and sample2, respectfully, that we are trying to infer
+pos <- sort(sample(10*n, n)) # simulate some positions/genomic coordinates
 
 ```
+
+We will now call the built-in simulation function from `polyIBD` to take our inputs a simulate a two-sampled VCF. The simulation is using a beta distribution with the shape parameters alpha=1 and beta=1 to simiulate population allele frequencies. This distribution can be adjusted by the user but the 1,1 shape parameters provide a population with a high proportion of fixated alleles (to see the distribution, input the following command to your R Console: #> hist(rbeta(1000, 0.5, 0.5))). 
+
+```{r, echo=T, eval=T}
+set.seed(44)
+sim <- IBDsimulatorparams(n=n, m1=m_true[1], m2=m_true[2], f=f_true, rho=rho_true, p=NULL, p_shape1=0.5, p_shape2=0.5, pos=pos)
+```
+
+The ouptut of the `IBDsimulatorparams` function is a list of four objects. 
+
+
+
+
+
