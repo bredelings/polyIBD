@@ -36,7 +36,7 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     # TODO - allow for multiple chromosomes, with infinite distances between chromosomes?
     SNP_dist <- diff(vcf$POS)
     
-    # define list of arguments
+    # define list of arguments to pass to Rcpp
     args <- list(x=x,
                 p=p,
                 SNP_dist=SNP_dist,
@@ -60,36 +60,20 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     output_raw <- runMCMC_cpp(args, args_functions)
     
     # check for convergence
-    conv <- c(output_raw$logLike_burnin, output_raw$logLike)
-    conv_z <- coda::geweke.diag(coda::mcmc(conv), frac1=burnin/(burnin+samples), frac2=samples/(burnin+samples))$z
-    conv_p <- 2*pnorm(abs(conv_z), lower.tail=FALSE)
+    checkConvergence(output_raw$logLike_burnin, output_raw$logLike)
     
-    # report convergence
-    if (conv_p>0.05) {
-        cat(paste0("convergence reached within defined burn-in period (Geweke p=", round(conv_p,3), ")"))
-    } else {
-        cat(paste0("WARNING: convergence not reached within defined burn-in period (Geweke p=", round(conv_p,3), ")"))
-    }
     
     # ------------------------------
     #      SAVE MCMC RAW OUTPUT
     # ------------------------------
     
-    # save raw chains
-    logLike_burnin_chain <- coda::mcmc(output_raw$logLike_burnin)
-    logLike_chain <- coda::mcmc(output_raw$logLike)
-    m1_chain <- coda::mcmc(output_raw$m1)
-    m2_chain <- coda::mcmc(output_raw$m2)
-    f_chain <- coda::mcmc(output_raw$f)
-    rho_chain <- coda::mcmc(output_raw$rho)
-    
     # list of raw output
-    raw_output <- list(logLike_burnin = logLike_burnin_chain,
-                        logLike = logLike_chain,
-                        m1 = m1_chain,
-                        m2 = m2_chain,
-                        f = f_chain,
-                        rho = rho_chain)
+    raw_output <- list(logLike_burnin = coda::mcmc(output_raw$logLike_burnin),
+                        logLike = coda::mcmc(output_raw$logLike),
+                        m1 = coda::mcmc(output_raw$m1),
+                        m2 = coda::mcmc(output_raw$m2),
+                        f = coda::mcmc(output_raw$f),
+                        rho = coda::mcmc(output_raw$rho))
     
     
     # ------------------------------
@@ -99,7 +83,7 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     # get marginal IBD matrix
     IBD_marginal <- Rcpp_to_mat(output_raw$IBD_marginal)
     colnames(IBD_marginal) <- rownames(vcf)
-    rownames(IBD_marginal) <- paste0("z",0:(nrow(IBD_marginal)-1))
+    rownames(IBD_marginal) <- paste0("z", 0:(nrow(IBD_marginal)-1))
     
     # list of summary output
     summary_output <- list(IBD_marginal = IBD_marginal)
@@ -109,10 +93,12 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
     #            RETURN
     # ------------------------------
     
+    # create output class polyIBD
     ret <- list(summary = summary_output,
                 raw = raw_output)
     class(ret) <- "polyIBD"
     
+    # return
     return(ret)
 }
 

@@ -7,8 +7,8 @@
 plot_rho(z)
 }
 \arguments{
-\item{dat}{TODO}
+\item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-text
+Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the recombination rate.
 }

@@ -4,11 +4,11 @@
 \alias{plot_f}
 \title{Trace plot of f}
 \usage{
-plot_f(z)
+plot_f(x, ...)
 }
 \arguments{
-\item{dat}{TODO}
+\item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-text
+Produces a simple MCMC trace plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
 }

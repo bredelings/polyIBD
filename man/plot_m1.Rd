@@ -4,11 +4,11 @@
 \alias{plot_m1}
 \title{Trace plot of m1}
 \usage{
-plot_m1(z, ...)
+plot_m1(x, ...)
 }
 \arguments{
-\item{dat}{TODO}
+\item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-text
+Produces a simple MCMC trace plot of the parameter \code{m1}, which represents the COI of the first sample.
 }

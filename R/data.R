@@ -1,18 +1,22 @@
 
 # ------------------------------------------------------------------
-#' @title polyIBD Empirical markovchainIBD simulator
+#' @title Simulate IBD sections between two samples
 #'
-#' @description Going off of empirical solution of model. Function inspired by Deonier's Computational Genomic Textbook?
+#' @description Walks along a vector of genomic locations and swiches between two states that represent IBD and non-IBD using a Markov model. The parameters that dictate the chance of switching state at any point include the average level of relatedness (\code{f}), the physical distance between loci in units of base pairs (from \code{pos}), and the recombination rate (\code{rho}), which is assumed constant over all loci.
 #'
-#' @param file
+#' @param f the average relatedness between the two samples
+#' @param rho the recombination rate. TODO - units of this parameter
+#' @param pos the genomic positions of the sites of interest
+#' 
 #' @export
 
-markovchainIBDsim <- function(n, f, rho, pos) {
+simIBD <- function(f, rho, pos) {
   
   # define alpha from f and rho
   alpha <- rho*f/(1-f)
   
   # draw starting state
+  n <- length(pos)
   ret <- rep(NA, n)
   ret[1] <- sample(c(0,1), size = 1, prob = c(1-f,f))
   
@@ -32,16 +36,16 @@ markovchainIBDsim <- function(n, f, rho, pos) {
 }
 
 # ------------------------------------------------------------------
-#' @title polyIBD Empirical Simulator
+#' @title Simulate data from polyIBD model
 #'
 #' @description Going off of empirical solution of model
 #'
 #' @param file
 #' @export
 
-IBDsimulatorparams <- function(n=100, m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, pos=1:n) {
+simData <- function(n=100, m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, pos=1:n) {
   
-  # simulate the major allele of the population allele frequencies (unless fixed on input)
+  # simulate the frequency of the major allele at each locus (unless fixed on input)
   if (is.null(p)) {
       p <- rbeta(n, p_shape1, p_shape2)
   } else {
@@ -56,16 +60,16 @@ IBDsimulatorparams <- function(n=100, m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1
   
   # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
   zmax <- min(m1, m2)
-  IBD <- matrix(NA,n,zmax)
+  IBD <- matrix(NA, n, zmax)
   for (i in 1:zmax) {
-      IBD[,i] <- markovchainIBDsim(n, f, rho, pos)
+      IBD[,i] <- simIBD(f, rho, pos)
       w <- which(IBD[,i]==1)
       haploid1[w,i] <- haploid2[w,i]
   }
   
   # make sim vcf based on haploid genotypes
   simvcf <- data.frame(CHROM="contig1", POS=pos, Sample1=1, Sample2=1)
-  rownames(simvcf) <- c(paste0("Locus", seq(1:n)))
+  rownames(simvcf) <- paste0("Locus", 1:n)
   
   simvcf[apply(haploid1, 1, function(x){all(x==0)}),3] <- 0
   simvcf[apply(haploid1, 1, function(x){all(x==2)}),3] <- 2
