@@ -12,7 +12,8 @@ Imports:
     Rcpp (>= 0.12.12),
     RcppParallel,
     coda,
-    viridis
+    viridis,
+    raster
 LinkingTo:
     Rcpp,
     RcppParallel

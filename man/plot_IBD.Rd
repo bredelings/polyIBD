@@ -4,11 +4,13 @@
 \alias{plot_IBD}
 \title{Plot marginal IBD matrix}
 \usage{
-plot_IBD(z)
+plot_IBD(x, trueIBD = NULL, ...)
 }
 \arguments{
-\item{dat}{TODO}
+\item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
+
+\item{trueIBD}{option to overlay a line corresponding to the true IBD (for example if using simulated data)}
 }
 \description{
-text
+Plots the full posterior IBD matrix between two samples. SNPs are arranged in order on the x-axis, and the IBD level is given on the y-axis. This represents the number of genotypes that are shared between samples, with the lowest level (IBD=0) representing zero shared genotypes and hence no IBD. The intensity of colour represents the probability of each IBD level at each locus.
 }

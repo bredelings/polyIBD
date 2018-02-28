@@ -4,11 +4,11 @@
 \alias{plot_rho}
 \title{Trace plot of rho}
 \usage{
-plot_rho(z)
+plot_rho(x, ...)
 }
 \arguments{
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the recombination rate.
+Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
 }
