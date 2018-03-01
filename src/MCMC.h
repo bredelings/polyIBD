@@ -12,6 +12,7 @@ class MCMC {
     // data and model parameters
     std::vector<int> x;
     int L;
+    double rho_max;
     std::vector<double> p_vec;
     std::vector<int> SNP_dist;
     double e1;

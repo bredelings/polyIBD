@@ -16,6 +16,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     x = Rcpp_to_vector_int(args["x"]);
     L = x.size();
     p_vec = Rcpp_to_vector_double(args["p"]);
+    rho_max = Rcpp_to_double(args["rho_max"]);
     SNP_dist = Rcpp_to_vector_int(args["SNP_dist"]);
     e1 = Rcpp_to_double(args["e1"]);
     e2 = Rcpp_to_double(args["e2"]);
@@ -36,7 +37,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     m2 = 1;
     z_max = (m1<m2) ? m1 : m2;
     f = 0.01;
-    rho = 0.01;
+    rho = rho_max;
     logLike_old = 0;
     frwrd_mat = vector< vector<double> >(m_max+1, vector<double>(L));
     bkwrd_mat = vector< vector<double> >(m_max+1, vector<double>(L));
@@ -66,8 +67,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     m1_weight_move = 1;
     m2_weight_stay = 1;
     m2_weight_move = 1;
-    f_propSD = 0.1;
-    rho_propSD = 0.1;
+    f_propSD = 0.2;
+    rho_propSD = rho_max/10;
     IBD_index = 0;
     
 }
@@ -102,7 +103,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
             if (rbernoulli1(0.5)) {
                 f_prop = rnorm1_interval(f, f_propSD, 0, 1);
             } else {
-                rho_prop = rnorm1_interval(rho, rho_propSD, 0, 0.1);
+                rho_prop = rnorm1_interval(rho, rho_propSD, 0, rho_max);
             }
         }
         
@@ -199,7 +200,7 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
             if (rbernoulli1(0.5)) {
                 f_prop = rnorm1_interval(f, f_propSD, 0, 1);
             } else {
-                rho_prop = rnorm1_interval(rho, rho_propSD, 0, 0.1);
+                rho_prop = rnorm1_interval(rho, rho_propSD, 0, rho_max);
             }
         }
         

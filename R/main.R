@@ -17,7 +17,7 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
+runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
   # ------------------------------
   #         PROCESS INPUTS
@@ -40,8 +40,8 @@ runMCMC <- function(vcf, p, rho=1, m_max=5, burnin=1e2, samples=1e3, e1=0.05, e2
   # define list of arguments to pass to Rcpp
   args <- list(x=x,
                p=p,
+               rho_max=rho_max,
                SNP_dist=SNP_dist,
-               rho=rho,
                m_max=m_max,
                burnin=burnin,
                samples=samples,
