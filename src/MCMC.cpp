@@ -95,7 +95,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         int m1_prop = propose_m(m1, m1_weight_move, m1_weight_stay);
         int m2_prop = propose_m(m2, m2_weight_move, m2_weight_stay);
         
-        // if no change in m, therefore propose either f or rho
+        // if no change in m then propose either f or rho
         double f_prop = f;
         double rho_prop = rho;
         if (m1_prop==m1 && m2_prop==m2) {
@@ -111,6 +111,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         double logLike_new = forward_alg(m1_prop, m2_prop);
         
         // Metropolis-Hastings step
+        // note that all proposal distributions are symmetric, therefore no Hastings step is required
         // if accept
         if (log(runif_0_1()) < (logLike_new-logLike_old)) {
             
@@ -207,6 +208,7 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
         double logLike_new = forward_alg(m1_prop, m2_prop);
         
         // Metropolis-Hastings step
+        // note that all proposal distributions are symmetric, therefore no Hastings step is required
         // if accept
         if (log(runif_0_1()) < (logLike_new-logLike_old)) {
             
@@ -256,12 +258,29 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
 
 //------------------------------------------------
 // MCMC::
-// define emmission probability lookup table. This table is essentially a list over m1, then m2, then k, where k is the number of HMM states at each locus (i.e. k = 1 + the maximum level of IBD between samples). At the final level of the list is a matrix with L rows and 9 columns giving emmission probabilities for each locus. The 9 columns correspond to the 9 possible genotypes combinations {A,A}, {A,Aa}, {A,a}, {Aa,A}, {Aa,Aa}, {Aa,a}, {a,A}, {a,Aa}, {a,a}.
+// define emmission probability lookup table. This table is essentially a list over m1, then m2, then k, where k is the number of HMM states at each locus (i.e. k = 1 + the maximum level of IBD between samples). At the final level of the list is a matrix with L rows and 16 columns giving emmission probabilities for each locus. The 16 columns correspond to the 16 possible genotypes combinations (NA means missing data):
+// 0 = {NA, NA}
+// 1 = {NA, A}
+// 2 = {NA, Aa}
+// 3 = {NA, a}
+// 4 = {A, NA}
+// 5 = {A,A}
+// 6 = {A,Aa}
+// 7 = {A,a}
+// 8 = {Aa, NA}
+// 9 = {Aa,A}
+// 10 = {Aa,Aa}
+// 11 = {Aa,a}
+// 12 = {a, NA}
+// 13 = {a,A}
+// 14 = {a,Aa}
+// 15 = {a,a}
+
 void MCMC::define_emmission_lookup() {
     
     // temporary vector for storing emmission probs
-    vector<double> x_raw(9);
-    vector<double> x_err(9);
+    vector<double> x_raw(16);
+    vector<double> x_err(16);
     
     // loop through m1
     emmission_lookup = vector< vector< vector< vector< vector<double> > > > >(m_max);
@@ -278,7 +297,7 @@ void MCMC::define_emmission_lookup() {
             // loop through z
             emmission_lookup[m1-1][m2-1] = vector< vector< vector<double> > >(k);
             for (int z=0; z<k; z++) {
-                emmission_lookup[m1-1][m2-1][z] = vector< vector<double> >(L, vector<double>(9));
+                emmission_lookup[m1-1][m2-1][z] = vector< vector<double> >(L, vector<double>(16));
                 
                 // loop through loci
                 for (int i=0; i<L; i++) {
@@ -289,48 +308,74 @@ void MCMC::define_emmission_lookup() {
                     // if no IBD
                     if (z==0) {
                         
-                        x_raw[0] = pow(p,m1+m2);
-                        x_raw[1] = pow(p,m1) * (1 - pow(p,m2) - pow(q,m2));
-                        x_raw[2] = pow(p,m1) * pow(q,m2);
+                        x_raw[0] = 1;
+                        x_raw[1] = pow(p,m2);
+                        x_raw[2] = (1 - pow(p,m2) - pow(q,m2));
+                        x_raw[3] = pow(q,m2);
                         
-                        x_raw[3] = (1 - pow(p,m1) - pow(q,m1)) * pow(p,m2);
-                        x_raw[4] = (1 - pow(p,m1) - pow(q,m1)) * (1 - pow(p,m2) - pow(q,m2));
-                        x_raw[5] = (1 - pow(p,m1) - pow(q,m1)) * pow(q,m2);
+                        x_raw[4] = pow(p,m1);
+                        x_raw[5] = pow(p,m1+m2);
+                        x_raw[6] = pow(p,m1) * (1 - pow(p,m2) - pow(q,m2));
+                        x_raw[7] = pow(p,m1) * pow(q,m2);
                         
-                        x_raw[6] = pow(q,m1) * pow(p,m2);
-                        x_raw[7] = pow(q,m1) * (1 - pow(p,m2) - pow(q,m2));
-                        x_raw[8] = pow(q,m1+m2);
+                        x_raw[8] = (1 - pow(p,m1) - pow(q,m1));
+                        x_raw[9] = (1 - pow(p,m1) - pow(q,m1)) * pow(p,m2);
+                        x_raw[10] = (1 - pow(p,m1) - pow(q,m1)) * (1 - pow(p,m2) - pow(q,m2));
+                        x_raw[11] = (1 - pow(p,m1) - pow(q,m1)) * pow(q,m2);
+                        
+                        x_raw[12] = pow(q,m1);
+                        x_raw[13] = pow(q,m1) * pow(p,m2);
+                        x_raw[14] = pow(q,m1) * (1 - pow(p,m2) - pow(q,m2));
+                        x_raw[15] = pow(q,m1+m2);
                         
                     }
                     // if some IBD
                     else {
                         
-                        x_raw[0] = pow(p,m1+m2-z);
-                        x_raw[1] = pow(p,m1) * (1 - pow(p,m2-z));
-                        x_raw[2] = 0;
+                        x_raw[0] = 1;
+                        x_raw[1] = pow(p,m2);
+                        x_raw[2] = (1 - pow(p,m2) - pow(q,m2));
+                        x_raw[3] = pow(q,m2);
                         
-                        x_raw[3] = (1 - pow(p,m1-z)) * pow(p,m2);
-                        x_raw[4] = (1 - pow(p,m1) - pow(q,m1)) - (1 - pow(p,m1-z))*pow(p,m2) - (1 - pow(q,m1-z))*pow(q,m2);
-                        x_raw[5] = (1 - pow(q,m1-z)) * pow(q,m2);
+                        x_raw[4] = pow(p,m1);
+                        x_raw[5] = pow(p,m1+m2-z);
+                        x_raw[6] = pow(p,m1) * (1 - pow(p,m2-z));
+                        x_raw[7] = 0;
                         
-                        x_raw[6] = 0;
-                        x_raw[7] = pow(q,m1) * (1 - pow(q,m2-z));
-                        x_raw[8] = pow(q,m1+m2-z);
+                        x_raw[8] = (1 - pow(p,m1) - pow(q,m1));
+                        x_raw[9] = (1 - pow(p,m1-z)) * pow(p,m2);
+                        x_raw[10] = (1 - pow(p,m1) - pow(q,m1)) - (1 - pow(p,m1-z))*pow(p,m2) - (1 - pow(q,m1-z))*pow(q,m2);
+                        x_raw[11] = (1 - pow(q,m1-z)) * pow(q,m2);
+                        
+                        x_raw[12] = pow(q,m1);
+                        x_raw[13] = 0;
+                        x_raw[14] = pow(q,m1) * (1 - pow(q,m2-z));
+                        x_raw[15] = pow(q,m1+m2-z);
                         
                     }
                     
                     // incorporate error
-                    x_err[0] = (1-e1)*((1-e1)*x_raw[0] + 0.5*e2*x_raw[1]) + 0.5*e2*((1-e1)*x_raw[3] + 0.5*e2*x_raw[4]);
-                    x_err[1] = (1-e1)*((1-e2)*x_raw[1] + e1*(x_raw[0]+x_raw[2])) + 0.5*e2*((1-e2)*x_raw[4] + e1*(x_raw[3]+x_raw[5]));
-                    x_err[2] = (1-e1)*((1-e1)*x_raw[2] + 0.5*e2*x_raw[1]) + 0.5*e2*((1-e1)*x_raw[5] + 0.5*e2*x_raw[4]);
+                    // e1 = prob homo incorrectly called as het
+                    // e2 = prob het incorrectly called as homo
+                    x_err[0] = x_raw[0];
+                    x_err[1] = (1-e1)*x_raw[1] + 0.5*e2*x_raw[2];
+                    x_err[2] = (1-e2)*x_raw[2] + e1*(x_raw[1]+x_raw[3]);
+                    x_err[3] = (1-e1)*x_raw[3] + 0.5*e2*x_raw[2];
                     
-                    x_err[3] = (1-e2)*((1-e1)*x_raw[3] + 0.5*e2*x_raw[4]) + e1*((1-e1)*x_raw[0] + 0.5*e2*x_raw[1]) + e1*((1-e1)*x_raw[6] + 0.5*e2*x_raw[7]);
-                    x_err[4] = (1-e2)*((1-e2)*x_raw[4] + e1*(x_raw[3]+x_raw[5])) + e1*((1-e2)*x_raw[1] + e1*(x_raw[0]+x_raw[2])) + e1*((1-e2)*x_raw[7] + e1*(x_raw[6]+x_raw[8]));
-                    x_err[5] = (1-e2)*((1-e1)*x_raw[5] + 0.5*e2*x_raw[4]) + e1*((1-e1)*x_raw[2] + 0.5*e2*x_raw[1]) + e1*((1-e1)*x_raw[8] + 0.5*e2*x_raw[7]);
+                    x_err[4] = (1-e1)*x_raw[4] + 0.5*e2*x_raw[8];
+                    x_err[5] = (1-e1)*((1-e1)*x_raw[5] + 0.5*e2*x_raw[6]) + 0.5*e2*((1-e1)*x_raw[9] + 0.5*e2*x_raw[10]);
+                    x_err[6] = (1-e1)*((1-e2)*x_raw[6] + e1*(x_raw[5]+x_raw[7])) + 0.5*e2*((1-e2)*x_raw[10] + e1*(x_raw[9]+x_raw[11]));
+                    x_err[7] = (1-e1)*((1-e1)*x_raw[7] + 0.5*e2*x_raw[6]) + 0.5*e2*((1-e1)*x_raw[11] + 0.5*e2*x_raw[10]);
                     
-                    x_err[6] = (1-e1)*((1-e1)*x_raw[6] + 0.5*e2*x_raw[7]) + 0.5*e2*((1-e1)*x_raw[3] + 0.5*e2*x_raw[4]);
-                    x_err[7] = (1-e1)*((1-e2)*x_raw[7] + e1*(x_raw[6]+x_raw[8])) + 0.5*e2*((1-e2)*x_raw[4] + e1*(x_raw[3]+x_raw[5]));
-                    x_err[8] = (1-e1)*((1-e1)*x_raw[8] + 0.5*e2*x_raw[7]) + 0.5*e2*((1-e1)*x_raw[5] + 0.5*e2*x_raw[4]);
+                    x_err[8] = (1-e2)*x_raw[8] + e1*(x_raw[4] + x_raw[12]);
+                    x_err[9] = (1-e2)*((1-e1)*x_raw[9] + 0.5*e2*x_raw[10]) + e1*((1-e1)*x_raw[5] + 0.5*e2*x_raw[6]) + e1*((1-e1)*x_raw[13] + 0.5*e2*x_raw[14]);
+                    x_err[10] = (1-e2)*((1-e2)*x_raw[10] + e1*(x_raw[9]+x_raw[11])) + e1*((1-e2)*x_raw[6] + e1*(x_raw[5]+x_raw[7])) + e1*((1-e2)*x_raw[14] + e1*(x_raw[13]+x_raw[15]));
+                    x_err[11] = (1-e2)*((1-e1)*x_raw[11] + 0.5*e2*x_raw[10]) + e1*((1-e1)*x_raw[7] + 0.5*e2*x_raw[6]) + e1*((1-e1)*x_raw[15] + 0.5*e2*x_raw[14]);
+                    
+                    x_err[12] = (1-e1)*x_raw[12] + 0.5*e2*x_raw[8];
+                    x_err[13] = (1-e1)*((1-e1)*x_raw[13] + 0.5*e2*x_raw[14]) + 0.5*e2*((1-e1)*x_raw[9] + 0.5*e2*x_raw[10]);
+                    x_err[14] = (1-e1)*((1-e2)*x_raw[14] + e1*(x_raw[13]+x_raw[15])) + 0.5*e2*((1-e2)*x_raw[10] + e1*(x_raw[9]+x_raw[11]));
+                    x_err[15] = (1-e1)*((1-e1)*x_raw[15] + 0.5*e2*x_raw[14]) + 0.5*e2*((1-e1)*x_raw[11] + 0.5*e2*x_raw[10]);
                     
                     // save to table
                     emmission_lookup[m1-1][m2-1][z][i] = x_err;
