@@ -51,8 +51,9 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     f_store = vector<double>(samples);
     rho_store = vector<double>(samples);
     IBD_store = vector< vector< vector<double> > >(samples);
-    IBD_weight = vector<double>(samples);
+    IBD_weight = vector<int>(samples);
     IBD_marginal = vector< vector<double> >(m_max+1, vector<double>(L));
+    accept_rate = 0;
     
     // calculate initial likelihood
     update_transition_lookup(f, rho, m1, m2, args_functions["getTransProbs"]);
@@ -177,7 +178,6 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
     
     // announce burn-in phase
     print("   sampling phase");
-    
     // loop through sampling iterations
     IBD_index = -1; // (this will be incremented to 0 before it is used in idexing)
     for (int rep=0; rep<samples; rep++) {
@@ -226,6 +226,8 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
             IBD_index++;
             IBD_store[IBD_index] = IBD_mat;
             
+            // update acceptance rate
+            accept_rate ++;
         }
         
         // increase current IBD_weight
@@ -240,7 +242,6 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
         
     }   // end MCMC loop
     
-    
     // calculate marginal IBD matrix over all MCMC output
     for (int rep=0; rep<samples; rep++) {
         // stop once we reach elements with zero weight
@@ -250,7 +251,7 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
         // add stored matrix to IBD_marginal, weighted by IBD_weight.
         for (int i=0; i<(m_max+1); i++) {
             for (int j=0; j<L; j++) {
-                IBD_marginal[i][j] += IBD_weight[rep]*IBD_store[rep][i][j];
+                IBD_marginal[i][j] += IBD_weight[rep]/double(samples) * IBD_store[rep][i][j];
             }
         }
     }

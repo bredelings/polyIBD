@@ -62,6 +62,39 @@ is.polyIBD <- function(x) {
   inherits(x, "polyIBD")
 }
 
+#------------------------------------------------
+# overload print() function to print summary only
+#' @export
+print.polyIBD <- function(x, ...) {
+  
+  # print summary only
+  summary(x)
+  
+  # return invisibly
+  invisible(x)
+}
+
+#------------------------------------------------
+# overload summary() function.
+#' @export
+summary.polyIBD <- function(x, ...) {
+  
+  # print MCMC summary
+  cat("# MCMC summary\n")
+  cat(paste("burn-in iterations:\t", length(x$raw$logLike_burnin)) ,"\n")
+  cat(paste("sampling iterations:\t", length(x$raw$logLike)) ,"\n")
+  cat(paste("acceptance rate:\t", x$summary$accept_rate) ,"\n")
+  cat(paste("run-time (seconds):\t", round(x$raw$runTime, 3)) ,"\n")
+  cat("\n")
+  
+  # print posterior parameter summary
+  cat("# Posterior estimates\n")
+  quants <- x$summary$quantiles
+  print(quants)
+  
+}
+
+
 # -----------------------------------
 # mat_to_Rcpp
 # takes matrix as input, converts to list format for use within Rcpp code

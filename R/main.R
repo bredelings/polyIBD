@@ -74,7 +74,8 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
                      m1 = coda::mcmc(output_raw$m1),
                      m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
-                     rho = coda::mcmc(output_raw$rho))
+                     rho = coda::mcmc(output_raw$rho),
+                     runTime = output_raw$runTime)
   
   
   # ------------------------------
@@ -86,8 +87,17 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   colnames(IBD_marginal) <- rownames(vcf)
   rownames(IBD_marginal) <- paste0("z", 0:(nrow(IBD_marginal)-1))
   
+  # get final acceptance rate
+  accept_rate <- output_raw$accept_rate/samples
+  
+  # calculate quantiles over parameters
+  quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
+  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "rho"),]
+  
   # list of summary output
-  summary_output <- list(IBD_marginal = IBD_marginal)
+  summary_output <- list(IBD_marginal = IBD_marginal,
+                         quantiles = quants,
+                         accept_rate = accept_rate)
   
   
   # ------------------------------

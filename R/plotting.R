@@ -164,6 +164,7 @@ plot_IBD <- function(x, trueIBD=NULL, ...) {
   
   # produce plot
   do.call(raster::image, c(list(x=r), args))
+  #do.call(raster::plot, c(list(x=r), args))
   
   # overlay true IBD
   if (!is.null(trueIBD)) {

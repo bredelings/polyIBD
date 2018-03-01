@@ -38,6 +38,8 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
     ret.push_back(Rcpp::wrap( mainMCMC.f_store ));
     ret.push_back(Rcpp::wrap( mainMCMC.rho_store ));
     ret.push_back(Rcpp::wrap( mainMCMC.IBD_marginal ));
+    ret.push_back(Rcpp::wrap( mainMCMC.accept_rate ));
+    ret.push_back(Rcpp::wrap( time_span.count() ));
     
     Rcpp::StringVector ret_names;
     ret_names.push_back("logLike_burnin");
@@ -47,6 +49,8 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
     ret_names.push_back("f");
     ret_names.push_back("rho");
     ret_names.push_back("IBD_marginal");
+    ret_names.push_back("accept_rate");
+    ret_names.push_back("runTime");
     
     ret.names() = ret_names;
     return ret;

@@ -43,8 +43,9 @@ class MCMC {
     std::vector<double> f_store;
     std::vector<double> rho_store;
     std::vector< std::vector< std::vector<double> > > IBD_store;
-    std::vector<double> IBD_weight;
+    std::vector<int> IBD_weight;
     std::vector< std::vector<double> > IBD_marginal;
+    int accept_rate;
     
     // misc objects
     int m1_weight_stay;

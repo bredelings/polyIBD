@@ -5,8 +5,29 @@
 \title{Simulate data from polyIBD model}
 \usage{
 simData(n = 100, m1 = 1, m2 = 1, f = 0.5, rho = 1, p = NULL,
-  p_shape1 = 0.1, p_shape2 = 0.1, pos = 1:n)
+  p_shape1 = 0.1, p_shape2 = 0.1, pos = 1:n, propMissing = 0)
+}
+\arguments{
+\item{n}{TODO}
+
+\item{m1}{TODO}
+
+\item{m2}{TODO}
+
+\item{f}{TODO}
+
+\item{rho}{TODO}
+
+\item{p}{TODO}
+
+\item{p_shape1}{TODO}
+
+\item{p_shape2}{TODO}
+
+\item{pos}{TODO}
+
+\item{propMissing}{TODO}
 }
 \description{
-Going off of empirical solution of model
+TODO
 }
