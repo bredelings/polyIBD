@@ -149,27 +149,17 @@ plot_IBD <- function(x, trueIBD=NULL, ...) {
   args <- list(...)
   argNames <- names(args)
   
-  # get IBD matrix
-  IBD <- unclass(x$summary$IBD_marginal)
-  IBD <- IBD[nrow(IBD):1,] # flip vertically
-  
-  # produce raster image from IBD matrix
-  r <- raster::raster(IBD, xmn=0.5, xmx=ncol(IBD)+0.5, ymn=-0.5, ymx=nrow(IBD)-0.5)
-  
   # set defaults on undefined arguments
-  if (! "col" %in% argNames) {args$col <- viridis::plasma(100)}
   if (! "xlab" %in% argNames) {args$xlab <- "SNP"}
   if (! "ylab" %in% argNames) {args$ylab <- "IBD level"}
-  if (! "asp" %in% argNames) {args$asp <- NA}
+  if (! "main" %in% argNames) {args$main <- "posterior IBD level"}
+  
+  # get IBD matrix
+  IBD <- unclass(x$summary$IBD_marginal)
   
   # produce plot
-  do.call(raster::image, c(list(x=r), args))
-  #do.call(raster::plot, c(list(x=r), args))
+  do.call(faster, c(list(x=1:ncol(IBD), y=0:(nrow(IBD)-1), z=t(IBD), bigplot=c(0.1, 0.85, 0.2, 0.8), smallplot=c(0.9, 0.92, 0.3, 0.7), legend.args=list(text="probability", side=3, line=0.5, adj=0, cex=0.8), whiteLine=trueIBD), args))
   
-  # overlay true IBD
-  if (!is.null(trueIBD)) {
-    lines(trueIBD, col="white", lwd=2)
-  }
 }
 
 #------------------------------------------------
@@ -202,6 +192,122 @@ plot.polyIBD <- function(x, y=NULL, ...) {
   plot_rho(x)
   
   # plot IBD matrix
-  plot_IBD(x, trueIBD=y, main="posterior IBD level")
+  plot_IBD(x, trueIBD=y, ...)
+}
+
+#------------------------------------------------
+# faster
+# Custom version of raster plot that is lightweight and doesn't suffer from problems relating to layout. Ordinary raster produces strange results when used as part of more complex layouts due to its method of setting and re-setting par(). This is avoided here by passing in an optional layout matrix that corresponds to the current layout. See ?fields::image.plot for details of what all arguments do.
+# (not exported)
+
+faster <- function (..., col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, horizontal=FALSE, legend.shrink=0.9, legend.width=1.2, legend.mar=ifelse(horizontal, 3.1, 5.1), legend.lab=NULL, legend.line=2,  bigplot=NULL, smallplot=NULL, lab.breaks=NULL, axis.args=NULL, legend.args=NULL, legend.cex=1, whiteLine=NULL) {
+  
+  # set defaults
+  if (!is.null(breaks)) {
+    nlevel <- length(breaks)-1
+  }
+  if (is.null(col)) {
+    col <- viridis::plasma(nlevel)
+  }
+  nlevel <- length(col)
+  
+  if (is.null(legend.mar)) {
+    legend.mar <- ifelse(horizontal, 3.1, 5.1)
+  }
+  old.par <- NULL
+  
+  # get layout matrix assuming simple increasing grid of values
+  mfrow <- par()$mfrow
+  layout_simple <- matrix(1:(mfrow[1]*mfrow[2]), mfrow[1], mfrow[2], byrow=TRUE)
+  
+  # set layout to simple grid if not specified
+  if (is.null(layout_mat)) {
+    layout_mat <- layout_simple
+  }
+  
+  # set breaks evenly over data range if not specified
+  nlevel <- length(col)
+  info <- fields::imagePlotInfo(..., breaks = breaks, nlevel = nlevel)
+  breaks <- info$breaks
+  
+  # get plotting limits
+  temp <- fields::imageplot.setup(add = FALSE, legend.shrink = legend.shrink, 
+                          legend.width = legend.width, legend.mar = legend.mar, 
+                          horizontal = horizontal, bigplot = bigplot, smallplot = smallplot)
+  smallplot <- temp$smallplot
+  bigplot <- temp$bigplot
+  
+  # check legend will fit
+  if ((smallplot[2] < smallplot[1]) | (smallplot[4] < smallplot[3])) {
+    par(old.par)
+    stop("plot region too small to add legend\n")
+  }
+  
+  # make colour scale
+  ix <- 1:2
+  iy <- breaks
+  nBreaks <- length(breaks)
+  midpoints <- (breaks[1:(nBreaks - 1)] + breaks[2:nBreaks])/2
+  iz <- matrix(midpoints, nrow = 1, ncol = length(midpoints))
+  
+  # add colour scale
+  par(old.par)
+  old.par <- par(pty = "m", plt = smallplot, err = -1)
+  if (!horizontal) {
+    image(ix, iy, iz, xaxt = "n", yaxt = "n", xlab = "", 
+          ylab = "", col = col, breaks = breaks)
+  }
+  else {
+    image(iy, ix, t(iz), xaxt = "n", yaxt = "n", xlab = "", 
+          ylab = "", col = col, breaks = breaks)
+  }
+  
+  # add numbers and box to scale
+  if (!is.null(lab.breaks)) {
+    axis.args <- c(list(side = ifelse(horizontal, 1, 4), 
+                        mgp = c(3, 1, 0), las = ifelse(horizontal, 0, 2), 
+                        at = breaks, labels = lab.breaks), axis.args)
+  }
+  else {
+    axis.args <- c(list(side = ifelse(horizontal, 1, 4), 
+                        mgp = c(3, 1, 0), las = ifelse(horizontal, 0, 2)), 
+                   axis.args)
+  }
+  do.call("axis", axis.args)
+  box()
+  
+  # add legend to scale
+  if (!is.null(legend.lab)) {
+    legend.args <- list(text = legend.lab, side = ifelse(horizontal, 
+                                                         1, 4), line = legend.line, cex = legend.cex)
+  }
+  if (!is.null(legend.args)) {
+    do.call(mtext, legend.args)
+  }
+  
+  # main image plot
+  old.par <- par(new = TRUE, plt = bigplot)
+  image(..., breaks = breaks, add = FALSE, col = col)
+  
+  # add white line
+  if (!is.null(whiteLine)) {
+    lines(whiteLine, col="white", lwd=2)
+  }
+  
+  # get position of current and next plot
+  mfg <- par()$mfg
+  thisPlot <- layout_mat[mfg[1], mfg[2]]
+  if (max(layout_simple)>1) {
+    nextPlot <- which(layout_simple==(thisPlot+1), arr.ind=TRUE)[1,]
+  }
+  
+  # switch back to old pars
+  par(old.par)
+  
+  # set position of next plot
+  if (max(layout_simple)>1) {
+    par(mfg=c(nextPlot[1], nextPlot[2], nrow(layout_mat), ncol(layout_mat)))
+  }
+  par(new=FALSE)
 }
 

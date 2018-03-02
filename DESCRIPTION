@@ -13,7 +13,7 @@ Imports:
     RcppParallel,
     coda,
     viridis,
-    raster
+    fields
 LinkingTo:
     Rcpp,
     RcppParallel

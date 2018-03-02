@@ -50,8 +50,6 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     m2_store = vector<int>(samples);
     f_store = vector<double>(samples);
     rho_store = vector<double>(samples);
-    IBD_store = vector< vector< vector<double> > >(samples);
-    IBD_weight = vector<int>(samples);
     IBD_marginal = vector< vector<double> >(m_max+1, vector<double>(L));
     accept_rate = 0;
     
@@ -220,18 +218,13 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
             m2 = m2_prop;
             logLike_old = logLike_new;
             
-            // update and store IBD_mat
+            // update IBD_mat
             backward_alg(m1, m2);
             get_IBD();
-            IBD_index++;
-            IBD_store[IBD_index] = IBD_mat;
             
             // update acceptance rate
             accept_rate ++;
         }
-        
-        // increase current IBD_weight
-        IBD_weight[IBD_index] ++;
         
         // store current values
         logLike_store[rep] = logLike_old;
@@ -240,22 +233,21 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
         f_store[rep] = f;
         rho_store[rep] = rho;
         
-    }   // end MCMC loop
-    
-    // calculate marginal IBD matrix over all MCMC output
-    for (int rep=0; rep<samples; rep++) {
-        // stop once we reach elements with zero weight
-        if (IBD_weight[rep]==0) {
-            break;
-        }
-        // add stored matrix to IBD_marginal, weighted by IBD_weight.
+        // add current IBD_mat to running estimate
         for (int i=0; i<(m_max+1); i++) {
             for (int j=0; j<L; j++) {
-                IBD_marginal[i][j] += IBD_weight[rep]/double(samples) * IBD_store[rep][i][j];
+                IBD_marginal[i][j] += IBD_mat[i][j];
             }
         }
-    }
+        
+    }   // end MCMC loop
     
+    // finalise IBD_mat
+    for (int i=0; i<(m_max+1); i++) {
+        for (int j=0; j<L; j++) {
+            IBD_marginal[i][j] /= double(samples);
+        }
+    }
 }
 
 //------------------------------------------------

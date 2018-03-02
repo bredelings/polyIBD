@@ -91,7 +91,6 @@ summary.polyIBD <- function(x, ...) {
   cat("# Posterior estimates\n")
   quants <- x$summary$quantiles
   print(quants)
-  
 }
 
 
