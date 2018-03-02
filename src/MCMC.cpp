@@ -61,14 +61,12 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     // misc objects
     // m weights dictate the chance of proposing a new m value ("move") vs. sticking with the current value ("stay"). These weights are updated during the burn-in phase, converging to an efficient proposal distribution. The chance of staying is never allowed to exceed 100* the chance of moving, to ensure there is always some chance of exploring new m values.
     // f_propSD and rho_propSD are updated during the burn-in phase using Robbins-Monro.
-    // IBD_index relates to the way the posterior IBD matrix is stored. If the Metropolis-Hastings step is failed then the IBD matrix does not change from one iteration to the next. It would therefore be  wasteful to store this matrix every iteration, as often we would be storing the same (large) object. Instead, we use a vector of weights (IBD_weight) that count the number of times each element of IBD_store applies. We only store the new IBD matrix if the Metropolis-Hastings step is passed, and otherwise we increase the weighting of the current matrix.
     m1_weight_stay = 1;
     m1_weight_move = 1;
     m2_weight_stay = 1;
     m2_weight_move = 1;
     f_propSD = 0.2;
     rho_propSD = rho_max/10;
-    IBD_index = 0;
     
 }
 
@@ -177,7 +175,6 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
     // announce burn-in phase
     print("   sampling phase");
     // loop through sampling iterations
-    IBD_index = -1; // (this will be incremented to 0 before it is used in idexing)
     for (int rep=0; rep<samples; rep++) {
         
         // report progress
@@ -406,7 +403,13 @@ void MCMC::update_transition_lookup(double f, double rho, int m1, int m2, Rcpp::
                 
                 // the probability of moving from state z1 to state z2 is the sum over some weighted exponentials
                 for (int i=0; i<(z_max+1); i++) {
+                    if (SNP_dist[j] > 0) {
                     transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
+                    } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
+                        if (Evalues[i]==0) {
+                            transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
+                        }
+                    }
                 }
                 
             }

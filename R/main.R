@@ -27,27 +27,30 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   # note - vcf must have 4 columns, samples in final two columns
   
   # extract basic parameters
-  L <- nrow(vcf)  # number of loci
+  tab1 <- table(vcf$CHROM)
+  nc <- length(tab1)
+  cnames <- names(tab1)
+  n <- as.vector(tab1)
+  
+  # get distances between SNPs. Distance=-1 between contigs, indicating infinite distance
+  SNP_dist <- diff(vcf$POS)
+  SNP_dist[cumsum(n)[1:(nc-1)]] <- -1
   
   # compare two samples and save comparison type in vector x
   # x is an integer vector with values in 0:15. These values indicate genotype combinations that cycle through the four options: {missing, homo REF, het, homo ALT} in the first sample, then the same four options in the second sample, leading to 16 options in total
   x <- 4*(vcf[,3]+1) + (vcf[,4]+1)
   
-  # get distances between SNPs
-  # TODO - allow for multiple chromosomes, with infinite distances between chromosomes
-  SNP_dist <- diff(vcf$POS)
-  
   # define list of arguments to pass to Rcpp
-  args <- list(x=x,
-               p=p,
-               rho_max=rho_max,
-               SNP_dist=SNP_dist,
-               m_max=m_max,
-               burnin=burnin,
-               samples=samples,
-               e1=e1,
-               e2=e2,
-               reportIteration=reportIteration)
+  args <- list(x = x,
+               p = unlist(p),
+               rho_max = rho_max,
+               SNP_dist = SNP_dist,
+               m_max = m_max,
+               burnin = burnin,
+               samples = samples,
+               e1 = e1,
+               e2 = e2,
+               reportIteration = reportIteration)
   
   # R functions to pass to Rcpp
   args_functions <- list(getTransProbs = polyIBD::getTransProbs)
@@ -83,9 +86,9 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   # ------------------------------
   
   # get marginal IBD matrix
-  IBD_marginal <- Rcpp_to_mat(output_raw$IBD_marginal)
-  colnames(IBD_marginal) <- rownames(vcf)
-  rownames(IBD_marginal) <- paste0("z", 0:(nrow(IBD_marginal)-1))
+  IBD_marginal <- t(Rcpp_to_mat(output_raw$IBD_marginal))
+  colnames(IBD_marginal) <- paste0("z", 0:(ncol(IBD_marginal)-1))
+  IBD_marginal <- cbind(vcf[,1:2], IBD_marginal)
   
   # get final acceptance rate
   accept_rate <- output_raw$accept_rate/samples

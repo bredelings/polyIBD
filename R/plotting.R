@@ -150,16 +150,20 @@ plot_IBD <- function(x, trueIBD=NULL, ...) {
   argNames <- names(args)
   
   # set defaults on undefined arguments
-  if (! "xlab" %in% argNames) {args$xlab <- "SNP"}
+  if (! "xlab" %in% argNames) {args$xlab <- "Genomic position"}
   if (! "ylab" %in% argNames) {args$ylab <- "IBD level"}
-  if (! "main" %in% argNames) {args$main <- "posterior IBD level"}
+  if (! "main" %in% argNames) {args$main <- "posterior mean IBD level"}
+  if (! "bigplot" %in% argNames) {args$bigplot <- c(0.1, 0.85, 0.2, 0.8)}
+  if (! "smallplot" %in% argNames) {args$smallplot <- c(0.9, 0.92, 0.3, 0.7)}
+  if (! "legend.args" %in% argNames) {args$legend.args <- list(text="probability", side=3, line=0.5, adj=0, cex=0.8)}
   
   # get IBD matrix
-  IBD <- unclass(x$summary$IBD_marginal)
+  CHROM <- x$summary$IBD_marginal[,1]
+  POS <- x$summary$IBD_marginal[,2]
+  IBD <- as.matrix(x$summary$IBD_marginal[,-(1:2)])
   
   # produce plot
-  do.call(faster, c(list(x=1:ncol(IBD), y=0:(nrow(IBD)-1), z=t(IBD), bigplot=c(0.1, 0.85, 0.2, 0.8), smallplot=c(0.9, 0.92, 0.3, 0.7), legend.args=list(text="probability", side=3, line=0.5, adj=0, cex=0.8), whiteLine=trueIBD), args))
-  
+  do.call(IBDraster, c(list(x=IBD, CHROM=CHROM, POS=POS, whiteLine=trueIBD), args))
 }
 
 #------------------------------------------------
@@ -197,10 +201,13 @@ plot.polyIBD <- function(x, y=NULL, ...) {
 
 #------------------------------------------------
 # faster
-# Custom version of raster plot that is lightweight and doesn't suffer from problems relating to layout. Ordinary raster produces strange results when used as part of more complex layouts due to its method of setting and re-setting par(). This is avoided here by passing in an optional layout matrix that corresponds to the current layout. See ?fields::image.plot for details of what all arguments do.
+# Produce multiple adjacent image plots separated by contig, with an associated legend. Makes use of functions from the fields pacakge, and hence includes many arguments also found in fields::image.plot.
 # (not exported)
 
-faster <- function (..., col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, horizontal=FALSE, legend.shrink=0.9, legend.width=1.2, legend.mar=ifelse(horizontal, 3.1, 5.1), legend.lab=NULL, legend.line=2,  bigplot=NULL, smallplot=NULL, lab.breaks=NULL, axis.args=NULL, legend.args=NULL, legend.cex=1, whiteLine=NULL) {
+IBDraster <- function (x, col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, horizontal=FALSE, legend.shrink=0.9, legend.width=1.2, legend.mar=ifelse(horizontal, 3.1, 5.1), legend.lab=NULL, legend.line=2,  bigplot=NULL, smallplot=NULL, lab.breaks=NULL, axis.args=NULL, legend.args=NULL, legend.cex=1, CHROM=NULL, POS=NULL, whiteLine=NULL, ...) {
+  
+  #-----------------
+  # set params
   
   # set defaults
   if (!is.null(breaks)) {
@@ -226,8 +233,7 @@ faster <- function (..., col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, hori
   }
   
   # set breaks evenly over data range if not specified
-  nlevel <- length(col)
-  info <- fields::imagePlotInfo(..., breaks = breaks, nlevel = nlevel)
+  info <- fields::imagePlotInfo(x, breaks = breaks, nlevel = nlevel)
   breaks <- info$breaks
   
   # get plotting limits
@@ -236,6 +242,10 @@ faster <- function (..., col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, hori
                           horizontal = horizontal, bigplot = bigplot, smallplot = smallplot)
   smallplot <- temp$smallplot
   bigplot <- temp$bigplot
+  
+  
+  #-----------------
+  # add legend
   
   # check legend will fit
   if ((smallplot[2] < smallplot[1]) | (smallplot[4] < smallplot[3])) {
@@ -285,14 +295,40 @@ faster <- function (..., col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, hori
     do.call(mtext, legend.args)
   }
   
-  # main image plot
-  old.par <- par(new = TRUE, plt = bigplot)
-  image(..., breaks = breaks, add = FALSE, col = col)
   
-  # add white line
+  #-----------------
+  # add main image plots
+  
+  # extract basic genomic position parameters
+  tab1 <- table(CHROM)
+  nc <- length(tab1)
+  cnames <- names(tab1)
+  n <- as.vector(tab1)
+  
+  # main image plot
+  par(old.par)
+  old.par <- par(new = TRUE, plt = bigplot)
+  image(1:sum(n), 0:(ncol(x)-1), x, breaks = breaks, add = FALSE, col = col, axes=FALSE, ...)
+  
+  # add dotted white lines between contigs
+  abline(v=cumsum(n)[-length(n)], col="white", lty=3)
+  
+  # add axes
+  axis(1, at=cumsum(n)-n/2, labels=cnames)
+  axis(2)
+  
+  # add white lines
   if (!is.null(whiteLine)) {
-    lines(whiteLine, col="white", lwd=2)
+    x0 <- 0
+    for (i in 1:nc) {
+      lines((x0+1):(x0+n[i]), whiteLine[[i]], col="white", lwd=2)
+      x0 <- x0 + n[i]
+    }
   }
+  
+  
+  #-----------------
+  # tidy up
   
   # get position of current and next plot
   mfg <- par()$mfg

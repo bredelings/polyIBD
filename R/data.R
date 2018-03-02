@@ -53,51 +53,82 @@ simIBD <- function(f, rho, pos) {
 #' 
 #' @export
 
-simData <- function(n=100, m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, pos=1:n, propMissing=0) {
+simData <- function(pos=list(contig1=1:1e3, contig2=1:1e3), m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
   
-  # simulate the frequency of the REF allele at each locus (unless fixed on input)
+  # get number of loci in each contig
+  nc <- length(pos)
+  n <- mapply(function(x){length(x)}, pos)
+  
+  # default contig names
+  if (is.null(names(pos)) | ""%in%names(pos)) {
+    names(pos) <- paste0("contig", 1:nc)
+  }
+  
+  # if p=NULL then simulate frequency of the REF allele at each locus in each contig
   if (is.null(p)) {
-      p <- rbeta(n, p_shape1, p_shape2)
-  } else {
-      if (length(p)==1) {
-          p <- rep(p,n)
-      }
+    p <- list()
+    for (i in 1:nc) {
+      p[[i]] <- rbeta(n[i], p_shape1, p_shape2)
+    }
   }
-  n <- length(pos)
   
-  # generate haploid genotypes for both individuals based on MOI and population allele frequencies. Here the major allele is denoted 0 and the minor allele 2.
-  haploid1 <- replicate(m1, 2*rbinom(n,1,prob=1-p))
-  haploid2 <- replicate(m2, 2*rbinom(n,1,prob=1-p))
+  # if p is single value then apply same value to all loci and all contigs
+  if (!is.list(p) & length(p)==1) {
+    p0 <- p
+    p <- list()
+    for (i in 1:nc) {
+      p[[i]] <- rep(p0,n[i])
+    }
+  }
   
-  # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
+  # initialise objects over all contigs
+  haploid1_df <- haploid2_df <- IBD_df <- simvcf <- NULL
+  
+  # loop over contigs
   zmax <- min(m1, m2)
-  IBD <- matrix(NA, n, zmax)
-  for (i in 1:zmax) {
-      IBD[,i] <- simIBD(f, rho, pos)
-      w <- which(IBD[,i]==1)
-      haploid1[w,i] <- haploid2[w,i]
+  for (i in 1:nc) {
+    
+    # generate haploid genotypes for both individuals based on MOI and population allele frequencies. Here the REF allele is denoted 0 and the ALT allele 2.
+    haploid1 <- replicate(m1, 2*rbinom(n[i], 1, prob=1-p[[i]]))
+    haploid2 <- replicate(m2, 2*rbinom(n[i], 1, prob=1-p[[i]]))
+    colnames(haploid1) <- paste0("Genotype", 1:m1)
+    colnames(haploid2) <- paste0("Genotype", 1:m2)
+    
+    # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
+    IBD <- matrix(NA, n[i], zmax)
+    for (j in 1:zmax) {
+        IBD[,j] <- simIBD(f, rho, pos[[i]])
+        w <- which(IBD[,j]==1)
+        haploid1[w,j] <- haploid2[w,j]
+    }
+    colnames(IBD) <- paste0("Genotype", 1:zmax)
+    
+    # make this section of vcf
+    vcf <- data.frame(Sample1=rep(1,n[i]), Sample2=rep(1,n[i]))
+    vcf$Sample1[apply(haploid1, 1, function(x){all(x==0)})] <- 0
+    vcf$Sample1[apply(haploid1, 1, function(x){all(x==2)})] <- 2
+    vcf$Sample2[apply(haploid2, 1, function(x){all(x==0)})] <- 0
+    vcf$Sample2[apply(haploid2, 1, function(x){all(x==2)})] <- 2
+    
+    # add to combined objects
+    df <- data.frame(CHROM=names(pos)[i], POS=pos[[i]])
+    haploid1_df <- rbind(haploid1_df, cbind(df, haploid1))
+    haploid2_df <- rbind(haploid2_df, cbind(df, haploid2))
+    IBD_df <- rbind(IBD_df, cbind(df, IBD))
+    simvcf <- rbind(simvcf, cbind(df, vcf))
+    
   }
-  
-  # make sim vcf based on haploid genotypes
-  simvcf <- data.frame(CHROM="contig1", POS=pos, Sample1=1, Sample2=1)
-  rownames(simvcf) <- paste0("Locus", 1:n)
-  
-  simvcf[apply(haploid1, 1, function(x){all(x==0)}),3] <- 0
-  simvcf[apply(haploid1, 1, function(x){all(x==2)}),3] <- 2
-  
-  simvcf[apply(haploid2, 1, function(x){all(x==0)}),4] <- 0
-  simvcf[apply(haploid2, 1, function(x){all(x==2)}),4] <- 2
   
   # missing data
   if (propMissing > 0) {
-    simvcf[,3][sample(1:n, round(n*propMissing))] <- -1
-    simvcf[,4][sample(1:n, round(n*propMissing))] <- -1
+    simvcf$Sample1[sample(1:sum(n), round(sum(n)*propMissing))] <- -1
+    simvcf$Sample2[sample(1:sum(n), round(sum(n)*propMissing))] <- -1
   }
   
   # return output as list
   retList <- list(p=p,
-                  haploid=list(haploid1,haploid2),
-                  IBD=IBD,
+                  haploid=list(haploid1=haploid1_df, haploid2=haploid2_df),
+                  IBD=IBD_df,
                   vcf=simvcf)
   
   return(retList)
