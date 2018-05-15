@@ -10,7 +10,10 @@ Description: One paragraph description of what the package does as one or more f
 License: GPL (>= 2)
 Imports:
     Rcpp (>= 0.12.12),
-    RcppParallel
+    RcppParallel,
+    coda,
+    viridis,
+    fields
 LinkingTo:
     Rcpp,
     RcppParallel
@@ -18,3 +21,6 @@ SystemRequirements:
     C++11,
     GNU make
 RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

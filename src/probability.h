@@ -1,10 +1,7 @@
 
-#ifndef __polyIBD__probability__
-#define __polyIBD__probability__
+#pragma once
 
 #include <random>
-
-namespace polyibd{
 
 //------------------------------------------------
 // draw from continuous uniform distribution on interval [0,1)
@@ -58,5 +55,3 @@ double dnbinom1(int n, double lambda, double gamma, bool returnLog=true);
 // draw from symmetric dichlet(alpha) distribution of length n
 std::vector<double> rdirichlet1(double alpha, int n);
 
-} // namespace polyibd
-#endif

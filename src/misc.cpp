@@ -2,7 +2,7 @@
 #include "misc.h"
 
 using namespace std;
-namespace polyibd {
+
 //------------------------------------------------
 // define very large/small numbers for catching overflow/underflow problems
 // OVERFLO
@@ -196,4 +196,3 @@ vector< vector< vector<double> > > Rcpp_to_array_double(Rcpp::List x) {
     return(ret);
 }
 
-} // end of name space polyibd
