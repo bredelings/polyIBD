@@ -97,9 +97,9 @@ simData <- function(pos=list(contig1=1:1e3, contig2=1:1e3), m1=1, m2=1, f=0.5, r
     # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
     IBD <- matrix(NA, n[i], zmax)
     for (j in 1:zmax) {
-        IBD[,j] <- simIBD(f, rho, pos[[i]])
-        w <- which(IBD[,j]==1)
-        haploid1[w,j] <- haploid2[w,j]
+        IBD[,j] <- simIBD(f, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        w <- which(IBD[,j]==1) 
+        haploid1[w,j] <- haploid2[w,j] # For regions that are IBD, set it to 1 between strains
     }
     colnames(IBD) <- paste0("Genotype", 1:zmax)
     
