@@ -1,3 +1,6 @@
+##################################
+###   Base Plots for PolyIBD   ###
+##################################
 
 #------------------------------------------------
 # plot_trace
@@ -346,4 +349,218 @@ IBDraster <- function (x, col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, hor
   }
   par(new=FALSE)
 }
+
+
+##################################
+###   GGplots for PolyIBD      ###
+##################################
+#------------------------------------------------
+# ggplot_trace
+# simple MCMC trace plot
+# (not exported)
+
+
+ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity",  inherit.aes = F, ...) {
+  # dependencies
+  list.of.packages <- c("tidyverse")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+  if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
+  library("tidyverse")
+  
+  # produce plot
+  ggplot(mapping = mapping,
+         data = data,
+         stat = stat,
+         position = position, 
+         inherit.aes = inherit.aes) + 
+    geom_point(colour="#252525", fill="#969696", alpha=0.8) +
+    theme(panel.background=element_rect(fill = "white", colour = "grey50"), 
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          plot.title = element_text(size = 14, face = "bold", hjust = 0.5, family = "Arial"),
+          axis.title.x=element_text(size=12, face="bold", family = "Arial"), 
+          axis.text.x=element_text(size=10, family = "Arial", angle = 45, hjust = 1), 
+          axis.title.y=element_text(size=12, face="bold", family = "Arial"), 
+          axis.text.y=element_text(size=10, family = "Arial"),
+          axis.ticks = element_blank()
+    )
+  
+  
+}
+
+
+
+#------------------------------------------------
+#' @title Trace ggplot of m1
+#'
+#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m1}, which represents the COI of the first sample.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#'
+#' @export
+#' @examples
+
+ggplot_m1 <- function(x, ...) {
+  
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  # get input arguments
+  args <- list(...)
+  
+  # produce df for ggplot
+  dat <- data.frame(iteration=1:length(x$raw$m1), mcmcchain=unclass(x$raw$m1))
+  
+  # produce plot
+  ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
+    scale_y_continuous(name="M1 Estimate", breaks=seq(1:max(unclass(x$raw$m1)+0.5)), 
+                       limits=c(0.5,max(unclass(x$raw$m1)+0.5))) +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$m1)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="M1 Trace")
+}
+
+#------------------------------------------------
+#' @title Trace ggplot of m2
+#'
+#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m2}, which represents the COI of the second sample.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#'
+#' @export
+#' @examples
+
+ggplot_m2 <- function(x, ...) {
+  
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  # get input arguments
+  args <- list(...)
+  
+  # produce df for ggplot
+  dat <- data.frame(iteration=1:length(x$raw$m2), mcmcchain=unclass(x$raw$m2))
+  
+  # produce plot
+  ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
+    scale_y_continuous(name="M2 Estimate", breaks=seq(1:max(unclass(x$raw$m2)+0.5)), 
+                       limits=c(0.5,max(unclass(x$raw$m2)+0.5))) +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$m2)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="M2 Trace")
+}
+
+
+#------------------------------------------------
+#' @title Trace ggplot of f
+#'
+#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#'
+#' @export
+#' @examples
+
+ggplot_f <- function(x, ...) {
+  
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  # get input arguments
+  args <- list(...)
+  
+  # produce df for ggplot
+  dat <- data.frame(iteration=1:length(x$raw$f), mcmcchain=unclass(x$raw$f))
+  
+  # produce plot
+  ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
+    scale_y_continuous(name="F Estimate", limits=c(0,1)) +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$f)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="F Trace")
+}
+
+#------------------------------------------------
+#' @title Trace plot of rho
+#'
+#' @description Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#'
+#' @export
+#' @examples
+
+ggplot_rho <- function(x, ...) {
+  
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  # get input arguments
+  args <- list(...)
+  
+  # produce df for ggplot
+  dat <- data.frame(iteration=1:length(x$raw$rho), mcmcchain=unclass(x$raw$rho))
+  
+  # produce plot
+  ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
+    scale_y_continuous(name="Rho Estimate") +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$rho)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="Rho Trace")
+}
+
+
+#------------------------------------------------
+#' @title Plot marginal IBD matrix
+#'
+#' @description Plots the full posterior IBD matrix between two samples. SNPs are arranged in order on the x-axis, and the IBD level is given on the y-axis. This represents the number of genotypes that are shared between samples, with the lowest level (IBD=0) representing zero shared genotypes and hence no IBD. The intensity of colour represents the probability of each IBD level at each locus.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
+#'
+#' @export
+#' @examples
+
+
+ggplot_IBD <- function(x, trueIBD=NULL, ...) {
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  list.of.packages <- c("tidyverse", "viridis")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+  if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
+  lapply(list.of.packages, function(x){require(x, character.only = TRUE)})
+  
+  # get input arguments
+  args <- list(...)
+  
+  # get IBD matrix
+  CHROM <- x$summary$IBD_marginal[,1]
+  POS <- x$summary$IBD_marginal[,2]
+  IBD <- as.matrix(x$summary$IBD_marginal[,-(1:2)])
+  
+  IBDdf <- data.frame(cbind(CHROM, POS, IBD))
+  IBDdflong <- tidyr::gather(data=IBDdf, key="Z", value="Prob", 3:ncol(IBDdf))
+  IBDdflong$Znum <- as.numeric(gsub("z", "", IBDdflong$Z))
+  
+  ggplot() +
+    geom_tile(data=IBDdflong, aes(x=factor(POS), y=Znum, fill=Prob)) +
+    facet_grid(~ CHROM, scales="free_x", space="free") +
+    scale_fill_continuous("", low="#a1d99b", high="#003c30") +
+    geom_hline(yintercept=seq(0.5, (max(IBDdflong$Znum)-0.5), by=1), color="black", size=0.5) +
+    scale_fill_viridis(alpha=0.2, option="plasma") +
+    scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
+    xlab("POS") +
+    guides(title="IBD Probability", labels = paste("0%", "100%")) + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          panel.background = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_blank(),
+          #axis.text.x = element_text(size=9, family = "Arial", angle = 45),
+          axis.title.y = element_text(size=14, face="bold", family = "Arial"),
+          axis.title.x = element_text(size=12, face="bold", family = "Arial"))
+  
+  # add in an if statement to handle the trueIBD info
+  # fix the x-axis 
+  
+}
+
+
 
