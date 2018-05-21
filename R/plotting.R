@@ -557,7 +557,6 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
           axis.title.x = element_text(size=12, face="bold", family = "Arial"))
   
-  # add in an if statement to handle the trueIBD info
   # fix the x-axis 
   
 }
