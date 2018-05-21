@@ -9,3 +9,6 @@ R_ignore/
 ^codecov\.yml$      # Used for continuous integration testing with codecov
 ^README\.Rmd$
 ^README-.*\.png$
+^\.travis\.yml$
+^appveyor\.yml$
+^codecov\.yml$
