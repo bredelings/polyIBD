@@ -1,10 +1,9 @@
 #' @title polyIBD vcf2SNPmatrix
-#' @description .....
-#' @param file
+#' @description Wrapper of the vcfR package.  Goal of readVcfsplittoSNPMATRIXlist is to take a vcf, convert it to a matrix, find informative sites. Goal of getLociPopAF is to calculate population allele frequency by loci. 
+#' @param vcffile is an object of class \code{vcfR}
 #' @export
 
-#   Goal of readVcfsplittoSNPMATRIXlist is to take a vcf, convert it to a matrix, find informative sites
-#   Goal of getLociPopAF is to calculate population allele frequency by loci
+
 # TODO:
 #     add better error handling
 #     Change these functions to one call as an S4 object with slots for SNPmatrix, GT, PopAf, and d

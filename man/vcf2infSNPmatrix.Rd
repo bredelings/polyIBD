@@ -6,6 +6,9 @@
 \usage{
 vcf2infSNPmatrix(vcffile, popAFcutoff = 0.01, biallelic = T, diploid = T)
 }
+\arguments{
+\item{vcffile}{is an object of class \code{vcfR}}
+}
 \description{
-.....
+Wrapper of the vcfR package.  Goal of readVcfsplittoSNPMATRIXlist is to take a vcf, convert it to a matrix, find informative sites. Goal of getLociPopAF is to calculate population allele frequency by loci.
 }

@@ -30,7 +30,7 @@ plot_trace <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 plot_m1 <- function(x, ...) {
   
@@ -57,7 +57,7 @@ plot_m1 <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 plot_m2 <- function(x, ...) {
   
@@ -84,7 +84,7 @@ plot_m2 <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 plot_f <- function(x, ...) {
   
@@ -112,7 +112,7 @@ plot_f <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 plot_rho <- function(x, ...) {
   
@@ -141,7 +141,7 @@ plot_rho <- function(x, ...) {
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
 #' @export
-#' @examples
+
 
 plot_IBD <- function(x, trueIBD=NULL, ...) {
   
@@ -398,7 +398,7 @@ ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", positio
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 ggplot_m1 <- function(x, ...) {
   
@@ -427,7 +427,7 @@ ggplot_m1 <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 ggplot_m2 <- function(x, ...) {
   
@@ -457,7 +457,7 @@ ggplot_m2 <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 ggplot_f <- function(x, ...) {
   
@@ -485,7 +485,7 @@ ggplot_f <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
-#' @examples
+
 
 ggplot_rho <- function(x, ...) {
   
@@ -515,7 +515,7 @@ ggplot_rho <- function(x, ...) {
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
 #' @export
-#' @examples
+
 
 
 ggplot_IBD <- function(x, trueIBD=NULL, ...) {
