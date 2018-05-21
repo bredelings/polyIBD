@@ -4,7 +4,7 @@ Title: Assessing Identity by Descent in Polyclonal Infections
 Version: 0.8.0
 Authors@R: c(
     person(c("Nicholas", "F"), "Brazeau", role = c("aut", "cre"), email = "nbrazeau1@gmail.com"),
-    person(c("Robert", "J"), "Verity", role = c("aut", "cre"), email = "r.verity@imperial.ac.uk")
+    person(c("Robert", "J"), "Verity", role = c("aut"), email = "r.verity@imperial.ac.uk")
     )
 Maintainer: Nicholas F Brazeau <nbrazeau1@gmail.com>
 Description: R package for inferring blocks of identity by descent (IBD) from un-phased haplotypic data
@@ -19,7 +19,9 @@ Imports:
     viridis,
     fields,
     vcfR,
-    tidyverse
+    tidyverse,
+    prettydoc,
+    gridExtra
 LinkingTo:
     Rcpp,
     RcppParallel

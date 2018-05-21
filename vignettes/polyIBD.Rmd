@@ -10,8 +10,10 @@ output:
     fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{"Getting Started with _polyIBD_"}
-  %\VignetteEngine{prettydoc::html_pretty}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{prettydoc::html_pretty}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = F, echo=F}
@@ -20,10 +22,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-
-if(!c("polyIBD") %in% installed.packages()[,"Package"]){
-  devtools::install_github(repo="nickbrazeau/polyIBD", ref="devo") # need to change this to master once we make our final push
-}
 
 library(polyIBD)
 library(tidyverse)
@@ -47,7 +45,7 @@ Using a bayesian approach, the main strength of `polyIBD` is that MOI estimates 
 `polyIBD` is a first-order Hidden Markov Model (HMM) that uses the Metropolis-Hasting Algorithm to infer model parameters. Within the HMM framework, `polyIBD` assumes that the transition probabilities and emission probabilites can be described and uses the forward-backward algorithm to calculate the likelihood of the hidden state. For an extended description of the model, please view the [supplementary information]().
 
 # Getting Started with `polyIBD` 
-First you will need to have successfully installed `polyIBD` as described [previously in the README](https://github.com/nickbrazeau/polyIBD).  
+First you will need to have successfully installed `polyIBD` as described previously in the [README](https://github.com/nickbrazeau/polyIBD).  
 
 ## Input 
 The input for `polyIBD` is a filtered^[Filtering will not be discussed here but resources include: [GATK Forums](https://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set), the [vcfR](https://cran.r-project.org/web/packages/vcfR/vignettes/intro_to_vcfR.html) tool, among others.] Variant Call File (VCF) that follows the [VCF specifciations](https://samtools.github.io/hts-specs/VCFv4.2.pdf) for the Genotype Filed and has a genotype (GT) value for each sample. In additon, VCFs must be unphased and called as a diploid. As such, acceptable GT values are: 0/0, 0/1, 1/1, and ".", for homozygous referent, heterozygous, homozygous alternative, and missing, respectively. Currently `polyIBD` does not handle missing data, which is a limitation that will be resolved shortly. 
@@ -59,7 +57,7 @@ For the purpose of this vignette, we will simulate a VCF with two samples and us
 n <- 1e3 # this is the number of loci we would like to simulate
 rho_true <- 5e-3 # this is the recombination rate we are trying to infer
 f_true <- 0.2 # this is the proportion of genetic relatedness we are trying to infer 
-m_true <- c(2,2) # this is the multiplicity of infection for sample1 and sample2, respectfully, that we are trying to infer
+m_true <- c(3,3) # this is the multiplicity of infection for sample1 and sample2, respectfully, that we are trying to infer
 pos <- sort(sample(10*n, n)) # simulate some positions/genomic coordinates
 
 ```
@@ -68,9 +66,106 @@ We will now call the built-in simulation function from `polyIBD` to take our inp
 
 ```{r, echo=T, eval=T}
 set.seed(44)
-sim <- IBDsimulatorparams(n=n, m1=m_true[1], m2=m_true[2], f=f_true, rho=rho_true, p=NULL, p_shape1=0.5, p_shape2=0.5, pos=pos)
+# run the simulation 
+sim <- simData(pos=list(contig1=pos,contig2=pos), 
+               m1=m_true[1], m2=m_true[2], 
+               f=f_true, rho=rho_true, p=NULL, p_shape1=0.1, p_shape2=0.1)
+
+
 ```
 
-The ouptut of the `IBDsimulatorparams` function is a list of four objects. 
+The ouptut of the `simData` function is a list of two lists and two dataframes:  
+1. Simulated population major allele frequencies for both samples (`p`)
+2. The haploid genotypes (0 for referrent allele, 2 for alternate allele) for both samples (`haploid`) 
+3. The haploid genotypes (0 for referrent allele, 2 for alternate allele) for both samples (`haploid`) 
+4. 4. The IBD genotypes at each positions genotypes (0 for referrent allele, 2 for alternate allele) for both samples (`haploid`) 
+⋅⋅* This is a main assumption in the package...TBD ...
+
+<p align="center">
+![ibd_match_plot](https://github.com/nickbrazeau/polyIBD/figures/IBD_match_sim.png)
+</p>
 
 
+## Running the MCMC 
+```{r, echo=T, eval=T}
+# run MCMC
+rho_max <- rho_true*100 # this is user-specified
+ret <- runMCMC(vcf=sim$vcf, p=sim$p, rho_max=rho_max,
+               burnin=5e3, samples=1e4, reportIteration=NA) # turning off report iteration for space
+```
+
+From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly. 
+### Summary Data
+Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (*ideally should be around 23%*), and the run-time of the function.   
+In addition, posterior estimates with median and 95% confidence intervals provided. 
+```{r, echo=T, eval=T}
+ret # is equivalent to summary(ret)
+
+```
+
+### Raw Data
+All of the raw data used to generate the above summary statistics is available within the returned MCMC object. 
+```{r, echo=T, eval=T}
+summary(ret$raw) # is equivalent to summary(ret)
+
+```
+
+## Viewing the Results
+### Base R
+```{r, echo=T, eval=T}
+# plot using base R 
+par(mfrow=c(2,2)) # for 4 plots
+par(mar=c(1,3,3,1)) # you can adjust margins as you see fit
+
+plot_m1(ret, ylim=c(0,5))
+abline(h=m_true[1], col=2)
+
+plot_m2(ret, ylim=c(0,5))
+abline(h=m_true[2], col=2)
+
+plot_f(ret)
+abline(h=f_true, col=2)
+
+plot_rho(ret)
+abline(h=rho_true, col=2)
+
+par(mfrow=c(1,1))
+par(mar=c(2.5,1,1,2.5))
+plot_IBD(ret)
+
+
+```
+
+### Using `ggplot` Objects
+```{r, echo=T, eval=T}
+# plot using ggplot from tidyverse
+
+plotm1 <- polyIBD::ggplot_m1(ret)
+plotm1 <- plotm1 + geom_hline(yintercept=m_true[1], colour="#cb181d")
+
+plotm2 <- polyIBD::ggplot_m2(ret)
+plotm2 <- plotm2 + geom_hline(yintercept=m_true[2], colour="#cb181d")
+
+plotf <- polyIBD::ggplot_f(ret)
+plotf <- plotf + geom_hline(yintercept=f_true, colour="#cb181d")
+  
+plotrho <- polyIBD::ggplot_rho(ret)
+plotrho <- plotrho + geom_hline(yintercept=rho_true, colour="#cb181d")
+
+
+## convert plots to gtable objects
+grobm1 <- ggplot2::ggplotGrob(plotm1)
+grobm2 <- ggplot2::ggplotGrob(plotm2)
+grobf <- ggplot2::ggplotGrob(plotf)
+grobrho <- ggplot2::ggplotGrob(plotrho)
+
+gridExtra::grid.arrange(grobm1,
+             grobm2,
+             grobf,
+             grobrho,
+             ncol=2)
+
+
+ggplot_IBD(ret)
+
+```
