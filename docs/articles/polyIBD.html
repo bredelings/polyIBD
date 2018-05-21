@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vignette Title • polyIBD</title>
+<title>Getting Started with <code>polyIBD</code> • polyIBD</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><meta property="og:title" content="Vignette Title">
+<script src="../jquery.sticky-kit.min.js"></script><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with &lt;code&gt;polyIBD&lt;/code&gt;">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -67,10 +67,11 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Vignette Title</h1>
-                        <h4 class="author">Vignette Author</h4>
+      <h1>Getting Started with <code>polyIBD</code>
+</h1>
+                        <h4 class="author">Nicholas F. Brazeau &amp; Robert Verity</h4>
             
-            <h4 class="date">2018-05-21</h4>
+            <h4 class="date">May 21, 2018</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nickbrazeau/polyIBD/blob/master/vignettes/polyIBD.Rmd"><code>vignettes/polyIBD.Rmd</code></a></small>
       <div class="hidden name"><code>polyIBD.Rmd</code></div>
@@ -79,209 +80,171 @@
 
     
     
-<p>Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The <code>html_vignette</code> output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The <code>html_vignette</code> format:</p>
-<ul>
-<li>Never uses retina figures</li>
-<li>Has a smaller default figure size</li>
-<li>Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style</li>
-</ul>
-<div id="vignette-info" class="section level2">
+<div id="overview" class="section level1">
+<h1 class="hasAnchor">
+<a href="#overview" class="anchor"></a>Overview</h1>
+<p><code>polyIBD</code> is an R package that can be used to infer regions of identity by descent (IBD) from samples that are unphased and potentially polyclonal.</p>
+<p>Recently, several programs have been written to address this problem, including Henden/Bahlo’s <a href="https://github.com/bahlolab/isoRelate">isorelate</a> and Schaffner/Neafsey’s <a href="https://github.com/glipsnort/hmmIBD">hmmIBD</a>. Here we extend upon these approaches and <strong>assume that the multiplicity of infection (MOI) is unkown and is not limited to 2.</strong></p>
+<p>Using a bayesian approach, the main strength of <code>polyIBD</code> is that MOI estimates are unbounded and can be inferred directly along with other model parameters. As such, <code>polyIBD</code> has the ability to infer:</p>
+<ol style="list-style-type: decimal">
+<li>Regions of IBD</li>
+<li>MOI estimates for both samples<br>
+</li>
+<li>Genetic Relatedness</li>
+<li>Rate of Recombination</li>
+</ol>
+<div id="description" class="section level2">
 <h2 class="hasAnchor">
-<a href="#vignette-info" class="anchor"></a>Vignette Info</h2>
-<p>Note the various macros within the <code>vignette</code> section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the <code>title</code> field and the <code>\VignetteIndexEntry</code> to match the title of your vignette.</p>
+<a href="#description" class="anchor"></a>Description</h2>
+<p><code>polyIBD</code> is a first-order Hidden Markov Model (HMM) that uses the Metropolis-Hasting Algorithm to infer model parameters. Within the HMM framework, <code>polyIBD</code> assumes that the transition probabilities and emission probabilites can be described and uses the forward-backward algorithm to calculate the likelihood of the hidden state. For an extended description of the model, please view the <a href="">supplementary information</a>.</p>
 </div>
-<div id="styles" class="section level2">
-<h2 class="hasAnchor">
-<a href="#styles" class="anchor"></a>Styles</h2>
-<p>The <code>html_vignette</code> template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:</p>
-<pre><code>output: 
-  rmarkdown::html_vignette:
-    css: mystyles.css</code></pre>
 </div>
-<div id="figures" class="section level2">
+<div id="getting-started-with-polyibd" class="section level1">
+<h1 class="hasAnchor">
+<a href="#getting-started-with-polyibd" class="anchor"></a>Getting Started with <code>polyIBD</code>
+</h1>
+<p>First you will need to have successfully installed <code>polyIBD</code> as described previously in the <a href="https://github.com/nickbrazeau/polyIBD">README</a>.</p>
+<div id="input" class="section level2">
 <h2 class="hasAnchor">
-<a href="#figures" class="anchor"></a>Figures</h2>
-<p>The figure sizes have been customised so that you can easily put two images side-by-side.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)
-<span class="kw">plot</span>(<span class="dv">10</span><span class="op">:</span><span class="dv">1</span>)</code></pre></div>
-<p><img src="polyIBD_files/figure-html/unnamed-chunk-1-1.png" width="700"><img src="polyIBD_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
-<p>You can enable figure captions by <code>fig_caption: yes</code> in YAML:</p>
-<pre><code>output:
-  rmarkdown::html_vignette:
-    fig_caption: yes</code></pre>
-<p>Then you can use the chunk option <code>fig.cap = "Your figure caption."</code> in <strong>knitr</strong>.</p>
+<a href="#input" class="anchor"></a>Input</h2>
+<p>The input for <code>polyIBD</code> is a filtered<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> Variant Call File (VCF) that follows the <a href="https://samtools.github.io/hts-specs/VCFv4.2.pdf">VCF specifciations</a> for the Genotype Filed and has a genotype (GT) value for each sample. In additon, VCFs must be unphased and called as a diploid. As such, acceptable GT values are: 0/0, 0/1, 1/1, and “.”, for homozygous referent, heterozygous, homozygous alternative, and missing, respectively. Currently <code>polyIBD</code> does not handle missing data, which is a limitation that will be resolved shortly.</p>
 </div>
-<div id="more-examples" class="section level2">
+<div id="simulated-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#more-examples" class="anchor"></a>More Examples</h2>
-<p>You can write math expressions, e.g. <span class="math inline">\(Y = X\beta + \epsilon\)</span>, footnotes<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and tables, e.g. using <code><a href="http://www.rdocumentation.org/packages/knitr/topics/kable">knitr::kable()</a></code>.</p>
-<table class="table">
-<thead><tr class="header">
-<th></th>
-<th align="right">mpg</th>
-<th align="right">cyl</th>
-<th align="right">disp</th>
-<th align="right">hp</th>
-<th align="right">drat</th>
-<th align="right">wt</th>
-<th align="right">qsec</th>
-<th align="right">vs</th>
-<th align="right">am</th>
-<th align="right">gear</th>
-<th align="right">carb</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Mazda RX4</td>
-<td align="right">21.0</td>
-<td align="right">6</td>
-<td align="right">160.0</td>
-<td align="right">110</td>
-<td align="right">3.90</td>
-<td align="right">2.620</td>
-<td align="right">16.46</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-<tr class="even">
-<td>Mazda RX4 Wag</td>
-<td align="right">21.0</td>
-<td align="right">6</td>
-<td align="right">160.0</td>
-<td align="right">110</td>
-<td align="right">3.90</td>
-<td align="right">2.875</td>
-<td align="right">17.02</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-<tr class="odd">
-<td>Datsun 710</td>
-<td align="right">22.8</td>
-<td align="right">4</td>
-<td align="right">108.0</td>
-<td align="right">93</td>
-<td align="right">3.85</td>
-<td align="right">2.320</td>
-<td align="right">18.61</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td>Hornet 4 Drive</td>
-<td align="right">21.4</td>
-<td align="right">6</td>
-<td align="right">258.0</td>
-<td align="right">110</td>
-<td align="right">3.08</td>
-<td align="right">3.215</td>
-<td align="right">19.44</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td>Hornet Sportabout</td>
-<td align="right">18.7</td>
-<td align="right">8</td>
-<td align="right">360.0</td>
-<td align="right">175</td>
-<td align="right">3.15</td>
-<td align="right">3.440</td>
-<td align="right">17.02</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">2</td>
-</tr>
-<tr class="even">
-<td>Valiant</td>
-<td align="right">18.1</td>
-<td align="right">6</td>
-<td align="right">225.0</td>
-<td align="right">105</td>
-<td align="right">2.76</td>
-<td align="right">3.460</td>
-<td align="right">20.22</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td>Duster 360</td>
-<td align="right">14.3</td>
-<td align="right">8</td>
-<td align="right">360.0</td>
-<td align="right">245</td>
-<td align="right">3.21</td>
-<td align="right">3.570</td>
-<td align="right">15.84</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">4</td>
-</tr>
-<tr class="even">
-<td>Merc 240D</td>
-<td align="right">24.4</td>
-<td align="right">4</td>
-<td align="right">146.7</td>
-<td align="right">62</td>
-<td align="right">3.69</td>
-<td align="right">3.190</td>
-<td align="right">20.00</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">2</td>
-</tr>
-<tr class="odd">
-<td>Merc 230</td>
-<td align="right">22.8</td>
-<td align="right">4</td>
-<td align="right">140.8</td>
-<td align="right">95</td>
-<td align="right">3.92</td>
-<td align="right">3.150</td>
-<td align="right">22.90</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">2</td>
-</tr>
-<tr class="even">
-<td>Merc 280</td>
-<td align="right">19.2</td>
-<td align="right">6</td>
-<td align="right">167.6</td>
-<td align="right">123</td>
-<td align="right">3.92</td>
-<td align="right">3.440</td>
-<td align="right">18.30</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-</tbody>
-</table>
-<p>Also a quote using <code>&gt;</code>:</p>
-<blockquote>
-<p>“He who gives up [code] safety for [code] speed deserves neither.” (<a href="https://twitter.com/hadleywickham/status/504368538874703872">via</a>)</p>
-</blockquote>
+<a href="#simulated-data" class="anchor"></a>Simulated Data</h2>
+<p>For the purpose of this vignette, we will simulate a VCF with two samples and use it to run <code>polyIBD</code>. First let’s input some specifications for the number of loci, the genetic relatedness, and the recombination rate for these samples.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># setup</span>
+n &lt;-<span class="st"> </span><span class="fl">1e3</span> <span class="co"># this is the number of loci we would like to simulate</span>
+rho_true &lt;-<span class="st"> </span><span class="fl">5e-3</span> <span class="co"># this is the recombination rate we are trying to infer</span>
+f_true &lt;-<span class="st"> </span><span class="fl">0.2</span> <span class="co"># this is the proportion of genetic relatedness we are trying to infer </span>
+m_true &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">3</span>) <span class="co"># this is the multiplicity of infection for sample1 and sample2, respectfully, that we are trying to infer</span>
+pos &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">sample</span>(<span class="dv">10</span><span class="op">*</span>n, n)) <span class="co"># simulate some positions/genomic coordinates</span></code></pre></div>
+<p>We will now call the built-in simulation function from <code>polyIBD</code> to take our inputs a simulate a two-sampled VCF. The simulation is using a beta distribution with the shape parameters alpha=1 and beta=1 to simiulate population allele frequencies. This distribution can be adjusted by the user but the 1,1 shape parameters provide a population with a high proportion of fixated alleles (to see the distribution, input the following command to your R Console: #&gt; hist(rbeta(1000, 0.5, 0.5))).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">44</span>)
+<span class="co"># run the simulation </span>
+sim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simData.html">simData</a></span>(<span class="dt">pos=</span><span class="kw">list</span>(<span class="dt">contig1=</span>pos,<span class="dt">contig2=</span>pos), 
+               <span class="dt">m1=</span>m_true[<span class="dv">1</span>], <span class="dt">m2=</span>m_true[<span class="dv">2</span>], 
+               <span class="dt">f=</span>f_true, <span class="dt">rho=</span>rho_true, <span class="dt">p=</span><span class="ot">NULL</span>, <span class="dt">p_shape1=</span><span class="fl">0.1</span>, <span class="dt">p_shape2=</span><span class="fl">0.1</span>)</code></pre></div>
+<p>The ouptut of the <code>simData</code> function is a list of two lists and two dataframes:<br>
+1. Simulated population major allele frequencies for both samples (<code>p</code>) 2. The haploid genotypes (0 for referrent allele, 2 for alternate allele) for both samples (<code>haploid</code>) 3. The haploid genotypes (0 for referrent allele, 2 for alternate allele) for both samples (<code>haploid</code>) 4. 4. The IBD genotypes at each positions genotypes (0 for referrent allele, 2 for alternate allele) for both samples (<code>haploid</code>) ⋅⋅* This is a main assumption in the package…TBD …</p>
+<p align="center">
+<img src="https://github.com/nickbrazeau/polyIBD/figures/IBD_match_sim.png" alt="ibd_match_plot"></p>
+</div>
+<div id="running-the-mcmc" class="section level2">
+<h2 class="hasAnchor">
+<a href="#running-the-mcmc" class="anchor"></a>Running the MCMC</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># run MCMC</span>
+rho_max &lt;-<span class="st"> </span>rho_true<span class="op">*</span><span class="dv">100</span> <span class="co"># this is user-specified</span>
+ret &lt;-<span class="st"> </span><span class="kw"><a href="../reference/runMCMC.html">runMCMC</a></span>(<span class="dt">vcf=</span>sim<span class="op">$</span>vcf, <span class="dt">p=</span>sim<span class="op">$</span>p, <span class="dt">rho_max=</span>rho_max,
+               <span class="dt">burnin=</span><span class="fl">5e3</span>, <span class="dt">samples=</span><span class="fl">1e4</span>, <span class="dt">reportIteration=</span><span class="ot">NA</span>) <span class="co"># turning off report iteration for space</span>
+<span class="co">#&gt; Running MCMC</span>
+<span class="co">#&gt;    burnin phase</span>
+<span class="co">#&gt;    sampling phase</span>
+<span class="co">#&gt; MCMC completed in 34.4422 seconds</span>
+<span class="co">#&gt; convergence reached within defined burn-in period (Geweke p=0.45)</span></code></pre></div>
+<p>From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly. ### Summary Data Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (<em>ideally should be around 23%</em>), and the run-time of the function.<br>
+In addition, posterior estimates with median and 95% confidence intervals provided.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ret <span class="co"># is equivalent to summary(ret)</span>
+<span class="co">#&gt; # MCMC summary</span>
+<span class="co">#&gt; burn-in iterations:   5000 </span>
+<span class="co">#&gt; sampling iterations:  10000 </span>
+<span class="co">#&gt; acceptance rate:  0.2697 </span>
+<span class="co">#&gt; run-time (seconds):   34.442 </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; # Posterior estimates</span>
+<span class="co">#&gt;              5%       50%       95%</span>
+<span class="co">#&gt; m1  3.000000000 3.0000000 4.0000000</span>
+<span class="co">#&gt; m2  3.000000000 3.0000000 3.0000000</span>
+<span class="co">#&gt; f   0.167903760 0.2641291 0.3716628</span>
+<span class="co">#&gt; rho 0.004621724 0.1681034 0.4653631</span></code></pre></div>
+<div id="raw-data" class="section level3">
+<h3 class="hasAnchor">
+<a href="#raw-data" class="anchor"></a>Raw Data</h3>
+<p>All of the raw data used to generate the above summary statistics is available within the returned MCMC object.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(ret<span class="op">$</span>raw) <span class="co"># is equivalent to summary(ret)</span>
+<span class="co">#&gt;                Length Class  Mode   </span>
+<span class="co">#&gt; logLike_burnin  5000  mcmc   numeric</span>
+<span class="co">#&gt; logLike        10000  mcmc   numeric</span>
+<span class="co">#&gt; m1             10000  mcmc   numeric</span>
+<span class="co">#&gt; m2             10000  mcmc   numeric</span>
+<span class="co">#&gt; f              10000  mcmc   numeric</span>
+<span class="co">#&gt; rho            10000  mcmc   numeric</span>
+<span class="co">#&gt; runTime            1  -none- numeric</span></code></pre></div>
+</div>
+</div>
+<div id="viewing-the-results" class="section level2">
+<h2 class="hasAnchor">
+<a href="#viewing-the-results" class="anchor"></a>Viewing the Results</h2>
+<div id="base-r" class="section level3">
+<h3 class="hasAnchor">
+<a href="#base-r" class="anchor"></a>Base R</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># plot using base R </span>
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>)) <span class="co"># for 4 plots</span>
+<span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">1</span>)) <span class="co"># you can adjust margins as you see fit</span>
+
+<span class="kw"><a href="../reference/plot_m1.html">plot_m1</a></span>(ret, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))
+<span class="kw">abline</span>(<span class="dt">h=</span>m_true[<span class="dv">1</span>], <span class="dt">col=</span><span class="dv">2</span>)
+
+<span class="kw"><a href="../reference/plot_m2.html">plot_m2</a></span>(ret, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))
+<span class="kw">abline</span>(<span class="dt">h=</span>m_true[<span class="dv">2</span>], <span class="dt">col=</span><span class="dv">2</span>)
+
+<span class="kw"><a href="../reference/plot_f.html">plot_f</a></span>(ret)
+<span class="kw">abline</span>(<span class="dt">h=</span>f_true, <span class="dt">col=</span><span class="dv">2</span>)
+
+<span class="kw"><a href="../reference/plot_rho.html">plot_rho</a></span>(ret)
+<span class="kw">abline</span>(<span class="dt">h=</span>rho_true, <span class="dt">col=</span><span class="dv">2</span>)</code></pre></div>
+<p><img src="polyIBD_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
+<span class="kw">par</span>(<span class="dt">mar=</span><span class="kw">c</span>(<span class="fl">2.5</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">2.5</span>))
+<span class="kw"><a href="../reference/plot_IBD.html">plot_IBD</a></span>(ret)</code></pre></div>
+<p><img src="polyIBD_files/figure-html/unnamed-chunk-6-2.png" width="700"></p>
+</div>
+<div id="using-ggplot-objects" class="section level3">
+<h3 class="hasAnchor">
+<a href="#using-ggplot-objects" class="anchor"></a>Using <code>ggplot</code> Objects</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># plot using ggplot from tidyverse</span>
+
+plotm1 &lt;-<span class="st"> </span>polyIBD<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/polyIBD/topics/ggplot_m1">ggplot_m1</a></span>(ret)
+plotm1 &lt;-<span class="st"> </span>plotm1 <span class="op">+</span><span class="st"> </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span>m_true[<span class="dv">1</span>], <span class="dt">colour=</span><span class="st">"#cb181d"</span>)
+
+plotm2 &lt;-<span class="st"> </span>polyIBD<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/polyIBD/topics/ggplot_m2">ggplot_m2</a></span>(ret)
+plotm2 &lt;-<span class="st"> </span>plotm2 <span class="op">+</span><span class="st"> </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span>m_true[<span class="dv">2</span>], <span class="dt">colour=</span><span class="st">"#cb181d"</span>)
+
+plotf &lt;-<span class="st"> </span>polyIBD<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/polyIBD/topics/ggplot_f">ggplot_f</a></span>(ret)
+plotf &lt;-<span class="st"> </span>plotf <span class="op">+</span><span class="st"> </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span>f_true, <span class="dt">colour=</span><span class="st">"#cb181d"</span>)
+  
+plotrho &lt;-<span class="st"> </span>polyIBD<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/polyIBD/topics/ggplot_rho">ggplot_rho</a></span>(ret)
+plotrho &lt;-<span class="st"> </span>plotrho <span class="op">+</span><span class="st"> </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span>rho_true, <span class="dt">colour=</span><span class="st">"#cb181d"</span>)
+
+
+## convert plots to gtable objects
+grobm1 &lt;-<span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplotGrob">ggplotGrob</a></span>(plotm1)
+grobm2 &lt;-<span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplotGrob">ggplotGrob</a></span>(plotm2)
+grobf &lt;-<span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplotGrob">ggplotGrob</a></span>(plotf)
+grobrho &lt;-<span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplotGrob">ggplotGrob</a></span>(plotrho)
+
+gridExtra<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/gridExtra/topics/arrangeGrob">grid.arrange</a></span>(grobm1,
+             grobm2,
+             grobf,
+             grobrho,
+             <span class="dt">ncol=</span><span class="dv">2</span>)</code></pre></div>
+<p><img src="polyIBD_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+
+<span class="kw"><a href="../reference/ggplot_IBD.html">ggplot_IBD</a></span>(ret)
+<span class="co">#&gt; Loading required package: viridis</span>
+<span class="co">#&gt; Loading required package: viridisLite</span>
+<span class="co">#&gt; Scale for 'fill' is already present. Adding another scale for 'fill',</span>
+<span class="co">#&gt; which will replace the existing scale.</span></code></pre></div>
+<p><img src="polyIBD_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
+</div>
+</div>
 </div>
 <div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>A footnote here.<a href="#fnref1">↩</a></p></li>
+<li id="fn1"><p>Filtering will not be discussed here but resources include: <a href="https://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set">GATK Forums</a>, the <a href="https://cran.r-project.org/web/packages/vcfR/vignettes/intro_to_vcfR.html">vcfR</a> tool, among others.<a href="#fnref1">↩</a></p></li>
 </ol>
 </div>
   </div>
@@ -291,10 +254,19 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#vignette-info">Vignette Info</a></li>
-      <li><a href="#styles">Styles</a></li>
-      <li><a href="#figures">Figures</a></li>
-      <li><a href="#more-examples">More Examples</a></li>
+<li>
+<a href="#overview">Overview</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#description">Description</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#getting-started-with-polyibd">Getting Started with <code>polyIBD</code></a><ul class="nav nav-pills nav-stacked">
+<li><a href="#input">Input</a></li>
+      <li><a href="#simulated-data">Simulated Data</a></li>
+      <li><a href="#running-the-mcmc">Running the MCMC</a></li>
+      <li><a href="#viewing-the-results">Viewing the Results</a></li>
+      </ul>
+</li>
       </ul>
 </div>
       </div>
