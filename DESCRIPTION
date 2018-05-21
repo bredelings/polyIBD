@@ -31,5 +31,3 @@ Suggests: knitr,
     rmarkdown,
     covr
 VignetteBuilder: knitr
-URL: https://github.com/nickbrazeau/polyIBD
-BugReports: https://github.com/nickbrazeau/polyIBD/issues
