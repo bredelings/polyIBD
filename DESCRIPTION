@@ -1,19 +1,25 @@
 Package: polyIBD
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
-Version: 1.0
-Date: 2017-09-28
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full
-          sentences.
+Title: Assessing Identity by Descent in Polyclonal Infections
+Version: 0.8.0
+Authors@R: c(
+    person(c("Nicholas", "F"), "Brazeau", role = c("aut", "cre"), email = "nbrazeau1@gmail.com"),
+    person(c("Robert", "J"), "Verity", role = c("aut", "cre"), email = "r.verity@imperial.ac.uk")
+    )
+Maintainer: Nicholas F Brazeau <nbrazeau1@gmail.com>
+Description: R package for inferring blocks of identity by descent (IBD) from un-phased haplotypic data
+URL: https://github.com/nickbrazeau/polyIBD
+BugReports: https://github.com/nickbrazeau/polyIBD/issues
+LazyData: TRUE
 License: GPL (>= 2)
 Imports:
     Rcpp (>= 0.12.12),
     RcppParallel,
     coda,
     viridis,
-    fields
+    fields,
+    vcfR,
+    tidyverse
 LinkingTo:
     Rcpp,
     RcppParallel
