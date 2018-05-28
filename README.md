@@ -10,12 +10,12 @@ R package for inferring blocks of identity by descent (IBD) from un-phased haplo
   
 
 ## Installation 
-To install the current version of _polyIBD_ first ensure that you have the R-package _devtools_:
+To install the current version of _polyIBD_, first ensure that you have the R-package _devtools_:
 ``` r
 install.packages("devtools")
 ```
 
-Then download and build _polyIBD_ with: 
+Then download and build _polyIBD_ from Github with: 
 ``` r
 devtools::install_github("nickbrazeau/polyIBD")
 ```
