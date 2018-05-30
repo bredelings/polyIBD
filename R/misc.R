@@ -15,7 +15,7 @@ getTransProbs <- function(f, rho, zmax) {
     rateMat <- matrix(0, z1, z1)
     rateMat[cbind(1:z0, 1:z0 + 1)] <- (z0:1)*rho*f # this is the poisson process assuming constant rates 
     rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho*(1-f) # this is the poisson process assuming constant rates 
-    rateMat[cbind(1:z1, 1:z1)] <- 1-rowSums(rateMat)
+    rateMat[cbind(1:z1, 1:z1)] <- -rowSums(rateMat)
     
     # obtain Eigen values and vectors
     E <- eigen(t(rateMat))
@@ -112,13 +112,9 @@ Rcpp_to_mat <- function(x) {
 
 
 
-
-
-
-
 # -----------------------------------
 # vcfFilter section
-
+# -----------------------------------
 
 
 #' @title polyIBD vcffilter
