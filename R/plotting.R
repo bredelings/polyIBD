@@ -361,13 +361,6 @@ IBDraster <- function (x, col=NULL, breaks=NULL, nlevel=64, layout_mat=NULL, hor
 
 
 ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity",  inherit.aes = F, ...) {
-  # dependencies
-  list.of.packages <- c("tidyverse")
-  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-  if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
-  library("tidyverse")
-  
-  # produce plot
   ggplot(mapping = mapping,
          data = data,
          stat = stat,
@@ -521,12 +514,7 @@ ggplot_rho <- function(x, ...) {
 ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
-  
-  list.of.packages <- c("tidyverse", "viridis")
-  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-  if(length(new.packages)) install.packages(new.packages) # here it will install if not already installed
-  lapply(list.of.packages, function(x){require(x, character.only = TRUE)})
-  
+
   # get input arguments
   args <- list(...)
   

@@ -117,15 +117,16 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
   # Calculate pairwise correlation matrix between observations. Input is a matrix with n rows corresponding to n multivariate measurements, output is a n-by-n correlation matrix. NA values are imputed as the mean.
   #--------------------------------------------------------
   corMat <- function(m) {
+    tol <- 1e-9 # tolerance for denominator if AF become the same
     n <- nrow(m)
     c <- matrix(NA,n,n)
     for (i in 1:n) {
-      x1 <- m[i,]
-      mu1 <- mean(unlist(x1),na.rm=TRUE)
+      x1 <- unlist(m[i,])
+      mu1 <- mean(x1,na.rm=TRUE)
       for (j in i:n) {
-        x2 <- m[j,]
-        mu2 <- mean(unlist(x2),na.rm=TRUE)
-        c[i,j] <- c[j,i] <- sum((x1-mu1)*(x2-mu2),na.rm=TRUE)/sqrt( sum((x1-mu1)^2,na.rm=TRUE)*sum((x2-mu2)^2,na.rm=TRUE) )
+        x2 <- unlist(m[j,])
+        mu2 <- mean(x2,na.rm=TRUE)
+        c[i,j] <- c[j,i] <- sum((x1-mu1)*(x2-mu2),na.rm=TRUE)/sqrt( sum((x1-mu1)^2,na.rm=TRUE)*sum((x2-mu2)^2,na.rm=TRUE) + tol)
       }
     }
     return(c)
@@ -148,6 +149,8 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
   
   cormatgendistwrapper <- function(vcfdf){
 
+    # store AF
+    vcfAF <- vcfdf
     # get correlation matrix. NA values are imputed as the mean
     df1 <- vcfdf[, !colnames(vcfdf) %in% c("CHROM", "POS")]
     c <- corMat(df1)
@@ -155,47 +158,79 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
     df2 <- vcfdf[, colnames(vcfdf) %in% c("POS")]
     gendist <- as.matrix(dist(df2))
     
-    ret <- list(corMat=c, gendist=gendist)
+    
+    # ggplot distance vs correlation on log scale
+    plotdf <- data.frame(CHROM=rep(ret$vcfAF$CHROM[1], length(gendist)),
+               correlation = c(c), 
+               gendist = c(gendist))
+    
+    corrplot <- plotdf %>% 
+      dplyr::mutate(gendisttol = gendist+1) %>% 
+      ggplot(aes(x=gendisttol, y=correlation)) +
+      geom_point() + 
+      geom_hline(yintercept = 0, colour="#de2d26") +
+      scale_x_log10() +
+      xlab("log(base-pair distance + 1)") + ylab("correlation") + 
+      ggtitle(paste(ret$vcfAF$CHROM[1])) +
+      theme_minimal()
+      
+    
+    ret <- list(vcfAF = vcfAF, corMat=c, gendist=gendist, corrplot = corrplot)
   }
   
   
   retlist <- lapply(vcflist, cormatgendistwrapper)
   
   
-  # set threshold distance past which observations are approximately independent. (These values can be refined after looking at the plots)
-  threshDist <- rep(1e3, 14)
   
-  # loop through all chromosomes
-  par(mfrow=c(4,4))
-  for (chrom in 1:length(vcfdflist)) {
-    
-    # get correlation matrix. NA values are imputed as the mean
-    c <- corMat(vcflist[[chrom]][, !colnames(vcflist[[chrom]]) %in% c("CHROM", "POS")])
-    
-    # get distance between SNPs. This can be extracted from the row names of the vcf
-    gendist <- as.matrix(dist(vcflist[[chrom]][, colnames(vcflist[[chrom]]) %in% c("POS")]))
-    
-    # plot distance vs correlation on log scale
-    plot(gendist+1, c, ylim=c(-1,1), pch=20, cex=0.5, col="#00005020", log="x", xlab="log(distance+1)", ylab="correlation", main=paste0("chrom",chrom))
-    abline(h=0)
-    abline(v=threshDist[chrom], col=2, lty=2)
-    
-    # filter based on distance
-    diag(gendist) <- Inf	# block self-comparison
-    while (any(gendist<threshDist[chrom])) {
-      w <- which(gendist<threshDist[chrom], arr.ind=TRUE)
-      dat_filt[[chrom]] <- dat_filt[[chrom]][-w[1,1],]
-      gendist <- gendist[-w[1,1],-w[1,1]]
-    }
-  }
+  return(retlist)
+  
 }
 
+
+
+  
 #' @title polyIBD filter for linkage disequilibrium 
 #' @description Filtering an object of class \code{vcfR} for linkage disequilibrium via genetic autocorrelation.
 #' @param 
 #'
 #' @export
 #' 
+
+function(vcfR_bychrom, genautocorrresult){
+    
+  # -----------------------------------------------------
+  # Read and check input
+  #------------------------------------------------------
+  if(is.null(vcffile)){
+    if(class(vcfR) != "vcfR"){
+      paste("vcfR object must be of class vcfR")
+    }
+    vcf <- vcfR
+  } else{
+    vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+  }
+  
+  length(vcfR_bychrom) == length(genautocorrresult)/4
+  
+    # filter based on distance
+    diag(df$gendist) <- Inf	# block self-comparison
+    
+    wfull <- numeric()
+    while (any(gendist<threshDist)) {
+      w <- which(gendist<threshDist, arr.ind=TRUE)
+      wtemp <- w[1,1]
+      wfull <- append(wfull, w1)
+      
+      vcf@gt <- vcf@gt[-w[1,1],]
+      vcf@fix <- vcf@fix[-w[1,1],]
+
+      gendist <- gendist[-w[1,1],-w[1,1]]
+    }
+  }
+}
+
+
 
 #--------------------------------------------------------
 # Drop samples with prop of loci missing
