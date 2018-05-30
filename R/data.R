@@ -23,10 +23,10 @@ simIBD <- function(f, rho, pos) {
   # draw subsequent states
   for (i in 2:n) {
       d <- pos[i]-pos[i-1]
-      if (ret[i-1]==0) {    # move from non-IBD state
+      if (ret[i-1]==0) {    # move from non-IBD state to non-IBD is t11
           t11 <- (1-f) + f*exp(-d*(alpha+rho))
           ret[i] <- sample(c(0,1), size = 1, prob = c(t11, 1-t11))
-      } else {  # move from IBD state
+      } else {  # move from IBD state to IBD is t22
           t22 <- f + (1-f)*exp(-d*(alpha+rho))
           ret[i] <- sample(c(0,1), size = 1, prob = c(1-t22, t22))
       }

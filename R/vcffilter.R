@@ -23,7 +23,7 @@ vcffilter <- function(vcffile,
   if(biallelic==TRUE){
     vcf <- vcf[vcfR::is.biallelic(vcf)]
   }else{
-    print("polyIBD only uses biallelic SNPs")
+    print("polyIBD relies on biallelic SNPs")
   }
   
   # store loci objects on info fields 
@@ -82,10 +82,18 @@ vcffilter <- function(vcffile,
     dplyr::mutate(Key = factor(Key)) %>% 
     dplyr::select(-gt_GQ) %>% 
     tidyr::spread(key=Indiv, value = gt_GT, fill = NA, drop = F) %>% 
-    dplyr::select(-Key) %>% # drop key later in order to make sure all loci are present in spread -- protective 
-    as.matrix()
+    dplyr::select(-Key)  # drop key later in order to make sure all loci are present in spread -- protective 
+  
+  #--------------------------------------------------------
+  # Drop samples with prop of loci missing
+  #--------------------------------------------------------
+  sample.prop.loci.missing <- colSums(is.na(gt))/nrow(gt)
+  gt <- gt[, c(prop.loci.missing > sample.prop.loci.missing)]
+  
   fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[passedloci,])
   meta <- append(vcf@meta, "##Additional Filters provided by polyIBD filter tools")
+  meta <- append(vcf@meta, paste("Some samples may have been filtered by polyIBD filter tools. The new sample count is:", ncol(gt)-1))
+  
   
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
   newvcfR <- new("vcfR", meta = meta, fix = as.matrix(fix), gt = gt)
@@ -100,13 +108,13 @@ vcffilter <- function(vcffile,
 #' @export
 #' 
 
-genautocorr<- function(vcf = NULL, vcfR = NULL){
+genautocorr <- function(vcffile = NULL, vcfR = NULL){
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
   if(is.null(vcffile)){
     if(class(vcfR) != "vcfR"){
-      paste("vcfR object must be of class vcfR")
+      stop("vcfR object must be of class vcfR")
     }
     vcf <- vcfR
   } else{
@@ -147,20 +155,18 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
   
   
   
-  cormatgendistwrapper <- function(vcfdf){
+  cormatgendistwrapper <- function(vcfdf_fromlist){
 
-    # store AF
-    vcfAF <- vcfdf
     # get correlation matrix. NA values are imputed as the mean
-    df1 <- vcfdf[, !colnames(vcfdf) %in% c("CHROM", "POS")]
+    df1 <- vcfdf_fromlist[, !colnames(vcfdf_fromlist) %in% c("CHROM", "POS")]
     c <- corMat(df1)
     # get distance between SNPs. This can be extracted from the row names of the vcf
-    df2 <- vcfdf[, colnames(vcfdf) %in% c("POS")]
+    df2 <- vcfdf_fromlist[, colnames(vcfdf_fromlist) %in% c("POS")]
     gendist <- as.matrix(dist(df2))
     
     
     # ggplot distance vs correlation on log scale
-    plotdf <- data.frame(CHROM=rep(ret$vcfAF$CHROM[1], length(gendist)),
+    plotdf <- data.frame(CHROM=rep(vcfdf_fromlist$CHROM[1], length(gendist)),
                correlation = c(c), 
                gendist = c(gendist))
     
@@ -171,11 +177,12 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
       geom_hline(yintercept = 0, colour="#de2d26") +
       scale_x_log10() +
       xlab("log(base-pair distance + 1)") + ylab("correlation") + 
-      ggtitle(paste(ret$vcfAF$CHROM[1])) +
+      ggtitle(paste(vcfdf_fromlist$CHROM[1])) +
       theme_minimal()
       
     
-    ret <- list(vcfAF = vcfAF, corMat=c, gendist=gendist, corrplot = corrplot)
+    ret <- list(vcfAF = vcfdf_fromlist, corMat=c, gendist=gendist, corrplot = corrplot)
+    return(ret)
   }
   
   
@@ -188,7 +195,6 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
 }
 
 
-
   
 #' @title polyIBD filter for linkage disequilibrium 
 #' @description Filtering an object of class \code{vcfR} for linkage disequilibrium via genetic autocorrelation.
@@ -197,47 +203,61 @@ genautocorr<- function(vcf = NULL, vcfR = NULL){
 #' @export
 #' 
 
-function(vcfR_bychrom, genautocorrresult){
-    
+genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NULL, threshDist=1e3){
+
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
+  if(is.null(genautocorrresult)){
+    stop("Must specify a linkage disequilibrium threshold (see help and tutorial).")
+  }
+  if(is.null(genautocorrresult)){
+    stop("Must specify a genetic autocorrelation results object using the genautocorr function")
+  }
+  
   if(is.null(vcffile)){
     if(class(vcfR) != "vcfR"){
-      paste("vcfR object must be of class vcfR")
+      stop("vcfR object must be of class vcfR")
     }
-    vcf <- vcfR
-  } else{
-    vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+      vcf <- vcfR    
+    } else{
+      vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+    }
+  
+  vcfdf <- cbind.data.frame(vcf@fix, vcf@gt)
+  vcflist <- split(vcfdf, f=factor(vcfdf$CHROM))
+  if(length(vcflist) != length(genautocorrresult)){
+    stop("The number of chromosomes in the vcfR objec and the results from the genetic autocorrelation analysis differ.")
   }
+  # -----------------------------------------------------
+  # Filter based on distance
+  #------------------------------------------------------
   
-  length(vcfR_bychrom) == length(genautocorrresult)/4
-  
-    # filter based on distance
-    diag(df$gendist) <- Inf	# block self-comparison
-    
-    wfull <- numeric()
+  filter_autocorr <- function(vcflist, genautocorrresult){
+    gendist <- as.matrix(genautocorrresult$gendist)
+    diag(gendist) <- Inf	# block self-comparison
     while (any(gendist<threshDist)) {
       w <- which(gendist<threshDist, arr.ind=TRUE)
-      wtemp <- w[1,1]
-      wfull <- append(wfull, w1)
-      
-      vcf@gt <- vcf@gt[-w[1,1],]
-      vcf@fix <- vcf@fix[-w[1,1],]
-
+      vcflist <- vcflist[-w[1,1],]
       gendist <- gendist[-w[1,1],-w[1,1]]
+      
     }
+    return(vcflist)
   }
+
+  updatedvcflist <- mapply(filter_autocorr, vcflist, genautocorrresult, SIMPLIFY = F)
+  updatedvcfdf <- do.call(rbind, updatedvcflist)
+  
+  # -----------------------------------------------------
+  # Return to vcfR object
+  #------------------------------------------------------
+  fix <- as.matrix(updatedvcfdf[,1:8])
+  gt <- as.matrix(updatedvcfdf[,9:ncol(updatedvcfdf)])
+  meta <- append(vcf@meta, paste("##Filtered for genetic autocorrelation by polyIBD filter tools with a threshold distance of", threshDist))
+  
+  # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
+  newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
+  
+  return(newvcfR)
+  
 }
-
-
-
-#--------------------------------------------------------
-# Drop samples with prop of loci missing
-#--------------------------------------------------------
-sample.prop.loci.missing <- colSums(is.na(gt))/nrow(gt)
-gt <- gt[, c(prop.loci.missing > sample.prop.loci.missing)]
-  
-  
-  
-
