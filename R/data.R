@@ -12,22 +12,19 @@
 
 simIBD <- function(f, rho, pos) {
   
-  # define alpha from f and rho
-  alpha <- rho*f/(1-f)
-  
   # draw starting state
-  n <- length(pos)
-  ret <- rep(NA, n)
+  n <- length(pos) # abs number of loci, not pos -- this is consistent with simData below
+  ret <- rep(NA, n) 
   ret[1] <- sample(c(0,1), size = 1, prob = c(1-f,f))
   
   # draw subsequent states
   for (i in 2:n) {
       d <- pos[i]-pos[i-1]
       if (ret[i-1]==0) {    # move from non-IBD state to non-IBD is t11
-          t11 <- (1-f) + f*exp(-d*(alpha+rho))
+          t11 <- 1 - f*(1-exp(-rho*d))
           ret[i] <- sample(c(0,1), size = 1, prob = c(t11, 1-t11))
       } else {  # move from IBD state to IBD is t22
-          t22 <- f + (1-f)*exp(-d*(alpha+rho))
+          t22 <- 1 - (1-f)*(1-exp(-rho*d))
           ret[i] <- sample(c(0,1), size = 1, prob = c(1-t22, t22))
       }
   }
@@ -53,7 +50,7 @@ simIBD <- function(f, rho, pos) {
 #' 
 #' @export
 
-simData <- function(pos=list(contig1=1:1e3, contig2=1:1e3), m1=1, m2=1, f=0.5, rho=1, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
+simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample(1e5, 1e2))), m1=1, m2=1, f=0.5, rho=1e-3, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
   
   # get number of loci in each contig
   nc <- length(pos)

@@ -9,8 +9,6 @@ NULL
 #------------------------------------------------
 #' Run polyIBD MCMC using Rcpp functions
 #'
-#' Run polyIBD MCMC using Rcpp functions.
-#'
 #' @param dat TODO
 #'
 #' @export
