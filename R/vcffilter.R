@@ -188,8 +188,6 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
   
   retlist <- lapply(vcflist, cormatgendistwrapper)
   
-  
-  
   return(retlist)
   
 }
