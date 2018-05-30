@@ -20,6 +20,7 @@ Imports:
     fields,
     vcfR,
     tidyverse,
+    Strings,
     prettydoc,
     gridExtra
 LinkingTo:
