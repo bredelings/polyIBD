@@ -10,7 +10,7 @@
 #' 
 #' @export
 
-simIBD <- function(f, rho, pos) {
+simIBD <- function(f, k, rho, pos) {
   
   # draw starting state
   n <- length(pos) # abs number of loci, not pos -- this is consistent with simData below
@@ -21,10 +21,10 @@ simIBD <- function(f, rho, pos) {
   for (i in 2:n) {
       d <- pos[i]-pos[i-1]
       if (ret[i-1]==0) {    # move from non-IBD state to non-IBD is t11
-          t11 <- 1 - f*(1-exp(-rho*d))
+          t11 <- 1 - f*(1-exp(-k*rho*d))
           ret[i] <- sample(c(0,1), size = 1, prob = c(t11, 1-t11))
       } else {  # move from IBD state to IBD is t22
-          t22 <- 1 - (1-f)*(1-exp(-rho*d))
+          t22 <- 1 - (1-f)*(1-exp(-k*rho*d))
           ret[i] <- sample(c(0,1), size = 1, prob = c(1-t22, t22))
       }
   }
@@ -50,7 +50,7 @@ simIBD <- function(f, rho, pos) {
 #' 
 #' @export
 
-simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample(1e5, 1e2))), m1=1, m2=1, f=0.5, rho=1e-3, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
+simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample(1e5, 1e2))), m1=1, m2=1, f=0.5, rho=1e-3, k=6, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
   
   # get number of loci in each contig
   nc <- length(pos)
@@ -94,7 +94,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample
     # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
     IBD <- matrix(NA, n[i], zmax)
     for (j in 1:zmax) {
-        IBD[,j] <- simIBD(f, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        IBD[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
         w <- which(IBD[,j]==1) 
         haploid1[w,j] <- haploid2[w,j] # For regions that are IBD, set it to 1 between strains
     }
