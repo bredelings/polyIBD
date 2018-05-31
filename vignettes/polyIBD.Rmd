@@ -25,6 +25,7 @@ knitr::opts_chunk$set(
 
 library(polyIBD)
 library(tidyverse)
+library(viridis)
 
 ```
 
@@ -89,7 +90,7 @@ The ouptut of the `simData` function is a list of two lists and two dataframes:
 ## Running the MCMC 
 ```{r, echo=T, eval=T}
 # run MCMC
-rho_max <- rho_true*100 # this is user-specified
+rho_max <- rho_true*10000 # this is user-specified
 ret <- runMCMC(vcf=sim$vcf, p=sim$p, rho_max=rho_max,
                burnin=5e3, samples=1e4, reportIteration=NA) # turning off report iteration for space
 ```

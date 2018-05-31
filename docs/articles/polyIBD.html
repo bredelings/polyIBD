@@ -71,7 +71,7 @@
 </h1>
                         <h4 class="author">Nicholas F. Brazeau &amp; Robert Verity</h4>
             
-            <h4 class="date">May 21, 2018</h4>
+            <h4 class="date">May 31, 2018</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nickbrazeau/polyIBD/blob/master/vignettes/polyIBD.Rmd"><code>vignettes/polyIBD.Rmd</code></a></small>
       <div class="hidden name"><code>polyIBD.Rmd</code></div>
@@ -134,29 +134,29 @@ sim &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simData
 <h2 class="hasAnchor">
 <a href="#running-the-mcmc" class="anchor"></a>Running the MCMC</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># run MCMC</span>
-rho_max &lt;-<span class="st"> </span>rho_true<span class="op">*</span><span class="dv">100</span> <span class="co"># this is user-specified</span>
+rho_max &lt;-<span class="st"> </span>rho_true<span class="op">*</span><span class="dv">10000</span> <span class="co"># this is user-specified</span>
 ret &lt;-<span class="st"> </span><span class="kw"><a href="../reference/runMCMC.html">runMCMC</a></span>(<span class="dt">vcf=</span>sim<span class="op">$</span>vcf, <span class="dt">p=</span>sim<span class="op">$</span>p, <span class="dt">rho_max=</span>rho_max,
                <span class="dt">burnin=</span><span class="fl">5e3</span>, <span class="dt">samples=</span><span class="fl">1e4</span>, <span class="dt">reportIteration=</span><span class="ot">NA</span>) <span class="co"># turning off report iteration for space</span>
 <span class="co">#&gt; Running MCMC</span>
 <span class="co">#&gt;    burnin phase</span>
 <span class="co">#&gt;    sampling phase</span>
-<span class="co">#&gt; MCMC completed in 34.4422 seconds</span>
-<span class="co">#&gt; convergence reached within defined burn-in period (Geweke p=0.45)</span></code></pre></div>
+<span class="co">#&gt; MCMC completed in 28.5842 seconds</span>
+<span class="co">#&gt; convergence reached within defined burn-in period (Geweke p=0.293)</span></code></pre></div>
 <p>From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly. ### Summary Data Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (<em>ideally should be around 23%</em>), and the run-time of the function.<br>
 In addition, posterior estimates with median and 95% confidence intervals provided.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ret <span class="co"># is equivalent to summary(ret)</span>
 <span class="co">#&gt; # MCMC summary</span>
 <span class="co">#&gt; burn-in iterations:   5000 </span>
 <span class="co">#&gt; sampling iterations:  10000 </span>
-<span class="co">#&gt; acceptance rate:  0.2697 </span>
-<span class="co">#&gt; run-time (seconds):   34.442 </span>
+<span class="co">#&gt; acceptance rate:  0.369 </span>
+<span class="co">#&gt; run-time (seconds):   28.584 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; # Posterior estimates</span>
-<span class="co">#&gt;              5%       50%       95%</span>
-<span class="co">#&gt; m1  3.000000000 3.0000000 4.0000000</span>
-<span class="co">#&gt; m2  3.000000000 3.0000000 3.0000000</span>
-<span class="co">#&gt; f   0.167903760 0.2641291 0.3716628</span>
-<span class="co">#&gt; rho 0.004621724 0.1681034 0.4653631</span></code></pre></div>
+<span class="co">#&gt;            5%        50%        95%</span>
+<span class="co">#&gt; m1  3.0000000  3.0000000  3.0000000</span>
+<span class="co">#&gt; m2  3.0000000  3.0000000  3.0000000</span>
+<span class="co">#&gt; f   0.1955568  0.2921017  0.3857033</span>
+<span class="co">#&gt; rho 2.6243926 24.6966880 47.4062323</span></code></pre></div>
 <div id="raw-data" class="section level3">
 <h3 class="hasAnchor">
 <a href="#raw-data" class="anchor"></a>Raw Data</h3>
@@ -233,8 +233,6 @@ gridExtra<span class="op">::</span><span class="kw"><a href="http://www.rdocumen
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 
 <span class="kw"><a href="../reference/ggplot_IBD.html">ggplot_IBD</a></span>(ret)
-<span class="co">#&gt; Loading required package: viridis</span>
-<span class="co">#&gt; Loading required package: viridisLite</span>
 <span class="co">#&gt; Scale for 'fill' is already present. Adding another scale for 'fill',</span>
 <span class="co">#&gt; which will replace the existing scale.</span></code></pre></div>
 <p><img src="polyIBD_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
