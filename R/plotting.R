@@ -389,7 +389,7 @@ ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", positio
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m1}, which represents the COI of the first sample.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#'
+#' @import tidyverse
 #' @export
 
 
@@ -418,7 +418,7 @@ ggplot_m1 <- function(x, ...) {
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m2}, which represents the COI of the second sample.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#'
+#' @import tidyverse
 #' @export
 
 
@@ -448,7 +448,7 @@ ggplot_m2 <- function(x, ...) {
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#'
+#' @import tidyverse
 #' @export
 
 
@@ -476,7 +476,7 @@ ggplot_f <- function(x, ...) {
 #' @description Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#'
+#' @import tidyverse
 #' @export
 
 
@@ -507,6 +507,8 @@ ggplot_rho <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
+#' @import tidyverse
+#' 
 #' @export
 
 
