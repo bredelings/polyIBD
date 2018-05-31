@@ -15,7 +15,7 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
+runMCMC <- function(vcf, p, m_max=5, k_max=50, rho=1e-5, k=1, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
   # ------------------------------
   #         PROCESS INPUTS
@@ -41,9 +41,10 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   # define list of arguments to pass to Rcpp
   args <- list(x = x,
                p = unlist(p),
-               rho_max = rho_max,
+               rho = rho,
                SNP_dist = SNP_dist,
                m_max = m_max,
+               k_max = k_max,
                burnin = burnin,
                samples = samples,
                e1 = e1,
@@ -75,7 +76,7 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
                      m1 = coda::mcmc(output_raw$m1),
                      m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
-                     rho = coda::mcmc(output_raw$rho),
+                     k = coda::mcmc(output_raw$k),
                      runTime = output_raw$runTime)
   
   
@@ -93,7 +94,7 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   
   # calculate quantiles over parameters
   quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
-  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "rho"),]
+  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "k"),]
   
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,
