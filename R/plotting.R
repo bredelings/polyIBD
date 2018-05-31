@@ -389,11 +389,13 @@ ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", positio
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m1}, which represents the COI of the first sample.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#' @import tidyverse
+#' 
 #' @export
 
 
 ggplot_m1 <- function(x, ...) {
+  
+  require(tidyverse)
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -418,11 +420,13 @@ ggplot_m1 <- function(x, ...) {
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{m2}, which represents the COI of the second sample.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#' @import tidyverse
+#' 
 #' @export
 
 
 ggplot_m2 <- function(x, ...) {
+  
+  require(tidyverse)
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -448,11 +452,13 @@ ggplot_m2 <- function(x, ...) {
 #' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#' @import tidyverse
+#' 
 #' @export
 
 
 ggplot_f <- function(x, ...) {
+  
+  require(tidyverse)
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -476,11 +482,13 @@ ggplot_f <- function(x, ...) {
 #' @description Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
-#' @import tidyverse
+#' 
 #' @export
 
 
 ggplot_rho <- function(x, ...) {
+  
+  require(tidyverse)
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -507,13 +515,14 @@ ggplot_rho <- function(x, ...) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
-#' @import tidyverse
-#' 
 #' @export
 
 
 
 ggplot_IBD <- function(x, trueIBD=NULL, ...) {
+  
+  require(tidyverse)
+  
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
 
@@ -532,7 +541,6 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   ggplot() +
     geom_tile(data=IBDdflong, aes(x=factor(POS), y=Znum, fill=Prob)) +
     facet_grid(~ CHROM, scales="free_x", space="free") +
-    scale_fill_continuous("", low="#a1d99b", high="#003c30") +
     geom_hline(yintercept=seq(0.5, (max(IBDdflong$Znum)-0.5), by=1), color="black", size=0.5) +
     scale_fill_viridis(alpha=0.2, option="plasma") +
     scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +

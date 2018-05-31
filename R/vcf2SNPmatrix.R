@@ -1,7 +1,7 @@
 #' @title polyIBD vcf2SNPmatrix
-#' @description Wrapper of the vcfR package.  Goal of readVcfsplittoSNPMATRIXlist is to take a vcf, convert it to a matrix, find informative sites. Goal of getLociPopAF is to calculate population allele frequency by loci. 
+#' @description This function wraps the \code{vcfR} package to convert a vcffile or \code{vcfR} object to a SNP matrix suitable for polyIBD. 
 #' @param vcffile is the file path that for the VCF. This VCF will be converted to an object of class \code{vcfR}.
-#'@param vcfR is the file path that for the VCF. This VCF will be converted to an object of class \code{vcfR}.
+#' @param vcfR is the file path that for the VCF. This VCF will be converted to an object of class \code{vcfR}.
 #'
 #' @export
 

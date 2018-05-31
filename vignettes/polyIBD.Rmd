@@ -87,86 +87,86 @@ The ouptut of the `simData` function is a list of two lists and two dataframes:
 </p>
 
 
-## Running the MCMC 
-```{r, echo=T, eval=T}
-# run MCMC
-rho_max <- rho_true*10000 # this is user-specified
-ret <- runMCMC(vcf=sim$vcf, p=sim$p, rho_max=rho_max,
-               burnin=5e3, samples=1e4, reportIteration=NA) # turning off report iteration for space
-```
+<!-- ## Running the MCMC  -->
+<!-- ```{r, echo=T, eval=T} -->
+<!-- # run MCMC -->
+<!-- rho_max <- rho_true*10000 # this is user-specified -->
+<!-- ret <- runMCMC(vcf=sim$vcf, p=sim$p, rho_max=rho_max, -->
+<!--                burnin=5e3, samples=1e4, reportIteration=NA) # turning off report iteration for space -->
+<!-- ``` -->
 
-From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly. 
-### Summary Data
-Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (*ideally should be around 23%*), and the run-time of the function.   
-In addition, posterior estimates with median and 95% confidence intervals provided. 
-```{r, echo=T, eval=T}
-ret # is equivalent to summary(ret)
+<!-- From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly.  -->
+<!-- ### Summary Data -->
+<!-- Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (*ideally should be around 23%*), and the run-time of the function.    -->
+<!-- In addition, posterior estimates with median and 95% confidence intervals provided.  -->
+<!-- ```{r, echo=T, eval=T} -->
+<!-- ret # is equivalent to summary(ret) -->
 
-```
+<!-- ``` -->
 
-### Raw Data
-All of the raw data used to generate the above summary statistics is available within the returned MCMC object. 
-```{r, echo=T, eval=T}
-summary(ret$raw) # is equivalent to summary(ret)
+<!-- ### Raw Data -->
+<!-- All of the raw data used to generate the above summary statistics is available within the returned MCMC object.  -->
+<!-- ```{r, echo=T, eval=T} -->
+<!-- summary(ret$raw) # is equivalent to summary(ret) -->
 
-```
+<!-- ``` -->
 
-## Viewing the Results
-### Base R
-```{r, echo=T, eval=T}
-# plot using base R 
-par(mfrow=c(2,2)) # for 4 plots
-par(mar=c(1,3,3,1)) # you can adjust margins as you see fit
+<!-- ## Viewing the Results -->
+<!-- ### Base R -->
+<!-- ```{r, echo=T, eval=T} -->
+<!-- # plot using base R  -->
+<!-- par(mfrow=c(2,2)) # for 4 plots -->
+<!-- par(mar=c(1,3,3,1)) # you can adjust margins as you see fit -->
 
-plot_m1(ret, ylim=c(0,5))
-abline(h=m_true[1], col=2)
+<!-- plot_m1(ret, ylim=c(0,5)) -->
+<!-- abline(h=m_true[1], col=2) -->
 
-plot_m2(ret, ylim=c(0,5))
-abline(h=m_true[2], col=2)
+<!-- plot_m2(ret, ylim=c(0,5)) -->
+<!-- abline(h=m_true[2], col=2) -->
 
-plot_f(ret)
-abline(h=f_true, col=2)
+<!-- plot_f(ret) -->
+<!-- abline(h=f_true, col=2) -->
 
-plot_rho(ret)
-abline(h=rho_true, col=2)
+<!-- plot_rho(ret) -->
+<!-- abline(h=rho_true, col=2) -->
 
-par(mfrow=c(1,1))
-par(mar=c(2.5,1,1,2.5))
-plot_IBD(ret)
-
-
-```
-
-### Using `ggplot` Objects
-```{r, echo=T, eval=T}
-# plot using ggplot from tidyverse
-
-plotm1 <- polyIBD::ggplot_m1(ret)
-plotm1 <- plotm1 + geom_hline(yintercept=m_true[1], colour="#cb181d")
-
-plotm2 <- polyIBD::ggplot_m2(ret)
-plotm2 <- plotm2 + geom_hline(yintercept=m_true[2], colour="#cb181d")
-
-plotf <- polyIBD::ggplot_f(ret)
-plotf <- plotf + geom_hline(yintercept=f_true, colour="#cb181d")
-  
-plotrho <- polyIBD::ggplot_rho(ret)
-plotrho <- plotrho + geom_hline(yintercept=rho_true, colour="#cb181d")
+<!-- par(mfrow=c(1,1)) -->
+<!-- par(mar=c(2.5,1,1,2.5)) -->
+<!-- plot_IBD(ret) -->
 
 
-## convert plots to gtable objects
-grobm1 <- ggplot2::ggplotGrob(plotm1)
-grobm2 <- ggplot2::ggplotGrob(plotm2)
-grobf <- ggplot2::ggplotGrob(plotf)
-grobrho <- ggplot2::ggplotGrob(plotrho)
+<!-- ``` -->
 
-gridExtra::grid.arrange(grobm1,
-             grobm2,
-             grobf,
-             grobrho,
-             ncol=2)
+<!-- ### Using `ggplot` Objects -->
+<!-- ```{r, echo=T, eval=T} -->
+<!-- # plot using ggplot from tidyverse -->
+
+<!-- plotm1 <- polyIBD::ggplot_m1(ret) -->
+<!-- plotm1 <- plotm1 + geom_hline(yintercept=m_true[1], colour="#cb181d") -->
+
+<!-- plotm2 <- polyIBD::ggplot_m2(ret) -->
+<!-- plotm2 <- plotm2 + geom_hline(yintercept=m_true[2], colour="#cb181d") -->
+
+<!-- plotf <- polyIBD::ggplot_f(ret) -->
+<!-- plotf <- plotf + geom_hline(yintercept=f_true, colour="#cb181d") -->
+
+<!-- plotrho <- polyIBD::ggplot_rho(ret) -->
+<!-- plotrho <- plotrho + geom_hline(yintercept=rho_true, colour="#cb181d") -->
 
 
-ggplot_IBD(ret)
+<!-- ## convert plots to gtable objects -->
+<!-- grobm1 <- ggplot2::ggplotGrob(plotm1) -->
+<!-- grobm2 <- ggplot2::ggplotGrob(plotm2) -->
+<!-- grobf <- ggplot2::ggplotGrob(plotf) -->
+<!-- grobrho <- ggplot2::ggplotGrob(plotrho) -->
 
-```
+<!-- gridExtra::grid.arrange(grobm1, -->
+<!--              grobm2, -->
+<!--              grobf, -->
+<!--              grobrho, -->
+<!--              ncol=2) -->
+
+
+<!-- ggplot_IBD(ret) -->
+
+<!-- ``` -->

@@ -111,7 +111,6 @@ Rcpp_to_mat <- function(x) {
 }
 
 
-
 # -----------------------------------
 # vcfFilter section
 # -----------------------------------
@@ -137,7 +136,12 @@ vcffilter <- function(vcffile,
                       prop.loci.missing = 0.05,
                       biallelic=TRUE){
   
+  require(vcfR)
+  require(tidyverse)
   
+  # -----------------------------------------------------
+  # Read and check input
+  #------------------------------------------------------
   vcf <- vcfR::read.vcfR(file=vcffile)
   if(biallelic==TRUE){
     vcf <- vcf[vcfR::is.biallelic(vcf)]
@@ -228,6 +232,10 @@ vcffilter <- function(vcffile,
 #' 
 
 genautocorr <- function(vcffile = NULL, vcfR = NULL){
+  
+  require(vcfR)
+  require(tidyverse)
+  
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
@@ -322,6 +330,9 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
 
 genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NULL, threshDist=1e3){
   
+  require(vcfR)
+  require(tidyverse)
+  
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
@@ -378,7 +389,3 @@ genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NU
   return(newvcfR)
   
 }
-
-
-
-

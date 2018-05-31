@@ -6,6 +6,7 @@
 #'
 #' @param f the average relatedness between the two samples
 #' @param rho the recombination rate. TODO - units of this parameter
+#' @param k the number of generations separating the two lineages
 #' @param pos the genomic positions of the sites of interest
 #' 
 #' @export
