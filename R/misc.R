@@ -7,11 +7,11 @@
 #' @param f TODO
 #' @export
 
-getTransProbs <- function(f, rho, k, zmax) {
+getTransProbs <- function(f, rho, k, z_max) {
     
     # generate rate matrix
-    z0 <- zmax
-    z1 <- zmax+1
+    z0 <- z_max
+    z1 <- z_max+1
     rateMat <- matrix(0, z1, z1)
     rateMat[cbind(1:z0, 1:z0 + 1)] <- (z0:1)*rho*k*f # this is the poisson process assuming constant rates 
     rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho*k*(1-f) # this is the poisson process assuming constant rates 
