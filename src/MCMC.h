@@ -52,10 +52,8 @@ public:
   int m2_weight_stay;
   int m2_weight_move;
   double f_propSD;
-  int k_weight_stay;
-  int k_weight_move;
+  double k_propSD;
   int IBD_index;
-  int k_prop; //why do i need this?
   
   
   // PUBLIC FUNCTIONS
@@ -67,10 +65,10 @@ public:
   void burnin_MCMC(Rcpp::List args_functions);
   void run_MCMC(Rcpp::List args_functions);
   void define_emmission_lookup();
-  void update_transition_lookup(double f, double rho, double k, int m1, int m2, Rcpp::Function getTransProbs);
+  void update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs);
   double forward_alg(int m1, int m2);
   void backward_alg(int m1, int m2);
   void get_IBD();
   double propose_m(double m_current, double weight_move, double weight_stay);
-  double propose_k(double k_current, double weight_move, double weight_stay);
+  double propose_k(int k_current, double k_propSD, int k_max);
 };

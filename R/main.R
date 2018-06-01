@@ -15,23 +15,38 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcf, p, m_max=5, k_max=50, rho=1e-5, k=1, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
+runMCMC <- function(vcfsnpmatrix = NULL, p, m_max=5,
+                    k_max=50, rho=1e-5, 
+                    burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
   # ------------------------------
   #         PROCESS INPUTS
   # ------------------------------
+  require(vcfR)
+  require(tidyverse)
+  
+  # -----------------------------------------------------
+  # Read and check input
+  #------------------------------------------------------
+  if(is.null(vcfsnpmatrix)){
+    stop("Must provide vcfsnpmatrix")
+  }
+    if(!any(class(vcfsnpmatrix) == "vcfsnpmatrix")){
+      stop("vcfsnpmatrix object must be of class vcfsnpmatrix")
+    }
+    vcf <- vcfsnpmatrix
   
   # TODO - input parameter checks
   # note - vcf must have 4 columns, samples in final two columns
   
   # extract basic parameters
-  tab1 <- table(vcf$CHROM)
+  tab1 <- table(vcf[,1]) # first column in this class is CHROM
   nc <- length(tab1)
   cnames <- names(tab1)
   n <- as.vector(tab1)
   
   # get distances between SNPs. Distance=-1 between contigs, indicating infinite distance
-  SNP_dist <- diff(vcf$POS)
+  SNP_dist <- diff(vcf[,2]) # second column in this class is POS
   SNP_dist[cumsum(n)[1:(nc-1)]] <- -1
   
   # compare two samples and save comparison type in vector x

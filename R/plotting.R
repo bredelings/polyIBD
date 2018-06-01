@@ -105,16 +105,16 @@ plot_f <- function(x, ...) {
 }
 
 #------------------------------------------------
-#' @title Trace plot of rho
+#' @title Trace plot of k
 #'
-#' @description Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
+#' @description Produces a simple MCMC trace plot of the parameter \code{k}, which represents the number of generations separating the two lineages (holding recombination rate constant).
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @export
 
 
-plot_rho <- function(x, ...) {
+plot_k <- function(x, ...) {
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -124,12 +124,12 @@ plot_rho <- function(x, ...) {
   argNames <- names(args)
   
   # set defaults on undefined arguments
-  if (! "ylab" %in% argNames) {args$ylab <- "rho"}
-  if (! "main" %in% argNames) {args$main <- "rho trace"}
-  if (! "ylim" %in% argNames) {args$ylim <- c(0, max(unclass(x$raw$rho)))}
+  if (! "ylab" %in% argNames) {args$ylab <- "k"}
+  if (! "main" %in% argNames) {args$main <- "k trace"}
+  if (! "ylim" %in% argNames) {args$ylim <- c(0, max(unclass(x$raw$k)))}
   
   # produce plot
-  do.call(plot_trace, c(list(x=unclass(x$raw$rho)), args))
+  do.call(plot_trace, c(list(x=unclass(x$raw$k)), args))
 }
 
 #------------------------------------------------
@@ -195,8 +195,8 @@ plot.polyIBD <- function(x, y=NULL, ...) {
   # plot f
   plot_f(x)
   
-  # plot rho
-  plot_rho(x)
+  # plot k
+  plot_k(x)
   
   # plot IBD matrix
   plot_IBD(x, trueIBD=y, ...)
@@ -477,16 +477,16 @@ ggplot_f <- function(x, ...) {
 }
 
 #------------------------------------------------
-#' @title Trace plot of rho
+#' @title Trace plot of k
 #'
-#' @description Produces a simple MCMC trace plot of the parameter \code{rho}, which represents the inverse of the average length of a recombinant block, and is a function of both the recombination rate and the number of generations separating the two lineages.
+#' @description Produces a simple MCMC trace plot of the parameter \code{k}, which represents the number of generations separating the two lineages (holding the recombination rate constant).
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' 
 #' @export
 
 
-ggplot_rho <- function(x, ...) {
+ggplot_k <- function(x, ...) {
   
   require(tidyverse)
   
@@ -497,13 +497,13 @@ ggplot_rho <- function(x, ...) {
   args <- list(...)
   
   # produce df for ggplot
-  dat <- data.frame(iteration=1:length(x$raw$rho), mcmcchain=unclass(x$raw$rho))
+  dat <- data.frame(iteration=1:length(x$raw$k), mcmcchain=unclass(x$raw$k))
   
   # produce plot
   ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
-    scale_y_continuous(name="Rho Estimate") +
-    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$rho)), probs=seq(0,1,0.25)))))) +
-    ggtitle(label="Rho Trace")
+    scale_y_continuous(name="k (generations) Estimate") +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$k)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="k Trace")
 }
 
 
@@ -519,13 +519,17 @@ ggplot_rho <- function(x, ...) {
 
 
 
+# TODO is lag right here? I don't like this...recombination blocks versus SNP absolute position issue
+
+
 ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   
   require(tidyverse)
+  require(viridis)
   
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
-
+  
   # get input arguments
   args <- list(...)
   
@@ -534,30 +538,93 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   POS <- x$summary$IBD_marginal[,2]
   IBD <- as.matrix(x$summary$IBD_marginal[,-(1:2)])
   
-  IBDdf <- data.frame(cbind(CHROM, POS, IBD))
+  IBDdf <- cbind.data.frame(CHROM, POS, IBD)
   IBDdflong <- tidyr::gather(data=IBDdf, key="Z", value="Prob", 3:ncol(IBDdf))
   IBDdflong$Znum <- as.numeric(gsub("z", "", IBDdflong$Z))
   
-  ggplot() +
-    geom_tile(data=IBDdflong, aes(x=factor(POS), y=Znum, fill=Prob)) +
-    facet_grid(~ CHROM, scales="free_x", space="free") +
-    geom_hline(yintercept=seq(0.5, (max(IBDdflong$Znum)-0.5), by=1), color="black", size=0.5) +
-    scale_fill_viridis(alpha=0.2, option="plasma") +
+  IBDdflong$start <- dplyr::lag(IBDdflong$POS)
+  IBDdflong$start[1] <- 0
+  IBDdflong$end <- IBDdflong$POS
+  
+  # filter unneccessary Znumbers
+  filtdf <- aggregate(IBDdflong$Prob, list(factor(IBDdflong$Znum)), sum)
+  if(any(filtdf == 0)){
+    filtdf <- filtdf[which(filtdf[,2] == 0), 1]
+    IBDdflong <- IBDdflong %>% 
+      dplyr::filter(! Znum %in% filtdf )
+  }
+  
+  plotobj <- ggplot() + 
+    geom_rect(data=IBDdflong, mapping=aes(xmin=start, xmax=end, ymin=Znum-0.49, ymax=Znum+0.49, fill=Prob)) +
+    viridis::scale_fill_viridis(alpha=0.2, option="plasma") +
     scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
     xlab("POS") +
+    facet_grid(~CHROM) + 
     guides(title="IBD Probability", labels = paste("0%", "100%")) + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           panel.background = element_blank(),
           axis.ticks = element_blank(),
-          axis.text.x = element_blank(),
-          #axis.text.x = element_text(size=9, family = "Arial", angle = 45),
+          axis.text.x = element_text(size=9, family = "Arial", angle = 45),
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
           axis.title.x = element_text(size=12, face="bold", family = "Arial"))
   
-  # fix the x-axis 
-  
+  if(!is.null(trueIBD)){
+    plotobj <- plotobj + geom_line(data=trueIBD, aes(x=POS, y=z_true), colour="#d73027", size=0.75) 
+  }  
+  return(plotobj)
 }
 
 
+#------------------------------------------------
+#' @title Plot polyIBD outputs collectively   
+#'
+#' @description Plots the MCMC chains for M1, M2, f, and k (generations), as well as the posterior distribution for the IBD matrix.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
+#'
+#' @export
 
+
+ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL, 
+                             truem2=NULL, truef=NULL, truek=NULL) {
+  if(!is.null(truem1)){
+    plotm1 <- ggplot_m1(x)
+    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#d73027")
+  } else {
+    plotm1 <- ggplot_m1(x)
+  } # end m1 plot
+  
+  if(!is.null(truem2)){
+    plotm2 <- ggplot_m2(x)
+    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#d73027")
+  } else {
+    plotm2 <- ggplot_m2(x)
+  } # end m2 plot
+  
+  if(!is.null(truef)){
+    plotf <- ggplot_f(x)
+    plotf <- plotf + geom_hline(yintercept=truef, colour="#d73027")
+  } else {
+    plotf <- ggplot_f(x)
+  } # end f plot
+  
+  if(!is.null(truek)){
+    plotk <- ggplot_k(x)
+    plotk <- plotk + geom_hline(yintercept=truek, colour="#d73027")
+  } else {
+    plotk <- ggplot_k(x)
+  } # end k plot
+
+  if(!is.null(trueIBD)){
+    plotibd <- ggplot_IBD(x, trueIBD)
+  } else {
+    plotibd <- ggplot_IBD(x)
+  } # end IBD plot
+
+  ggpubr::ggarrange(ggpubr::ggarrange(plotm1, plotm2,  plotf, plotk, nrow=2, ncol = 2),
+                    plotibd,
+                    nrow = 2
+  )
+}

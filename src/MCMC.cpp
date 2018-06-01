@@ -62,15 +62,13 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   
   // misc objects
   // m weights dictate the chance of proposing a new m value ("move") vs. sticking with the current value ("stay"). These weights are updated during the burn-in phase, converging to an efficient proposal distribution. The chance of staying is never allowed to exceed 100* the chance of moving, to ensure there is always some chance of exploring new m values.
-  // f_propSD and rho_propSD are updated during the burn-in phase using Robbins-Monro.
+  // f_propSD and k_propSD are updated during the burn-in phase using Robbins-Monro (although k_propSD isn't being used right now).
   m1_weight_stay = 1;
   m1_weight_move = 1;
   m2_weight_stay = 1;
   m2_weight_move = 1;
   f_propSD = 0.2;
-  k_weight_stay = 1;
-  k_weight_move = 1;
-  
+  k_propSD = 0.2; // this isn't being used right now...come back to it 
 }
 
 //------------------------------------------------
@@ -96,14 +94,15 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     int m1_prop = propose_m(m1, m1_weight_move, m1_weight_stay);
     int m2_prop = propose_m(m2, m2_weight_move, m2_weight_stay);
     
-    // if no change in m then propose either f or rho
+    // if no change in m then propose either f or k
     double f_prop = f;
-    double rho_prop = rho;
+    int k_prop = k;
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        int k_prop = propose_k(k, k_weight_move, k_weight_stay);
+       //some proposal distribution for k -- consider weights later
+        k_prop = propose_k(k, k_propSD, k_max);
       }
     }
     
@@ -125,9 +124,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
       
-      // or update rho_propSD
+      // or update k standard deviation
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
+        k_propSD  += (1-0.23)/sqrt(double(rep)); // this isn't being used right now...need to think if want to use it for dirichlet or later
       }
       
       // update parameter values and likelihood
@@ -155,14 +154,10 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD = (f_propSD < 0) ? -f_propSD : f_propSD;
       }
       
-      // update k sample wight
-      if (m1==m1_prop && m2==m2_prop && k_prop!=rho) {
-        // update k sampling weights
-        k_weight_stay = (k==k_prop) ? k_weight_stay : ++k_weight_stay;
-
-        // limit k sampling weights
-        k_weight_stay = (k_weight_stay > 100*k_weight_move) ? 100*k_weight_move : k_weight_stay;
-
+      // update k standard deviation
+      if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
+        k_propSD  -= 0.23/sqrt(double(rep));
+        k_propSD = (k_propSD < 0) ? -k_propSD : k_propSD; //isn't being used right now...
         
       }
       
@@ -196,14 +191,14 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
     int m1_prop = propose_m(m1, m1_weight_move, m1_weight_stay);
     int m2_prop = propose_m(m2, m2_weight_move, m2_weight_stay);
     
-    // if no change in m, therefore propose either f or rho
+    // if no change in m, therefore propose either f or k
     double f_prop = f;
-    double rho_prop = rho;
+    double k_prop = k;
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        int k_prop = propose_k(k, k_weight_move, k_weight_stay);
+        k_prop = propose_k(k, k_propSD, k_max);
       }
     }
     
@@ -388,7 +383,7 @@ void MCMC::define_emmission_lookup() {
 //------------------------------------------------
 // MCMC::
 // update transition probability lookup table. This table is a list over L-1 loci, and each element of the list is a matrix of transition probabilities of going from one HMM state to another. Note, these probabilities give the chance of moving states from the current SNP to the next SNP, which is why we have L-1 matrices for L loci (i.e. there is no matrix for the final SNP because there is nowhere to move to). This function employs the R function getTransProbs() to get eigenvalues and eigenvectors of the rate matrix, then uses these values to calculate transition probabilities for any given distance between SNPs.
-void MCMC::update_transition_lookup(double f, double rho, double k, int m1, int m2, Rcpp::Function getTransProbs) {
+void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs) {
   
   // get z_max
   int z_max = (m1 < m2) ? m1 : m2;
@@ -542,15 +537,13 @@ double MCMC::propose_m(double m_current, double weight_move, double weight_stay)
 
 //------------------------------------------------
 // MCMC::
-// propose new value of k given current value and sampling weights. New value cannot be 0 or greater than k_max.
-double MCMC::propose_k(double k_current, double weight_move, double weight_stay) {
+// propose new value of k given current value and its SD for the acceptance rate. 
+// New value cannot be 0 or greater than k_max but is standardized by the previous iterations.
+double MCMC::propose_k(int k_current, double k_propSD, int k_max) {
   
-  double k_prop = k_current;
-  if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
-    k_prop = rbernoulli1(0.5) ? k_current+1 : k_current-1;
-    k_prop = (k_prop==0 || k_prop>m_max) ? k_current : k_prop;
-  }
+  int k_prop = sample2(1,k_max);
   
   return(k_prop);
 }
+
 

@@ -9,7 +9,8 @@
 # TODO:
 #     add better error handling
 #     Change these functions to one call as an S4 object with slots for SNPmatrix, GT, PopAf, and d
-
+#     better class definitions
+#     snpmatrixlist needs to be in an apply loop not for loop 
 
 vcf2infSNPmatrix <- function(vcffile, vcfR) {
 
@@ -47,16 +48,28 @@ vcf2infSNPmatrix <- function(vcffile, vcfR) {
   } else {
     print("You have a ploidy that is less than 1 or greater than 3, which cannot be accomodated by polyIBD")
   }
+  # -----------------------------------------------------
+  # Determine the number of samples and thier combinations 
+  #------------------------------------------------------
+  smpls <- factor(colnames(vcfR::extract.gt(vcf)))
+  smpls <- t(combn(smpls, 2))
   
   # -----------------------------------------------------
   # Attach Positions to the VCF GT Informative Loci
   #------------------------------------------------------
-
-  REG <- data.frame(datvcf@fix, stringsAsFactors = F)
-  REG <- REG[,colnames(REG) %in% c("CHROM", "POS")] #vcf format it is first two columns but to be explicit
-  REG$POS <- as.numeric(REG$POS) # taking char to num -- fine in R, maybe not in Cpp
-  snpmatrix <- cbind(REG, snpmatrix)
-  return(snpmatrix)
+  
+  snpmatrixlist <- lapply(1:nrow(smpls), function(x){matrix(NA, ncol=4, nrow=nrow(snpmatrix))})
+    CHROM <- vcfR::getCHROM(vcf)
+    POS <- vcfR::getPOS(vcf)
+  for(i in 1:nrow(smpls)){
+    snpmatrixsave <- snpmatrix[, colnames(snpmatrix) %in% smpls[i,]]
+    snpmatrixsave <- cbind.data.frame(CHROM, POS, snpmatrixsave)
+    class(snpmatrixsave) <- append(class(snpmatrixsave),"vcfsnpmatrix")
+    snpmatrixlist[[i]] <- snpmatrixsave
+    rm(snpmatrixsave) # to prevent later clashes
+  }
+  
+  
 }
 
 
