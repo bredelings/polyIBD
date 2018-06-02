@@ -56,7 +56,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   accept_rate = 0;
   
   // calculate initial likelihood
-  update_transition_lookup(f, rho, k, m1, m2, args_functions["getTransProbs"],  args_functions["rotatemat"]);
+  update_transition_lookup(f, rho, k, m1, m2, args_functions["getTransProbs"]);
   logLike_old = forward_alg(m1, m2);
   logLike_burnin_store[0] = logLike_old;
   
@@ -108,7 +108,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     }
     
     // update transition probabilities and calculate new likelihood
-    update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"], args_functions["rotatemat"]);
+    update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(m1_prop, m2_prop);
     
     // Metropolis-Hastings step
@@ -204,7 +204,7 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
     }
     
     // update transition probabilities and calculate new likelihood
-    update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"], args_functions["rotatemat"]);
+    update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(m1_prop, m2_prop);
     
     // Metropolis-Hastings step
@@ -384,7 +384,7 @@ void MCMC::define_emmission_lookup() {
 //------------------------------------------------
 // MCMC::
 // update transition probability lookup table. This table is a list over L-1 loci, and each element of the list is a matrix of transition probabilities of going from one HMM state to another. Note, these probabilities give the chance of moving states from the current SNP to the next SNP, which is why we have L-1 matrices for L loci (i.e. there is no matrix for the final SNP because there is nowhere to move to). This function employs the R function getTransProbs() to get eigenvalues and eigenvectors of the rate matrix, then uses these values to calculate transition probabilities for any given distance between SNPs.
-void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs, Rcpp::Function rotatemat) {
+void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs) {
   
   // get z_max
   int z_max = (m1 < m2) ? m1 : m2;
@@ -399,7 +399,7 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
   for (int j=0; j<(L-1); j++) {
     // clear existing values
     for (int z1=0; z1<(m_max+1); z1++) {
-      fill(transition_lookup_temp[j][z1].begin(), transition_lookup_temp[j][z1].end(), 0);
+      fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 0);
     }
     // populate lookup table based on rate matrix solution
     for (int z1=0; z1<(z_max+1); z1++) {
@@ -408,10 +408,10 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
         // the probability of moving from state z1 to state z2 is the sum over some weighted exponentials
         for (int i=0; i<(z_max+1); i++) {
           if (SNP_dist[j] > 0) {
-            transition_lookup_temp[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
+            transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
           } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
             if (Evalues[i]==0) {
-              transition_lookup_temp[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
+              transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
             }
           }
         }
@@ -421,9 +421,11 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
   }
  
  // fix transition_lookup table to make matrix structure {(UU, UI), (IU, II)} in the sample case
-
-   Rcpp::List transition_lookup = rotatemat(transition_lookup_temp);
-   transition_lookup = Rcpp_to_mat_double(transition_lookup);
+  // rotate 1
+  transition_lookup = rotate_matrix(transition_lookup, transition_lookup.size());
+  // rotate 2
+  transition_lookup = rotate_matrix(transition_lookup, transition_lookup.size());
+  
 }
 
 

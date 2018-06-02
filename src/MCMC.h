@@ -27,7 +27,6 @@ public:
   
   // lookup tables
   std::vector< std::vector< std::vector< std::vector< std::vector<double> > > > > emmission_lookup;
-  std::vector< std::vector< std::vector<double> > > transition_lookup_temp;
   std::vector< std::vector< std::vector<double> > > transition_lookup;
   
   // transient MCMC objects
@@ -67,7 +66,7 @@ public:
   void burnin_MCMC(Rcpp::List args_functions);
   void run_MCMC(Rcpp::List args_functions);
   void define_emmission_lookup();
-  void update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs, Rcpp::Function rotatemat);
+  void update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs);
   double forward_alg(int m1, int m2);
   void backward_alg(int m1, int m2);
   void get_IBD();
