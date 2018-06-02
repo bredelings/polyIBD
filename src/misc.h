@@ -85,7 +85,7 @@ void printVector(const std::vector<TYPE> &x) {
 //------------------------------------------------
 // helper function for printing contents of a matrix (templated for different data types)
 template<class TYPE>
-void printMatrix(const std::vector< std::vector<TYPE>> &M) {
+void printMatrix(const std::vector< std::vector<TYPE> > &M) {
 	for(const auto & row: M ){
 		for(const auto & col : row){
 			Rcpp::Rcout << col << " ";
