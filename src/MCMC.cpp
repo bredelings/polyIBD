@@ -68,7 +68,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m2_weight_stay = 1;
   m2_weight_move = 1;
   f_propSD = 0.2;
-  k_propSD = 0.2; // this isn't being used right now...come back to it 
+  k_weight_stay = 1;
+  k_weight_move = 1;
 }
 
 //------------------------------------------------
@@ -102,7 +103,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
        //some proposal distribution for k -- consider weights later
-        k_prop = propose_k(k, k_propSD, k_max);
+       k_prop = propose_k(k, k_weight_move, k_weight_stay);
       }
     }
     
@@ -124,9 +125,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
       
-      // or update k standard deviation
+      // or update k sample weights
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_propSD  += (1-0.23)/sqrt(double(rep)); // this isn't being used right now...need to think if want to use it for dirichlet or later
+        k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
       }
       
       // update parameter values and likelihood
@@ -156,9 +157,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       
       // update k standard deviation
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_propSD  -= 0.23/sqrt(double(rep));
-        k_propSD = (k_propSD < 0) ? -k_propSD : k_propSD; //isn't being used right now...
-        
+        k_weight_stay = (k==k_prop) ? k_weight_stay : ++k_weight_stay;
+        // limit k sampling weights
+        k_weight_stay = (k_weight_stay > 100*k_weight_move) ? 100*k_weight_move : k_weight_stay;
       }
       
     }
@@ -193,12 +194,12 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
     
     // if no change in m, therefore propose either f or k
     double f_prop = f;
-    double k_prop = k;
+    int k_prop = k;
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = propose_k(k, k_propSD, k_max);
+        k_prop = propose_k(k, k_weight_move, k_weight_stay);
       }
     }
     
@@ -423,7 +424,12 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
 
 //------------------------------------------------
 // MCMC::
-// the forward algorithm of the HMM. This function does two things: 1) returns the log-likelihood integrated over all paths through the HMM, 2) updates the forward matrix. The forward matrix is normalised at each step to sum to 1 (to avoid underflow issues), but this does not affect the log-likelihood calculation.
+// the forward algorithm of the HMM. 
+// This function does two things: 1) returns the log-likelihood integrated over all paths through the HMM, 
+//                                2) updates the forward matrix. 
+// The forward matrix is normalised at each step to sum to 1 (to avoid underflow issues), but this does not affect the log-likelihood calculation.
+//  Remember, forward algorithm gives us the likelihood. Remember that element frwrd is defined as Pr(x_1,x_2,...,x_i,State_i=1), 
+
 double MCMC::forward_alg(int m1, int m2) {
   
   // get z_max
@@ -468,7 +474,11 @@ double MCMC::forward_alg(int m1, int m2) {
 
 //------------------------------------------------
 // MCMC::
-// the backward algorithm of the HMM. This function updates the backwards matrix, while normalising at each step to sum to 1 (to avoid underflow issues).
+// the backward algorithm of the HMM. 
+// This function updates the backwards matrix, while normalising at each step to sum to 1 (to avoid underflow issues).
+// Remember, The element bkwrd contains the probability of all data past observation x[i], given that we are in state 1 at time i. 
+// In other words it contains Pr(x_{i+1},x_{i+1},...x_n | State_i=1).
+
 void MCMC::backward_alg(int m1, int m2) {
   
   // get z_max
@@ -537,13 +547,15 @@ double MCMC::propose_m(double m_current, double weight_move, double weight_stay)
 
 //------------------------------------------------
 // MCMC::
-// propose new value of k given current value and its SD for the acceptance rate. 
-// New value cannot be 0 or greater than k_max but is standardized by the previous iterations.
-double MCMC::propose_k(int k_current, double k_propSD, int k_max) {
+// New value cannot be 0 or greater than k_max and k is proposed given current k and sampling weights
+double MCMC::propose_k(double k_current, double weight_move, double weight_stay) {
   
-  int k_prop = sample2(1,k_max);
+  double k_prop = k_current;
+  if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
+    k_prop = rbernoulli1(0.5) ? k_current+1 : k_current-1;
+    k_prop = (k_prop==0 || k_prop>k_max) ? k_current : k_prop;
+  }
   
   return(k_prop);
 }
-
 

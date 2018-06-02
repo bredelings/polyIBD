@@ -15,7 +15,7 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcfsnpmatrix = NULL, p, m_max=5,
+runMCMC <- function(vcfsnpmatrix = vcfsnpmatrixobject, p, m_max=5,
                     k_max=50, rho=1e-5, 
                     burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
@@ -29,7 +29,7 @@ runMCMC <- function(vcfsnpmatrix = NULL, p, m_max=5,
   # Read and check input
   #------------------------------------------------------
   if(is.null(vcfsnpmatrix)){
-    stop("Must provide vcfsnpmatrix")
+    stop("Must provide vcfsnpmatrix object")
   }
     if(!any(class(vcfsnpmatrix) == "vcfsnpmatrix")){
       stop("vcfsnpmatrix object must be of class vcfsnpmatrix")
