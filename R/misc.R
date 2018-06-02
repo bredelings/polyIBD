@@ -25,9 +25,17 @@ getTransProbs <- function(f, rho, k, z_max) {
 }
 
 
+# ------------------------------------------------------------------
+#' @title rotate a matrix 
+#'
+#' @description Takes a matrix and rotates it 90 degrees counterclockwise. Thank you to Matthew Lundberg & Eric Leschinski from Stackoverflow thread: https://stackoverflow.com/questions/16496210/rotate-a-matrix-in-r
+#' @param f TODO 
+#' @export
 
-
-
+rotatemat <- function(array){
+  ret <- lapply(array, function(x){t(apply(x, 2, rev))})
+  return(ret)
+}
 # -----------------------------------
 # checkConvergence
 # calculates Geweke statistic from a series of burn-in and sampling draws. Report whether burn-in length was sufficient based on this statistic.
