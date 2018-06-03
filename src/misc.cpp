@@ -196,18 +196,4 @@ vector< vector< vector<double> > > Rcpp_to_array_double(Rcpp::List x) {
     return(ret);
 }
 
-//------------------------------------------------
-// rotates a matrix of mxm size
-// taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
-int rotate_matrix(int **m, int size){
-  for(int level = 0; level < size / 2; level ++){
-    for(int i = level; i < size - level - 1; i ++){
-      int t = m[level][i];
-      m[level][i] = m[i][size - 1 - level];
-      m[i][size - 1 - level] = m[size - 1 - level][size - 1 - i];
-      m[size - 1 - level][size - 1 - i] = m[size - 1 - i][level];
-      m[size - 1 - i][level] = t;
-    }
-  }
-}
 

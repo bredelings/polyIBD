@@ -72,4 +72,10 @@ public:
   void get_IBD();
   double propose_m(double m_current, double weight_move, double weight_stay);
   double propose_k(double k_current, double weight_move, double weight_stay);
+  // rotates a matrix of mxm size
+  // taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
+  void rotate_matrix(int **m, int size);
 };
+
+
+

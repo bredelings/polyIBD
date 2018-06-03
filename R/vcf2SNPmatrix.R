@@ -19,7 +19,7 @@ vcf2infSNPmatrix <- function(vcffile, vcfR) {
   #------------------------------------------------------
   if(is.null(vcffile)){
     if(class(vcfR) != "vcfR"){
-      paste("vcfR object must be of class vcfR")
+      stop("vcfR object must be of class vcfR")
     }
     vcf <- vcfR
   } else{

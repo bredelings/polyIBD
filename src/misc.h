@@ -169,7 +169,3 @@ std::vector< std::vector< std::vector<double> > > Rcpp_to_array_double(Rcpp::Lis
 // converts input from Rcpp::List format to vector<vector<vector<int>>> format.
 std::vector< std::vector< std::vector<int> > > Rcpp_to_array_int(Rcpp::List x);
 
-//------------------------------------------------
-// rotates a matrix of mxm size
-// taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
-int rotate_matrix(int **m, int size);

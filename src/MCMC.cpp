@@ -422,12 +422,13 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
  
  // fix transition_lookup table to make matrix structure {(UU, UI), (IU, II)} in the sample case
   // rotate 1
-  transition_lookup = rotate_matrix(transition_lookup, transition_lookup.size());
-  // rotate 2
-  transition_lookup = rotate_matrix(transition_lookup, transition_lookup.size());
+//  for (int j=0; j<(L-1); j++) {
+//    transition_lookup[j] = rotate_matrix(transition_lookup[j], transition_lookup[j].size());
+//  }
   
-}
+  // rotate 2
 
+} // end of transition_update function 
 
 
 //------------------------------------------------
@@ -567,3 +568,18 @@ double MCMC::propose_k(double k_current, double weight_move, double weight_stay)
   return(k_prop);
 }
 
+
+//------------------------------------------------
+// rotates a matrix of mxm size
+// taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
+void rotate_matrix(int **m, int size){
+  for(int level = 0; level < size / 2; level ++){
+    for(int i = level; i < size - level - 1; i ++){
+      int t = m[level][i];
+      m[level][i] = m[i][size - 1 - level];
+      m[i][size - 1 - level] = m[size - 1 - level][size - 1 - i];
+      m[size - 1 - level][size - 1 - i] = m[size - 1 - i][level];
+      m[size - 1 - i][level] = t;
+    }
+  }
+}
