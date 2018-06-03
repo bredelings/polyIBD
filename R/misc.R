@@ -106,24 +106,39 @@ summary.polyIBD <- function(x, ...) {
 # function for determining if object is of class polyIBD
 #' @export
 
-is.vcfsnpmatrix <- function(x) {
-  inherits(x, "vcfsnpmatrix")
+is.polyIBDinput <- function(x) {
+  inherits(x, "polyIBDinput")
 }
+
 
 #------------------------------------------------
 # overload print() function to print summary only
 #' @export
-print.vcfsnpmatrix <- function(x, ...) {
+print.polyIBDinput <- function(x, ...) {
   
   # print this outpot onle
   cat("**************** \n")
-  cat(paste("There are", length(x), "Sample Combinations in this VCFsnpmatrix Object \n"))
-  cat(paste(nrow(x[[1]]), "Variants per Sample Combination"))
+  cat(paste("There are", length(x), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
+  cat(paste(nrow(x[[1]]$snpmatrix[[1]]), "Variants per Sample Combination"), "\n")
   cat("**************** \n")
   # return invisibly
   invisible(x)
 }
 
+
+#------------------------------------------------
+# overload summary() function to print summary only
+#' @export
+summary.polyIBDinput <- function(x, ...) {
+  
+  # print this outpot onle
+  cat("**************** \n")
+  cat(paste("There are", length(x), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
+  cat(paste(nrow(x[[1]]$snpmatrix[[1]]), "Variants per Sample Combination"), "\n")
+  cat("**************** \n")
+  # return invisibly
+  invisible(x)
+}
 
 # -----------------------------------
 # mat_to_Rcpp

@@ -123,9 +123,6 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample
     simvcf$Sample2[sample(1:sum(n), round(sum(n)*propMissing))] <- -1
   }
   
-  # add class to simvcf for vcfsnpmatrix
-  class(simvcf) <- append(class(simvcf),"vcfsnpmatrix")
-  
   # return output as list
   retList <- list(p=p,
                   haploid=list(haploid1=haploid1_df, haploid2=haploid2_df),

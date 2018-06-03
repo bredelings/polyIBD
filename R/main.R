@@ -15,7 +15,7 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcfsnpmatrix = vcfsnpmatrixobject, p, m_max=5,
+runMCMC <- function(input = polyIBDinput, m_max=5,
                     k_max=50, rho=1e-5, 
                     burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
@@ -28,16 +28,14 @@ runMCMC <- function(vcfsnpmatrix = vcfsnpmatrixobject, p, m_max=5,
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
-  if(is.null(vcfsnpmatrix)){
-    stop("Must provide vcfsnpmatrix object")
-  }
-    if(!any(class(vcfsnpmatrix) == "vcfsnpmatrix")){
-      stop("vcfsnpmatrix object must be of class vcfsnpmatrix")
-    }
-    vcf <- vcfsnpmatrix
+  #stopifnot(is.polyIBDinput(input))
   
   # TODO - input parameter checks
   # note - vcf must have 4 columns, samples in final two columns
+  # better management of memory for p 
+  
+  vcf <- input[[1]]
+  p <- input[[2]]
   
   # extract basic parameters
   tab1 <- table(vcf[,1]) # first column in this class is CHROM
@@ -122,7 +120,8 @@ runMCMC <- function(vcfsnpmatrix = vcfsnpmatrixobject, p, m_max=5,
   # ------------------------------
   
   # create output class polyIBD
-  ret <- list(summary = summary_output,
+  ret <- list(samples = colnames(vcf[3:4]),
+              summary = summary_output,
               raw = raw_output)
   class(ret) <- "polyIBD"
   

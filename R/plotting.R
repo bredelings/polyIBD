@@ -530,8 +530,6 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
   
-  # get input arguments
-  args <- list(...)
   
   # get IBD matrix
   CHROM <- x$summary$IBD_marginal[,1]
@@ -542,16 +540,20 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   IBDdflong <- tidyr::gather(data=IBDdf, key="Z", value="Prob", 3:ncol(IBDdf))
   IBDdflong$Znum <- as.numeric(gsub("z", "", IBDdflong$Z))
   
-  IBDdflong$start <- dplyr::lag(IBDdflong$POS)
-  IBDdflong$start[1] <- 0
-  IBDdflong$end <- IBDdflong$POS
+  # split by chrom to avoid lag pos from diff chrom
+  IBDdflonglist <- split(IBDdflong, f=IBDdflong$CHROM)
+  IBDdflonglist <- lapply(IBDdflonglist, function(df){
+    df$start <- dplyr::lag(df$POS)
+    df$end <- df$POS
+    return(df)
+  })
+  IBDdflong <- do.call("rbind", IBDdflonglist)
   
   # filter unneccessary Znumbers
   filtdf <- aggregate(IBDdflong$Prob, list(factor(IBDdflong$Znum)), sum)
   if(any(filtdf == 0)){
     filtdf <- filtdf[which(filtdf[,2] == 0), 1]
-    IBDdflong <- IBDdflong %>% 
-      dplyr::filter(! Znum %in% filtdf )
+    IBDdflong <- IBDdflong %>% dplyr::filter(! Znum %in% filtdf )
   }
   
   plotobj <- ggplot() + 
