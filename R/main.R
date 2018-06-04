@@ -15,7 +15,7 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(input = polyIBDinput, m_max=5,
+runMCMC <- function(vcf = polyIBDinputvcf, p = p, m_max=5,
                     k_max=50, rho=1e-5, 
                     burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
@@ -34,8 +34,8 @@ runMCMC <- function(input = polyIBDinput, m_max=5,
   # note - vcf must have 4 columns, samples in final two columns
   # better management of memory for p 
   
-  vcf <- input[[1]]
-  p <- input[[2]]
+  #vcf <- input[[1]]
+  #p <- input[[2]]
   
   # extract basic parameters
   tab1 <- table(vcf[,1]) # first column in this class is CHROM
@@ -89,7 +89,9 @@ runMCMC <- function(input = polyIBDinput, m_max=5,
                      m1 = coda::mcmc(output_raw$m1),
                      m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
+                     f_ind = coda::mcmc(output_raw$f_ind),
                      k = coda::mcmc(output_raw$k),
+                     #sim_trans_n = coda::mcmc(output_raw$sim_trans_n),
                      runTime = output_raw$runTime)
   
   

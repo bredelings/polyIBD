@@ -55,6 +55,12 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   IBD_marginal = vector< vector<double> >(m_max+1, vector<double>(L));
   accept_rate = 0;
   
+  // temp objects
+  f_ind = 0;
+  f_ind_store = vector<double>(samples);
+ // sim_trans_n = 0;
+ // sim_trans_n_store = vector<int>(samples);
+  
   // calculate initial likelihood
   update_transition_lookup(f, rho, k, m1, m2, args_functions["getTransProbs"]);
   logLike_old = forward_alg(m1, m2);
@@ -178,6 +184,11 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
   
   // announce burn-in phase
   print("   sampling phase");
+  
+  // calculate initial IBD matrix
+  backward_alg(m1, m2);
+  get_IBD();
+  
   // loop through sampling iterations
   for (int rep=0; rep<samples; rep++) {
     
@@ -227,12 +238,15 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
       accept_rate ++;
     }
     
+    
     // store current values
     logLike_store[rep] = logLike_old;
     m1_store[rep] = m1;
     m2_store[rep] = m2;
     f_store[rep] = f;
+    f_ind_store[rep] = f_ind;
     k_store[rep] = k;
+    //sim_trans_n_store[rep] = sim_trans_n;
     
     // add current IBD_mat to running estimate
     for (int i=0; i<(m_max+1); i++) {
@@ -525,6 +539,8 @@ void MCMC::get_IBD() {
   // get z_max
   int z_max = (m1 < m2) ? m1 : m2;
   
+  f_ind = 0;
+  
   // take product of forward and backward matrices, and normalise
   double IBD_sum = 0;
   for (int j=0; j<L; j++) {
@@ -536,8 +552,34 @@ void MCMC::get_IBD() {
     for (int z=0; z<(z_max+1); z++) {
       IBD_mat[z][j] /= IBD_sum;
     }
+    f_ind += IBD_mat[1][j];
   }
+  f_ind /= double(L);
   
+  /*
+  double state_prob_sum = 0;
+  vector<double> state_prob(z_max+1);
+  for (int z=0; z<(z_max+1); z++) {
+    state_prob[z] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
+    state_prob_sum += state_prob[z];
+  }
+  int sim_state = sample1(state_prob, state_prob_sum) - 1;
+  
+  sim_trans_n = 0;
+  for (int j=1; j<L; j++) {
+    state_prob_sum = 0;
+    for (int z=0; z<(z_max+1); z++) {
+      state_prob[z] = transition_lookup[j-1][sim_state][z];
+      state_prob[z] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
+      state_prob_sum += state_prob[z];
+    }
+    int sim_state_new = sample1(state_prob, state_prob_sum) - 1;
+    if (sim_state_new != sim_state) {
+      sim_trans_n++;
+    }
+    sim_state = sim_state_new;
+  }
+  */
 }
 
 //------------------------------------------------

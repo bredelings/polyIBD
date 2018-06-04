@@ -36,7 +36,9 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
   ret.push_back(Rcpp::wrap( mainMCMC.m1_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.m2_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.f_store ));
+  ret.push_back(Rcpp::wrap( mainMCMC.f_ind_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.k_store ));
+  //ret.push_back(Rcpp::wrap( mainMCMC.sim_trans_n_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.IBD_marginal ));
   ret.push_back(Rcpp::wrap( mainMCMC.accept_rate ));
   ret.push_back(Rcpp::wrap( time_span.count() ));
@@ -47,7 +49,9 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
   ret_names.push_back("m1");
   ret_names.push_back("m2");
   ret_names.push_back("f");
+  ret_names.push_back("f_ind");
   ret_names.push_back("k");
+//ret_names.push_back("sim_trans_n");
   ret_names.push_back("IBD_marginal");
   ret_names.push_back("accept_rate");
   ret_names.push_back("runTime");

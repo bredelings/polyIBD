@@ -46,6 +46,12 @@ public:
   std::vector< std::vector<double> > IBD_marginal;
   int accept_rate;
   
+  // temp objects
+  double f_ind;
+  std::vector<double> f_ind_store;
+  int sim_trans_n;
+  std::vector<int> sim_trans_n_store;
+  
   // misc objects
   int m1_weight_stay;
   int m1_weight_move;

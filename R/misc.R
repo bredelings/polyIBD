@@ -8,19 +8,19 @@
 #' @export
 
 getTransProbs <- function(f, rho, k, z_max) {
-
+    
     # generate rate matrix
     z0 <- z_max
     z1 <- z_max+1
     rateMat <- matrix(0, z1, z1)
-    rateMat[cbind(1:z0, 1:z0 + 1)] <- (z0:1)*rho*(1-f) # this is the poisson process assuming constant rates
-    rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho*f # this is the poisson process assuming constant rates
+    rateMat[cbind(1:z0, 1:z0 + 1)] <- (z0:1)*rho*k*f # fill in matrix with flows up from current state to next state
+    rateMat[cbind(1:z0 + 1, 1:z0)] <- (1:z0)*rho*k*(1-f) # ...
     rateMat[cbind(1:z1, 1:z1)] <- -rowSums(rateMat)
-
+    
     # obtain Eigen values and vectors
     E <- eigen(t(rateMat))
     Esolve <- solve(E$vectors)
-
+    
     return(list(Evalues=E$values, Evectors=mat_to_Rcpp(E$vectors), Esolve=mat_to_Rcpp(Esolve)))
 }
 
