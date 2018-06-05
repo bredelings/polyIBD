@@ -124,6 +124,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample
   }
   
   # return output as list
+
   retlist <- list(snpmatrix=simvcf,
                   p=p,
                   haploid=list(haploid1=haploid1_df, haploid2=haploid2_df),
@@ -131,5 +132,6 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample
   
   class(retlist) <- "polyIBDinput"
   return(retlist)
+  
 }
 

@@ -15,23 +15,36 @@ NULL
 #' @examples
 #' runMCMC()
 
-runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
+runMCMC <- function(input = polyIBDinput, m_max=5,
+                    k_max=50, rho=1e-5, 
+                    burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
   # ------------------------------
   #         PROCESS INPUTS
   # ------------------------------
+  require(vcfR)
+  require(tidyverse)
+  
+  # -----------------------------------------------------
+  # Read and check input
+  #------------------------------------------------------
+  #stopifnot(is.polyIBDinput(input))
   
   # TODO - input parameter checks
   # note - vcf must have 4 columns, samples in final two columns
+  # better management of memory for p 
+  
+  vcf <- input[[1]]
+  p <- input[[2]]
   
   # extract basic parameters
-  tab1 <- table(vcf$CHROM)
+  tab1 <- table(vcf[,1]) # first column in this class is CHROM
   nc <- length(tab1)
   cnames <- names(tab1)
   n <- as.vector(tab1)
   
   # get distances between SNPs. Distance=-1 between contigs, indicating infinite distance
-  SNP_dist <- diff(vcf$POS)
+  SNP_dist <- diff(vcf[,2]) # second column in this class is POS
   SNP_dist[cumsum(n)[1:(nc-1)]] <- -1
   
   # compare two samples and save comparison type in vector x
@@ -41,9 +54,10 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   # define list of arguments to pass to Rcpp
   args <- list(x = x,
                p = unlist(p),
-               rho_max = rho_max,
+               rho = rho,
                SNP_dist = SNP_dist,
                m_max = m_max,
+               k_max = k_max,
                burnin = burnin,
                samples = samples,
                e1 = e1,
@@ -75,7 +89,9 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
                      m1 = coda::mcmc(output_raw$m1),
                      m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
-                     rho = coda::mcmc(output_raw$rho),
+                     f_ind = coda::mcmc(output_raw$f_ind),
+                     k = coda::mcmc(output_raw$k),
+                     #sim_trans_n = coda::mcmc(output_raw$sim_trans_n),
                      runTime = output_raw$runTime)
   
   
@@ -93,7 +109,7 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   
   # calculate quantiles over parameters
   quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
-  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "rho"),]
+  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "k"),]
   
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,
@@ -106,7 +122,8 @@ runMCMC <- function(vcf, p, m_max=5, rho_max=1e-5, burnin=1e2, samples=1e3, e1=0
   # ------------------------------
   
   # create output class polyIBD
-  ret <- list(summary = summary_output,
+  ret <- list(samples = colnames(vcf[3:4]),
+              summary = summary_output,
               raw = raw_output)
   class(ret) <- "polyIBD"
   

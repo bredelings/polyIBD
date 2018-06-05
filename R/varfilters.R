@@ -1,3 +1,9 @@
+
+# -----------------------------------
+# vcfFilter section
+# -----------------------------------
+
+
 #' @title polyIBD vcffilter
 #' @description Filtering a variant call file (VCF) using the vcfR package.
 #' @param vcffile is the file path that for the VCF. This VCF will be converted to an object of class \code{vcfR}.
@@ -18,7 +24,12 @@ vcffilter <- function(vcffile,
                       prop.loci.missing = 0.05,
                       biallelic=TRUE){
   
+  require(vcfR)
+  require(tidyverse)
   
+  # -----------------------------------------------------
+  # Read and check input
+  #------------------------------------------------------
   vcf <- vcfR::read.vcfR(file=vcffile)
   if(biallelic==TRUE){
     vcf <- vcf[vcfR::is.biallelic(vcf)]
@@ -29,7 +40,7 @@ vcffilter <- function(vcffile,
   # store loci objects on info fields 
   infolist <- c("AF", "DP", "QD", "MQ", "SOR")
   infolist <- lapply(infolist, 
-                         function(x){vcfR::extract_info_tidy(vcf, info_fields = x)})
+                     function(x){vcfR::extract_info_tidy(vcf, info_fields = x)})
   infodf <- plyr::join_all(infolist, by = "Key", type = "left")
   
   if(typeof(infodf$AF) == "character"){
@@ -62,7 +73,7 @@ vcffilter <- function(vcffile,
   }  
   passedloci <- infodf$Key
   
-
+  
   #--------------------------------------------------------
   # filter sample-level GQ
   #--------------------------------------------------------
@@ -109,6 +120,10 @@ vcffilter <- function(vcffile,
 #' 
 
 genautocorr <- function(vcffile = NULL, vcfR = NULL){
+  
+  require(vcfR)
+  require(tidyverse)
+  
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
@@ -139,7 +154,7 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
     }
     return(c)
   }
-
+  
   # extract the within sample allele frequencies
   vcfAD <- vcfR::extract.gt(vcf, element = "AD")
   vcfAD <- vcfR::AD_frequency(vcfAD)
@@ -156,7 +171,7 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
   
   
   cormatgendistwrapper <- function(vcfdf_fromlist){
-
+    
     # get correlation matrix. NA values are imputed as the mean
     df1 <- vcfdf_fromlist[, !colnames(vcfdf_fromlist) %in% c("CHROM", "POS")]
     c <- corMat(df1)
@@ -167,8 +182,8 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
     
     # ggplot distance vs correlation on log scale
     plotdf <- data.frame(CHROM=rep(vcfdf_fromlist$CHROM[1], length(gendist)),
-               correlation = c(c), 
-               gendist = c(gendist))
+                         correlation = c(c), 
+                         gendist = c(gendist))
     
     corrplot <- plotdf %>% 
       dplyr::mutate(gendisttol = gendist+1) %>% 
@@ -179,7 +194,7 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
       xlab("log(base-pair distance + 1)") + ylab("correlation") + 
       ggtitle(paste(vcfdf_fromlist$CHROM[1])) +
       theme_minimal()
-      
+    
     
     ret <- list(vcfAF = vcfdf_fromlist, corMat=c, gendist=gendist, corrplot = corrplot)
     return(ret)
@@ -193,7 +208,7 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
 }
 
 
-  
+
 #' @title polyIBD filter for linkage disequilibrium 
 #' @description Filtering an object of class \code{vcfR} for linkage disequilibrium via genetic autocorrelation.
 #' @param 
@@ -202,7 +217,10 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
 #' 
 
 genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NULL, threshDist=1e3){
-
+  
+  require(vcfR)
+  require(tidyverse)
+  
   # -----------------------------------------------------
   # Read and check input
   #------------------------------------------------------
@@ -217,10 +235,10 @@ genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NU
     if(class(vcfR) != "vcfR"){
       stop("vcfR object must be of class vcfR")
     }
-      vcf <- vcfR    
-    } else{
-      vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
-    }
+    vcf <- vcfR    
+  } else{
+    vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+  }
   
   vcfdf <- cbind.data.frame(vcf@fix, vcf@gt)
   vcflist <- split(vcfdf, f=factor(vcfdf$CHROM))
@@ -242,7 +260,7 @@ genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NU
     }
     return(vcflist)
   }
-
+  
   updatedvcflist <- mapply(filter_autocorr, vcflist, genautocorrresult, SIMPLIFY = F)
   updatedvcfdf <- do.call(rbind, updatedvcflist)
   

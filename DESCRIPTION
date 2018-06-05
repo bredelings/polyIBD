@@ -22,7 +22,8 @@ Imports:
     tidyverse,
     stringr,
     prettydoc,
-    gridExtra
+    gridExtra,
+    ggpubr
 LinkingTo:
     Rcpp,
     RcppParallel

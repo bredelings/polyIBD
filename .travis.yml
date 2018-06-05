@@ -6,3 +6,10 @@ cache: packages
 
 after_success:
   - Rscript -e 'covr::codecov()'
+
+notifications:
+  email:
+    recipients:
+      - nbrazeau@med.unc.edu
+    on_success: change
+    on_failure: change
