@@ -77,9 +77,9 @@ plot_m2 <- function(x, ...) {
 }
 
 #------------------------------------------------
-#' @title Trace plot of f
+#' @title Trace plot of f posterior prob
 #'
-#' @description Produces a simple MCMC trace plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
+#' @description Produces a simple MCMC trace plot of the parameter \code{f}, which represents the posterior probability of identity by descent between two samples.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
@@ -447,16 +447,16 @@ ggplot_m2 <- function(x, ...) {
 
 
 #------------------------------------------------
-#' @title Trace ggplot of f
+#' @title Trace ggplot of f posterior prob  
 #'
-#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
+#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the posterior probability of identity by descent between two samples.
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' 
 #' @export
 
 
-ggplot_f <- function(x, ...) {
+ggplot_f_postprob <- function(x, ...) {
   
   require(tidyverse)
   
@@ -475,6 +475,40 @@ ggplot_f <- function(x, ...) {
     scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$f)), probs=seq(0,1,0.25)))))) +
     ggtitle(label="F Trace")
 }
+
+
+
+#------------------------------------------------
+#' @title Trace ggplot of f individual 
+#'
+#' @description Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the individual draw of the posterior probability of identity by descent between two samples.
+#'
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#' 
+#' @export
+
+
+ggplot_f <- function(x, ...) {
+  
+  require(tidyverse)
+  
+  # only works on objects of class polyIBD
+  stopifnot(is.polyIBD(x))
+  
+  # get input arguments
+  args <- list(...)
+  
+  # produce df for ggplot
+  dat <- data.frame(iteration=1:length(x$raw$f_ind), mcmcchain=unclass(x$raw$f_ind))
+  
+  # produce plot
+  ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
+    scale_y_continuous(name="F Estimate", limits=c(0,1)) +
+    scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$f_ind)), probs=seq(0,1,0.25)))))) +
+    ggtitle(label="F (Ind) Trace")
+}
+
+
 
 #------------------------------------------------
 #' @title Trace plot of k
