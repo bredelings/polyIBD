@@ -664,3 +664,69 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
                     nrow = 2
   )
 }
+
+
+
+
+
+#------------------------------------------------
+#' @title Plot polyIBD IBD matrix and vcf that was used to generate the IBD inferences    
+#'
+#' @description Plots the posterior distribution for the IBD matrix in parallel to the SNP Matrix that was used for inference.
+#'
+#' @param snps an object of class \code{polyIBDinput}, as produced by the function \code{polyIBD::vcf2polyIBDinput}
+#' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#'
+#' @export
+
+library(tidyverse)
+
+ggplot_IBD_SNPs <- function(x, trueIBD, snps){
+  
+  snps <- snps[[1]] # only need first element in vcf
+  # get SNP matrix
+  CHROM <- snps[,1]
+  POS <- snps[,2]
+  vars <- as.matrix(snps[,-(1:2)])
+  varsdf <- cbind.data.frame(CHROM, POS, vars)
+  
+  varsdf$status <- ifelse(varsdf$Sample1 == varsdf$Sample2, "Concor", "Discord")
+  varsdf$status[varsdf$Sample1 == 1 | varsdf$Sample2 == 1] <- "Het"
+  
+  # split by chrom to avoid lag pos from diff chrom
+  varsdflist <- split(varsdf, f=varsdf$CHROM)
+  varsdflist <- lapply(varsdflist, function(df){
+    df$start <- dplyr::lag(df$POS)
+    df$end <- df$POS
+    return(df)
+  })
+  varsdf <- do.call("rbind", varsdflist)
+  
+  ### now call IBD plotter
+  plotIBD <- ggplot_IBD(x, trueIBD)
+  
+  plotsnps <- ggplot() + 
+    geom_rect(data=varsdf, mapping=aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5, fill=factor(status))) + 
+    scale_fill_manual("Support", values=c("#005AC8", "#AA0A3C", "#0AB45A", "#cccccc")) + 
+    facet_grid(~CHROM) + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          panel.background = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.x = element_text(size=9, family = "Arial", angle = 45),
+          axis.title.y = element_text(size=14, face="bold", family = "Arial"),
+          axis.text.y = element_blank()) 
+  
+  grid::grid.newpage()
+  grid::grid.draw(rbind(ggplotGrob(plotsnps), ggplotGrob(plotIBD), size = "last"))
+  
+}
+
+
+
+
+
+
+
+
+  
