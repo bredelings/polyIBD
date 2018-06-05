@@ -41,31 +41,33 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   k = 1;
   k_max = 50;
   logLike_old = 0;
-  frwrd_mat = vector< vector<double> >(m_max+1, vector<double>(L));
-  bkwrd_mat = vector< vector<double> >(m_max+1, vector<double>(L));
-  IBD_mat = vector< vector<double> >(m_max+1, vector<double>(L));
+  frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
+  bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
+  IBD_mat = vector< vector< double> >(m_max+1, vector<double>(L));
   
   // objects for storing MCMC results
-  logLike_burnin_store = vector<double>(burnin);
-  logLike_store = vector<double>(samples);
+  logLike_burnin_store = vector< double>(burnin);
+  logLike_store = vector< double>(samples);
   m1_store = vector<int>(samples);
   m2_store = vector<int>(samples);
   f_store = vector<double>(samples);
   k_store = vector<double>(samples);
-  IBD_marginal = vector< vector<double> >(m_max+1, vector<double>(L));
+  IBD_marginal = vector< vector< double> >(m_max+1, vector< double>(L));
   accept_rate = 0;
   
   // temp objects
   f_ind = 0;
   f_ind_store = vector<double>(samples);
- // sim_trans_n = 0;
- // sim_trans_n_store = vector<int>(samples);
+  // sim_trans_n = 0;
+  // sim_trans_n_store = vector<int>(samples);
   
   // calculate initial likelihood
   update_transition_lookup(f, rho, k, m1, m2, args_functions["getTransProbs"]);
+  
+  
   logLike_old = forward_alg(m1, m2);
   logLike_burnin_store[0] = logLike_old;
-  
+
   // misc objects
   // m weights dictate the chance of proposing a new m value ("move") vs. sticking with the current value ("stay"). These weights are updated during the burn-in phase, converging to an efficient proposal distribution. The chance of staying is never allowed to exceed 100* the chance of moving, to ensure there is always some chance of exploring new m values.
   // f_propSD and k_propSD are updated during the burn-in phase using Robbins-Monro (although k_propSD isn't being used right now).
@@ -82,7 +84,6 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
 // MCMC::
 // Run burn-in phase of MCMC. Each iteration we alternate which parameters are updated. First, we give m1 and m2 a chance to update, based on the sampling weights. If m1 or m2 do change then we don't update the other parameters. If by chance m1 and m2 stay the same we choose one of the other parameters to update with equal probability. The advantage to this method is that, because only one parameter is updated each iteration, we can only change the proposal standard deviation relating to that parameter (by Robbins-Monro). If multiple parameters changed each iteration we could not change these proposal standard deviations independently.
 void MCMC::burnin_MCMC(Rcpp::List args_functions) {
-  
   // announce burn-in phase
   print("Running MCMC");
   print("   burnin phase");
@@ -107,15 +108,18 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
+        
       } else {
-       //some proposal distribution for k -- consider weights later
-       k_prop = propose_k(k, k_weight_move, k_weight_stay);
+        //some proposal distribution for k -- consider weights later
+        k_prop = propose_k(k, k_weight_move, k_weight_stay);
       }
     }
     
     // update transition probabilities and calculate new likelihood
     update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(m1_prop, m2_prop);
+    
+    
     
     // Metropolis-Hastings step
     // note that all proposal distributions are symmetric, therefore no Hastings step is required
@@ -169,7 +173,6 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       }
       
     }
-    
     // store logLike
     logLike_burnin_store[rep] = logLike_old;
     
@@ -237,7 +240,6 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
       // update acceptance rate
       accept_rate ++;
     }
-    
     
     // store current values
     logLike_store[rep] = logLike_old;
@@ -433,15 +435,7 @@ void MCMC::update_transition_lookup(double f, double rho, int k, int m1, int m2,
       }
     }
   }
- 
- // fix transition_lookup table to make matrix structure {(UU, UI), (IU, II)} in the sample case
-  // rotate 1
-//  for (int j=0; j<(L-1); j++) {
-//    transition_lookup[j] = rotate_matrix(transition_lookup[j], transition_lookup[j].size());
-//  }
   
-  // rotate 2
-
 } // end of transition_update function 
 
 
@@ -470,6 +464,7 @@ double MCMC::forward_alg(int m1, int m2) {
     frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
     frwrd_sum += frwrd_mat[z][0];
   }
+  
   logLike += log(frwrd_sum);
   for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] /= frwrd_sum;
@@ -483,8 +478,10 @@ double MCMC::forward_alg(int m1, int m2) {
       for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
       }
+      
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       frwrd_sum += frwrd_mat[z][j];
+      
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
@@ -540,7 +537,8 @@ void MCMC::get_IBD() {
   int z_max = (m1 < m2) ? m1 : m2;
   
   f_ind = 0;
-  
+  double temp = 0;
+  double temp2 = 0;
   // take product of forward and backward matrices, and normalise
   double IBD_sum = 0;
   for (int j=0; j<L; j++) {
@@ -552,32 +550,47 @@ void MCMC::get_IBD() {
     for (int z=0; z<(z_max+1); z++) {
       IBD_mat[z][j] /= IBD_sum;
     }
-    f_ind += IBD_mat[1][j];
+    f_ind += IBD_mat[1][j]; // original
+    
+    temp += IBD_mat[2][j];
+    temp += IBD_mat[0][j];
   }
-  f_ind /= double(L);
+  printf("This is the 0 level           "); //debug
+  temp /= double(L); // debug
+  print(temp); // debug
+  printf("\n");
+    
+  printf("This is the 1 level           "); //debug
+  f_ind /= double(L);  // original
+  print(f_ind);
+  printf("\n");
+  
+  printf("This is the 2 level           "); //debug
+  temp2 /= double(L);
+  print(temp2);
   
   /*
   double state_prob_sum = 0;
   vector<double> state_prob(z_max+1);
   for (int z=0; z<(z_max+1); z++) {
-    state_prob[z] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-    state_prob_sum += state_prob[z];
+  state_prob[z] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
+  state_prob_sum += state_prob[z];
   }
   int sim_state = sample1(state_prob, state_prob_sum) - 1;
   
   sim_trans_n = 0;
   for (int j=1; j<L; j++) {
-    state_prob_sum = 0;
-    for (int z=0; z<(z_max+1); z++) {
-      state_prob[z] = transition_lookup[j-1][sim_state][z];
-      state_prob[z] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
-      state_prob_sum += state_prob[z];
-    }
-    int sim_state_new = sample1(state_prob, state_prob_sum) - 1;
-    if (sim_state_new != sim_state) {
-      sim_trans_n++;
-    }
-    sim_state = sim_state_new;
+  state_prob_sum = 0;
+  for (int z=0; z<(z_max+1); z++) {
+  state_prob[z] = transition_lookup[j-1][sim_state][z];
+  state_prob[z] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
+  state_prob_sum += state_prob[z];
+  }
+  int sim_state_new = sample1(state_prob, state_prob_sum) - 1;
+  if (sim_state_new != sim_state) {
+  sim_trans_n++;
+  }
+  sim_state = sim_state_new;
   }
   */
 }
@@ -608,20 +621,4 @@ double MCMC::propose_k(double k_current, double weight_move, double weight_stay)
   }
   
   return(k_prop);
-}
-
-
-//------------------------------------------------
-// rotates a matrix of mxm size
-// taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
-void rotate_matrix(int **m, int size){
-  for(int level = 0; level < size / 2; level ++){
-    for(int i = level; i < size - level - 1; i ++){
-      int t = m[level][i];
-      m[level][i] = m[i][size - 1 - level];
-      m[i][size - 1 - level] = m[size - 1 - level][size - 1 - i];
-      m[size - 1 - level][size - 1 - i] = m[size - 1 - i][level];
-      m[size - 1 - i][level] = t;
-    }
-  }
 }

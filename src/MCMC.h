@@ -32,18 +32,18 @@ public:
   // transient MCMC objects
   int m1, m2, k, z_max;
   double f, logLike_old;
-  std::vector< std::vector<double> > frwrd_mat;
-  std::vector< std::vector<double> > bkwrd_mat;
-  std::vector< std::vector<double> > IBD_mat;
+  std::vector< std::vector<  double> > frwrd_mat;
+  std::vector< std::vector<  double> > bkwrd_mat;
+  std::vector< std::vector< double> > IBD_mat;
   
   // objects for storing MCMC results
-  std::vector<double> logLike_burnin_store;
-  std::vector<double> logLike_store;
+  std::vector< double> logLike_burnin_store;
+  std::vector< double> logLike_store;
   std::vector<int> m1_store;
   std::vector<int> m2_store;
   std::vector<double> f_store;
   std::vector<double> k_store;
-  std::vector< std::vector<double> > IBD_marginal;
+  std::vector< std::vector<  double> > IBD_marginal;
   int accept_rate;
   
   // temp objects
@@ -78,9 +78,6 @@ public:
   void get_IBD();
   double propose_m(double m_current, double weight_move, double weight_stay);
   double propose_k(double k_current, double weight_move, double weight_stay);
-  // rotates a matrix of mxm size
-  // taken from here https://sites.google.com/site/spaceofjameschen/home/array/rotate-a-matrix-by-90-degrees
-  void rotate_matrix(int **m, int size);
 };
 
 
