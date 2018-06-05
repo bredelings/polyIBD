@@ -555,7 +555,7 @@ void MCMC::get_IBD() {
       f_ind += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
     }
     
-    Lcomb += (z_max+1)*SNP_dist[j]; // AUC -- z+1 to include the zero level
+    Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
     
   }
  //   f_ind /= double(L);  // original when only considering MOI 1,1
