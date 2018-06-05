@@ -109,7 +109,7 @@ runMCMC <- function(input = polyIBDinput, m_max=5,
   
   # calculate quantiles over parameters
   quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
-  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "k"),]
+  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "f_ind", "k"),]
   
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,
