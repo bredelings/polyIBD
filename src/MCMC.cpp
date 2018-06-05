@@ -537,8 +537,7 @@ void MCMC::get_IBD() {
   int z_max = (m1 < m2) ? m1 : m2;
   
   f_ind = 0;
-  double temp = 0;
-  double temp2 = 0;
+  double Lcomb = 0;
   // take product of forward and backward matrices, and normalise
   double IBD_sum = 0;
   for (int j=0; j<L; j++) {
@@ -550,25 +549,18 @@ void MCMC::get_IBD() {
     for (int z=0; z<(z_max+1); z++) {
       IBD_mat[z][j] /= IBD_sum;
     }
-    f_ind += IBD_mat[1][j]; // original
+  //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
+
+    for (int z=1; z<(z_max+1); z++){
+      f_ind += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
+    }
     
-    temp += IBD_mat[2][j];
-    temp += IBD_mat[0][j];
+    Lcomb += (z_max+1)*SNP_dist[j]; // AUC -- z+1 to include the zero level
+    
   }
-  printf("This is the 0 level           "); //debug
-  temp /= double(L); // debug
-  print(temp); // debug
-  printf("\n");
-    
-  printf("This is the 1 level           "); //debug
-  f_ind /= double(L);  // original
-  print(f_ind);
-  printf("\n");
-  
-  printf("This is the 2 level           "); //debug
-  temp2 /= double(L);
-  print(temp2);
-  
+ //   f_ind /= double(L);  // original when only considering MOI 1,1
+  f_ind /= double(Lcomb); 
+
   /*
   double state_prob_sum = 0;
   vector<double> state_prob(z_max+1);
