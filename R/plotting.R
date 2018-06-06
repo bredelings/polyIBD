@@ -630,7 +630,7 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
                              truem2=NULL, truef=NULL, truek=NULL) {
   if(!is.null(truem1)){
     plotm1 <- ggplot_m1(x)
-    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.6))
+    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.6)
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
