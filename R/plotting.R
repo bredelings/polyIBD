@@ -630,28 +630,28 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
                              truem2=NULL, truef=NULL, truek=NULL) {
   if(!is.null(truem1)){
     plotm1 <- ggplot_m1(x)
-    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.3)
+    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.15)
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
   
   if(!is.null(truem2)){
     plotm2 <- ggplot_m2(x)
-    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.3)
+    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.15)
   } else {
     plotm2 <- ggplot_m2(x)
   } # end m2 plot
   
   if(!is.null(truef)){
     plotf <- ggplot_f(x)
-    plotf <- plotf + geom_hline(yintercept=truef, colour="#de2d26", size=1.3)
+    plotf <- plotf + geom_hline(yintercept=truef, colour="#de2d26", size=1.15)
   } else {
     plotf <- ggplot_f(x)
   } # end f plot
   
   if(!is.null(truek)){
     plotk <- ggplot_k(x)
-    plotk <- plotk + geom_hline(yintercept=truek, colour="#de2d26", size=1.3)
+    plotk <- plotk + geom_hline(yintercept=truek, colour="#de2d26", size=1.15)
   } else {
     plotk <- ggplot_k(x)
   } # end k plot
