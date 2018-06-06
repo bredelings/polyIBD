@@ -601,9 +601,9 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
           panel.background = element_blank(),
           axis.ticks = element_blank(),
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
+          axis.text.y = element_text(size=10.5, face="bold", family = "Arial", margin = margin(r = 1)),
           axis.title.x = element_text(size=12, face="bold", family = "Arial"),
-          axis.text.y = element_text(size=10.5, face="bold", family = "Arial"),
-          axis.text.x = element_text(size=9, family = "Arial", angle = 45),
+          axis.text.x = element_text(size=9, family = "Arial", angle = 45, margin = margin(r = 1)),
           strip.text.x = element_text(size =12, face="bold", family = "Arial"),
           legend.text=element_text(size = 10.5, face="bold", family = "Arial"),
           legend.title=element_text(size = 11, face="bold", family = "Arial"))

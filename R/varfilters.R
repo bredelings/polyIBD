@@ -108,7 +108,7 @@ vcffilter <- function(vcffile = NULL,
   
   
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
-  newvcfR <- new("vcfR", meta = meta, fix = as.matrix(fix), gt = gt)
+  newvcfR <- new("vcfR", meta = meta, fix = as.matrix(fix), gt = as.matrix(gt))
   
 }
 
