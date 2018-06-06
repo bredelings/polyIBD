@@ -13,7 +13,7 @@
 #     snpmatrixlist needs to be in an apply loop not for loop 
 #     better management of memory with p
 
-vcf2polyIBDinput <- function(vcffile, vcfR) {
+vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
 
   # -----------------------------------------------------
   # Read and check input
@@ -23,8 +23,10 @@ vcf2polyIBDinput <- function(vcffile, vcfR) {
       stop("vcfR object must be of class vcfR")
     }
     vcf <- vcfR
-  } else{
+  } else if (!is.null(vcffile)){
     vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+  } else {
+    stop("Must specify an input")
   }
   
   vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs

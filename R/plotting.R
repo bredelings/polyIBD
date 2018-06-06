@@ -688,24 +688,30 @@ ggplot_SNPs_IBD <- function(x, trueIBD, snps){
   vars <- as.matrix(snps[,-(1:2)])
   varsdf <- cbind.data.frame(CHROM, POS, vars)
   
-  varsdf$status <- ifelse(varsdf$Sample1 == varsdf$Sample2, "Concor", "Discord")
+  varsdf$status <- ifelse(varsdf$Sample1 == varsdf$Sample2, "Concord", "Discord")
   varsdf$status[varsdf$Sample1 == 1 | varsdf$Sample2 == 1] <- "Het"
   
   # split by chrom to avoid lag pos from diff chrom
   varsdflist <- split(varsdf, f=varsdf$CHROM)
-  varsdflist <- lapply(varsdflist, function(df){
-    df$start <- dplyr::lag(df$POS)
-    df$end <- df$POS
+  varsdflist <- lapply(varsdflist, lagPOS <- function(df){
+    df <- df %>% 
+      dplyr::mutate(start = lag(POS)) %>% 
+      dplyr::mutate(end = POS) %>% 
+      dplyr::mutate(statusfct = factor(status, levels=c("Concord", "Discord", "Het")))
+    df$start[1] = df$end[1] # fix lag NA and just make it the first instiation
+    
     return(df)
-  })
+    }
+  )
+  
   varsdf <- do.call("rbind", varsdflist)
   
   ### now call IBD plotter
   plotIBD <- ggplot_IBD(x, trueIBD)
   
   plotsnps <- ggplot() + 
-    geom_rect(data=varsdf, mapping=aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5, fill=factor(status, levels=c("Concord", "Discord", "Het")))) + 
-    scale_fill_manual("Support", values=c("#005AC8", "#AA0A3C", "#0AB45A", "#cccccc")) + 
+    geom_rect(data=varsdf, mapping=aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5, fill=statusfct)) + 
+    scale_fill_manual("Support", values=c("#005AC8", "#AA0A3C", "#F0F032", "#cccccc")) + 
     facet_grid(~CHROM) + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
