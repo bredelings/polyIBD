@@ -14,7 +14,7 @@
 #-----------------------------------------------------
 # Read VCF and Go to SNP Matrix of Informative Sites
 #------------------------------------------------------
-vcffilter <- function(vcffile, 
+vcffilter <- function(vcffile = NULL, 
                       formatGQ=30, 
                       infoMQ=50,
                       infoQD=25,
