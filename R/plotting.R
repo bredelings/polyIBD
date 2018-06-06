@@ -592,18 +592,21 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   
   plotobj <- ggplot() + 
     geom_rect(data=IBDdflong, mapping=aes(xmin=start, xmax=end, ymin=Znum-0.49, ymax=Znum+0.49, fill=Prob)) +
-    viridis::scale_fill_viridis(alpha=0.2, option="plasma") +
+    viridis::scale_fill_viridis("IBD Probability", alpha=0.2, option="plasma") +
     scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
     xlab("POS") +
     facet_grid(~CHROM) + 
-    guides(title="IBD Probability", labels = paste("0%", "100%")) + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           panel.background = element_blank(),
           axis.ticks = element_blank(),
-          axis.text.x = element_text(size=9, family = "Arial", angle = 45),
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
-          axis.title.x = element_text(size=12, face="bold", family = "Arial"))
+          axis.title.x = element_text(size=12, face="bold", family = "Arial"),
+          axis.text.y = element_text(size=10.5, face="bold", family = "Arial"),
+          axis.text.x = element_text(size=9, family = "Arial", angle = 45),
+          strip.text.x = element_text(size =12, face="bold", family = "Arial"),
+          legend.text=element_text(size = 10.5, face="bold", family = "Arial"),
+          legend.title=element_text(size = 11, face="bold", family = "Arial"))
   
   if(!is.null(trueIBD)){
     plotobj <- plotobj + geom_line(data=trueIBD, aes(x=POS, y=z_true), colour="#de2d26", size=0.75) 
@@ -719,7 +722,11 @@ ggplot_SNPs_IBD <- function(x, trueIBD, snps){
           axis.ticks = element_blank(),
           axis.text.x = element_text(size=9, family = "Arial", angle = 45),
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
-          axis.text.y = element_blank()) 
+          axis.text.y = element_text(size=10.5, face="bold", family = "Arial"),
+          strip.text.x = element_text(size =12, face="bold", family = "Arial"),
+          legend.text=element_text(size = 10.5, face="bold", family = "Arial"),
+          legend.title=element_text(size = 11, face="bold", family = "Arial")
+          )
   
   grid::grid.newpage()
   grid::grid.draw(rbind(ggplotGrob(plotsnps), ggplotGrob(plotIBD), size = "last"))
