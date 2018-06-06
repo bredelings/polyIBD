@@ -51,7 +51,10 @@ simIBD <- function(f, k, rho, pos) {
 #' 
 #' @export
 
-simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), contig2=sort(sample(1e5, 1e2))), m1=1, m2=1, f=0.5, rho=1e-3, k=6, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing=0) {
+simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)), 
+                             contig2=sort(sample(1e5, 1e2))), 
+                    m1=1, m2=1, f=0.5, rho=1e-7, k=5, p=NULL, 
+                    p_shape1=0.1, p_shape2=0.1, propMissing=0) {
   
   # get number of loci in each contig
   nc <- length(pos)

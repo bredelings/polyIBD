@@ -535,7 +535,7 @@ ggplot_k <- function(x, ...) {
   
   # produce plot
   ggplot_trace(data=dat, mapping = aes(x=iteration, y=mcmcchain)) + 
-    scale_y_continuous(name="k (generations) Estimate") +
+    scale_y_continuous(name="k Estimate") +
     scale_x_continuous(name="MCMC Chain Iteration", breaks=c(as.numeric(floor(quantile(x=c(1:length(x$raw$k)), probs=seq(0,1,0.25)))))) +
     ggtitle(label="k Trace")
 }
@@ -606,7 +606,7 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
           axis.title.x = element_text(size=12, face="bold", family = "Arial"))
   
   if(!is.null(trueIBD)){
-    plotobj <- plotobj + geom_line(data=trueIBD, aes(x=POS, y=z_true), colour="#d73027", size=0.75) 
+    plotobj <- plotobj + geom_line(data=trueIBD, aes(x=POS, y=z_true), colour="#de2d26", size=0.75) 
   }  
   return(plotobj)
 }
@@ -627,28 +627,28 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
                              truem2=NULL, truef=NULL, truek=NULL) {
   if(!is.null(truem1)){
     plotm1 <- ggplot_m1(x)
-    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#d73027")
+    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26")
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
   
   if(!is.null(truem2)){
     plotm2 <- ggplot_m2(x)
-    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#d73027")
+    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26")
   } else {
     plotm2 <- ggplot_m2(x)
   } # end m2 plot
   
   if(!is.null(truef)){
     plotf <- ggplot_f(x)
-    plotf <- plotf + geom_hline(yintercept=truef, colour="#d73027")
+    plotf <- plotf + geom_hline(yintercept=truef, colour="#de2d26")
   } else {
     plotf <- ggplot_f(x)
   } # end f plot
   
   if(!is.null(truek)){
     plotk <- ggplot_k(x)
-    plotk <- plotk + geom_hline(yintercept=truek, colour="#d73027")
+    plotk <- plotk + geom_hline(yintercept=truek, colour="#de2d26")
   } else {
     plotk <- ggplot_k(x)
   } # end k plot
@@ -666,22 +666,20 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
 }
 
 
-
-
-
 #------------------------------------------------
-#' @title Plot polyIBD IBD matrix and vcf that was used to generate the IBD inferences    
+#' @title Plot marginal IBD matrix with true IBD option and VCF that would have been generated for the two samples for comparison
 #'
-#' @description Plots the posterior distribution for the IBD matrix in parallel to the SNP Matrix that was used for inference.
+#' @description Plots the full posterior IBD matrix between two samples. SNPs are arranged in order on the x-axis, and the IBD level is given on the y-axis. This represents the number of genotypes that are shared between samples, with the lowest level (IBD=0) representing zero shared genotypes and hence no IBD. The intensity of colour represents the probability of each IBD level at each locus.
 #'
-#' @param snps an object of class \code{polyIBDinput}, as produced by the function \code{polyIBD::vcf2polyIBDinput}
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
+#' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
 #' @export
 
-library(tidyverse)
+ggplot_SNPs_IBD <- function(x, trueIBD, snps){
 
-ggplot_IBD_SNPs <- function(x, trueIBD, snps){
+  library(tidyverse)
+  library(grid)
   
   snps <- snps[[1]] # only need first element in vcf
   # get SNP matrix
@@ -706,7 +704,7 @@ ggplot_IBD_SNPs <- function(x, trueIBD, snps){
   plotIBD <- ggplot_IBD(x, trueIBD)
   
   plotsnps <- ggplot() + 
-    geom_rect(data=varsdf, mapping=aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5, fill=factor(status))) + 
+    geom_rect(data=varsdf, mapping=aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5, fill=factor(status, levels=c("Concord", "Discord", "Het")))) + 
     scale_fill_manual("Support", values=c("#005AC8", "#AA0A3C", "#0AB45A", "#cccccc")) + 
     facet_grid(~CHROM) + 
     theme(panel.grid.major = element_blank(), 
