@@ -721,8 +721,8 @@ ggplot_SNPs_IBD <- function(x, trueIBD, snps){
           panel.background = element_blank(),
           axis.ticks = element_blank(),
           axis.text.x = element_text(size=9, family = "Arial", angle = 45),
-          axis.title.y = element_text(size=14, face="bold", family = "Arial"),
-          axis.text.y = element_text(size=10.5, face="bold", family = "Arial"),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
           strip.text.x = element_text(size =12, face="bold", family = "Arial"),
           legend.text=element_text(size = 10.5, face="bold", family = "Arial"),
           legend.title=element_text(size = 11, face="bold", family = "Arial")
