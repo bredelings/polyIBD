@@ -79,36 +79,34 @@ vcffilter <- function(vcffile = NULL,
   # filter sample-level GQ
   #--------------------------------------------------------
   # store format and filter fields
-  vcfsample <- vcfR::extract_gt_tidy(vcf, format_fields = c("GQ", "GT"), alleles = F, verbose = F)
+  vcfsample <- vcfR::extract.gt(vcf, element =  "GQ", as.numeric = T)
+  
+  # filter bad loci
+  vcfsample <- vcfsample[passedloci,]
   
   if(!is.null(formatGQ)){
-    vcfsample$gt_GT[vcfsample$gt_GQ < formatGQ] <- NA
+    vcfsample[vcfsample < formatGQ] <- NA
   }
   
   #--------------------------------------------------------
   # Subset by loci, GQ
   #--------------------------------------------------------
-  
-  gt <- vcfsample %>% 
-    dplyr::filter(Key %in% passedloci) %>% 
-    dplyr::mutate(Key = factor(Key)) %>% 
-    dplyr::select(-gt_GQ) %>% 
-    tidyr::spread(key=Indiv, value = gt_GT, fill = NA, drop = F) %>% 
-    dplyr::select(-Key)  # drop key later in order to make sure all loci are present in spread -- protective 
-  
+  vcf@gt <- vcf@gt[passedloci,]
+  vcf@gt[is.na(vcfsample)] <- NA
+
   #--------------------------------------------------------
   # Drop samples with prop of loci missing
   #--------------------------------------------------------
-  sample.prop.loci.missing <- colSums(is.na(gt))/nrow(gt)
-  gt <- gt[, c(prop.loci.missing > sample.prop.loci.missing)]
+  sample.prop.loci.missing <- colSums(is.na(vcf@gt))/nrow(vcf@gt)
+  vcf@gt <- vcf@gt[, c(prop.loci.missing > sample.prop.loci.missing)]
   
-  fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[passedloci,])
   meta <- append(vcf@meta, "##Additional Filters provided by polyIBD filter tools")
   meta <- append(vcf@meta, paste("Some samples may have been filtered by polyIBD filter tools. The new sample count is:", ncol(gt)-1))
-  
+  fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[passedloci,])
+  gt <- as.matrix(vcf@gt)
   
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
-  newvcfR <- new("vcfR", meta = meta, fix = as.matrix(fix), gt = as.matrix(gt))
+  newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
   
 }
 
