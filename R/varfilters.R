@@ -22,7 +22,7 @@ vcffilter <- function(vcffile,
                       infoAF = 0.05,
                       infoDP = NULL, 
                       prop.loci.missing = 0.05,
-                      biallelic=TRUE){
+                      biallelicSNPs=TRUE){
   
   require(vcfR)
   require(tidyverse)
@@ -31,8 +31,9 @@ vcffilter <- function(vcffile,
   # Read and check input
   #------------------------------------------------------
   vcf <- vcfR::read.vcfR(file=vcffile)
-  if(biallelic==TRUE){
-    vcf <- vcf[vcfR::is.biallelic(vcf)]
+  if(biallelicSNPs==TRUE){
+    vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
+    vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
   }else{
     print("polyIBD relies on biallelic SNPs")
   }
@@ -135,6 +136,8 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
   } else{
     vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
   }
+  vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
+  vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
   
   #--------------------------------------------------------
   # Calculate pairwise correlation matrix between observations. Input is a matrix with n rows corresponding to n multivariate measurements, output is a n-by-n correlation matrix. NA values are imputed as the mean.
@@ -239,6 +242,9 @@ genautocorr_filter <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NU
   } else{
     vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
   }
+  
+  vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
+  vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
   
   vcfdf <- cbind.data.frame(vcf@fix, vcf@gt)
   vcflist <- split(vcfdf, f=factor(vcfdf$CHROM))

@@ -27,6 +27,9 @@ vcf2polyIBDinput <- function(vcffile, vcfR) {
     vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
   }
   
+  vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
+  vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
+  
   # -----------------------------------------------------
   # determine ploidy to determine genotype numeric placeholder  
   #------------------------------------------------------
