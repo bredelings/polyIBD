@@ -57,7 +57,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
         }
       }
     }
-  
+  Rcpp::stop("This is the end of emm prob");
 
 
   
