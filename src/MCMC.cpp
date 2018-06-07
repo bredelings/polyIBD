@@ -475,6 +475,7 @@ double MCMC::forward_alg(int m1, int m2) {
   }
   // carry out remaining steps of algorithm
   int lociiter = 1; // debug
+  
   for (int j=1; j<L; j++) {
     frwrd_sum = 0;
     printf("Line 479 \n");
@@ -486,17 +487,19 @@ double MCMC::forward_alg(int m1, int m2) {
       printf("Line 483 \n");
       }
       
+      printf("This is the size of emm prob the array, should be size of J \n");
+      print(emmission_lookup[m1-1][m2-1][z].size());
+      printf("\n");
+      
+      printf("This is the size of the df within the emm prob array, should be size of 16 always \n");
+      print(emmission_lookup[m1-1][m2-1][z][j].size());
+      printf("\n");
+      
+      
       printf("Line 485 \n");
       printf("This is the emm prob to be multiplied \n");
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       printf("\n");
-      
-      if(emmission_lookup[m1-1][m2-1][z][j][x[j]] < 1e-100){
-        emmission_lookup[m1-1][m2-1][z][j][x[j]] = 1e-100;
-      } // quick way to avoid underflo
-      
-      printf("This is the NEW emm prob to be multiplied \n");
-      print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       
