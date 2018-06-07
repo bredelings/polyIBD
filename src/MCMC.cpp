@@ -32,10 +32,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // The emmission lookup table is fully defined here. 
   define_emmission_lookup();
   // debug potential non-real value in emm prob
-  z_max = (m1<m2) ? m1 : m2;
-  printf("This is z_max \n");
-  print(z_max);
-  printf("\n");
+  int m_max=5;
+  int k = m_max+1;
   
   for (int m1=1; m1<=m_max; m1++) {
     printf("\n");
@@ -46,18 +44,20 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     for (int m2=1; m2<=m_max; m2++) {
       printf("This is M2 "); print(m2); 
       
-      for (int z=0; z<(z_max+1); z++){
-        printf("This is Z "); print(z); printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][0][x[0]]);
-      }}}
-  //       for (int l=0; l<L; l++){
-  //         for(int e=0; e<=15; e++){
-  //           print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+      for (int z=0; z<k; z++){
+        printf("This is Z "); print(z); 
+        for (int l=0; l<L; l++){
+          printf("This is L "); print(l); 
+          for(int e=0; e<=15; e++){
+            printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][l][x[0]]);
+            
+           // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
+            }
+          }
+        }
+      }
+    }
+  }
 
   Rcpp::stop("End of emm probs");
   
