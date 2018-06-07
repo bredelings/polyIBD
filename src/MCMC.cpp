@@ -33,11 +33,15 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   define_emmission_lookup();
   // debug potential non-real value in emm prob
   z_max = (m1<m2) ? m1 : m2;
+  printf("This is z_max \n");
+  print(z_max);
+  printf("\n");
+  
   for (int m1=1; m1<=m_max; m1++) {
-    printf("/n");
+    printf("\n");
     printf("This is M1 \n");
     print(m1);
-    printf("/n");
+    printf("\n");
 
     for (int m2=1; m2<=m_max; m2++) {
       printf("This is M2 "); print(m2); 
