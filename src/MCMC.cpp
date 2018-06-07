@@ -34,15 +34,17 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // debug potential non-real value in emm prob
   z_max = (m1<m2) ? m1 : m2;
   for (int m1=1; m1<=m_max; m1++) {
+    printf("/n");
     printf("This is M1 \n");
     print(m1);
+    printf("/n");
+
     for (int m2=1; m2<=m_max; m2++) {
-      printf("This is M2 \n");
-      print(m2);
-      print(emmission_lookup[m1-1][m2-1][0][0][x[0]]);
-    }}
-  
-  //     for (int z=0; z<(z_max+1); z++){
+      printf("This is M2 "); print(m2); 
+      
+      for (int z=0; z<(z_max+1); z++){
+        printf("This is Z "); print(z); printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][0][x[0]]);
+      }}}
   //       for (int l=0; l<L; l++){
   //         for(int e=0; e<=15; e++){
   //           print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
@@ -52,8 +54,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   //     }
   //   }
   // }
-  // 
-  
+
+  Rcpp::stop("End of emm probs")
   
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
