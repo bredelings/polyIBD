@@ -516,10 +516,8 @@ double MCMC::forward_alg(int m1, int m2) {
       printf("\n");
       
       
-      printf("Line 485 \n");
-      if(!isfinite(emmission_lookup[m1-1][m2-1][z][j][x[j]])){
-        Rcpp::stop("error1");
-      }
+      printf("Is emm finitie");
+      print(isfinite(emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       
       printf("This is the emm prob to be multiplied \n");
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
