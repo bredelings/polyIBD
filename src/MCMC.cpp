@@ -495,6 +495,9 @@ double MCMC::forward_alg(int m1, int m2) {
         emmission_lookup[m1-1][m2-1][z][j][x[j]] = 1e-100;
       } // quick way to avoid underflo
       
+      printf("This is the NEW emm prob to be multiplied \n");
+      print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
+      
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       
       
