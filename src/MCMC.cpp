@@ -457,15 +457,26 @@ double MCMC::forward_alg(int m1, int m2) {
     fill(frwrd_mat[i].begin(), frwrd_mat[i].end(), 0);
   }
   
-  printf("This is the size of the forward matrix");
+  printf("This is M1 \n"); 
+  print(m1);
+  printf("This is M2 \n"); 
+  print(m2);
+  printf("This is Zmax \n"); 
+  print(z_max);
+  printf("This is the size of the forward matrix \n");
   print(frwrd_mat.size());
+  
   
   // carry out first step of algorithm
   double frwrd_sum = 0;
   double logLike = 0;
   for (int z=0; z<(z_max+1); z++) {
-//    frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-    frwrd_mat[z][0] = 1;
+    
+    if (frwrd_mat.size()<(z+1)) {
+      Rcpp::stop("error1");
+    }
+    
+    frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
     frwrd_sum += frwrd_mat[z][0];
   }
   
