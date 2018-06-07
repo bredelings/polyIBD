@@ -62,6 +62,7 @@ for(int i=0; i <= x.size(); i++){
   print(x[i]);
 }
 printf("\n");
+
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
