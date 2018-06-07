@@ -100,10 +100,10 @@ vcffilter <- function(vcffile = NULL,
   sample.prop.loci.missing <- colSums(is.na(vcf@gt))/nrow(vcf@gt)
   vcf@gt <- vcf@gt[, c(prop.loci.missing > sample.prop.loci.missing)]
   
-  meta <- append(vcf@meta, "##Additional Filters provided by polyIBD filter tools")
-  meta <- append(vcf@meta, paste("Some samples may have been filtered by polyIBD filter tools. The new sample count is:", ncol(gt)-1))
   fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[passedloci,])
   gt <- as.matrix(vcf@gt)
+  meta <- append(vcf@meta, "##Additional Filters provided by polyIBD filter tools")
+  meta <- append(vcf@meta, paste("Some samples may have been filtered by polyIBD filter tools. The new sample count is:", ncol(gt)-1))
   
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
   newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
