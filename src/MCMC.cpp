@@ -57,10 +57,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
         }
       }
     }
-  Rcpp::stop("This is the end of emm prob");
 
-
-  
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
