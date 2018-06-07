@@ -38,6 +38,7 @@ runMCMC <- function(input=polyIBDinput,  m_max=5,
  
   
   # extract basic parameters
+  paste("Is this the problem")
   tab1 <- table(vcf[,1]) # first column in this class is CHROM
   nc <- length(tab1)
   cnames <- names(tab1)

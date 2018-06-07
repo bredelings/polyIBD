@@ -526,17 +526,17 @@ double MCMC::forward_alg(int m1, int m2) {
       // print(emmission_lookup[m1-1][m2-1][z][j].size());
       // printf("\n");
       
-      printf("We are now at this level of Z: \n");
-      print(z);
-      printf("\n");
-      printf("Is emm finitie \n");
-      int emmlevel = x[j]; //assign level of emmission prob for this loci
-      printf("This is the EMM level for prob  "); print(emmlevel);
-      print(isfinite(emmission_lookup[m1-1][m2-1][z][j][emmlevel]));
-      
-      printf("This is the emm prob to be multiplied \n");
-      print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
-      printf("\n");
+      // printf("We are now at this level of Z: \n");
+      // print(z);
+      // printf("\n");
+      // printf("Is emm finitie \n");
+      // int emmlevel = x[j]; //assign level of emmission prob for this loci
+      // printf("This is the EMM level for prob  "); print(emmlevel);
+      // print(isfinite(emmission_lookup[m1-1][m2-1][z][j][emmlevel]));
+      // 
+      // printf("This is the emm prob to be multiplied \n");
+      // print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
+      // printf("\n");
       
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       frwrd_sum += frwrd_mat[z][j];
@@ -545,8 +545,8 @@ double MCMC::forward_alg(int m1, int m2) {
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
-    printf("This is iteration \n");
-    print(j);
+    // printf("This is iteration \n");
+    // print(j);
   }
   
   return(logLike);
