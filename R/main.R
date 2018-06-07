@@ -38,7 +38,6 @@ runMCMC <- function(input=polyIBDinput,  m_max=5,
  
   
   # extract basic parameters
-  paste("Is this the problem")
   tab1 <- table(vcf[,1]) # first column in this class is CHROM
   nc <- length(tab1)
   cnames <- names(tab1)
@@ -51,7 +50,14 @@ runMCMC <- function(input=polyIBDinput,  m_max=5,
   # compare two samples and save comparison type in vector x
   # x is an integer vector with values in 0:15. These values indicate genotype combinations that cycle through the four options: {missing, homo REF, het, homo ALT} in the first sample, then the same four options in the second sample, leading to 16 options in total
   x <- 4*(vcf[,3]+1) + (vcf[,4]+1)
-  
+  # fill in NA gaps
+  x[is.na(vcf[,3]) & is.na(vcf[,4])] <- 0
+  x[is.na(vcf[,3]) & vcf[,4] == 0] <- 1
+  x[is.na(vcf[,3]) & vcf[,4] == 1] <- 2
+  x[is.na(vcf[,3]) & vcf[,4] == 2] <- 3
+  x[vcf[,3] == 0 & is.na(vcf[,4])] <- 4
+  x[vcf[,3] == 1 & is.na(vcf[,4])] <- 8
+  x[vcf[,3] == 2 & is.na(vcf[,4])] <- 12
   # define list of arguments to pass to Rcpp
   args <- list(x = x,
                p = unlist(p),

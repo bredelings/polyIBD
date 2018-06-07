@@ -1,4 +1,3 @@
-
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include "MCMC.h"
@@ -29,42 +28,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   reportIteration = Rcpp_to_int(args["reportIteration"]);
   
   // define lookup tables
-  // The emmission lookup table is fully defined here. 
+  // The emmission lookup table is fully defined here. The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   define_emmission_lookup();
-  // debug potential non-real value in emm prob
-  // int m_max=5;
-  // 
-  // // loop through m1
-  // for (int m1=1; m1<=m_max; m1++) {
-  //   printf("This is M1 "); print(m1);
-  //   //loop through m2
-  //   for (int m2=1; m2<=m_max; m2++) {
-  //     printf("This is M2 "); print(m2); 
-  //     // define k as 1 + maximum IBD
-  //     int k = m1 + 1;
-  //     k = (m1<m2) ? k : m2 + 1;
-  //     // loop through z
-  //     for (int z=0; z<k; z++){
-  //       printf("This is Z "); print(z); 
-  //       for (int i=0; i<L; i++){
-  //         printf("This is L "); print(i); 
-  //         for(int e=0; e<=15; e++){
-  //           print(e); printf(" level, with prob: "); print(emmission_lookup[m1-1][m2-1][z][i][x[e]]);
-  //           
-  //          // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-printf("This is the x emm prob matrix");
-for(int i=0; i <= x.size(); i++){
-  print(x[i]);
-}
-printf("\n");
-
-  
-  // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
   
   // initialise transient MCMC objects
@@ -101,7 +66,7 @@ printf("\n");
   
   logLike_old = forward_alg(m1, m2);
   logLike_burnin_store[0] = logLike_old;
-
+  
   // misc objects
   // m weights dictate the chance of proposing a new m value ("move") vs. sticking with the current value ("stay"). These weights are updated during the burn-in phase, converging to an efficient proposal distribution. The chance of staying is never allowed to exceed 100* the chance of moving, to ensure there is always some chance of exploring new m values.
   // f_propSD and k_propSD are updated during the burn-in phase using Robbins-Monro (although k_propSD isn't being used right now).
@@ -336,9 +301,9 @@ void MCMC::define_emmission_lookup() {
     for (int m2=1; m2<=m_max; m2++) {
       
       // define k as 1 + maximum IBD
-      int k = m1 + 1; //this is the original code
-      k = (m1<m2) ? k : m2 + 1; //this is the original code
-
+      int k = m1 + 1;
+      k = (m1<m2) ? k : m2 + 1;
+      
       // loop through z
       emmission_lookup[m1-1][m2-1] = vector< vector< vector<double> > >(k);
       for (int z=0; z<k; z++) {
@@ -491,62 +456,36 @@ double MCMC::forward_alg(int m1, int m2) {
     fill(frwrd_mat[i].begin(), frwrd_mat[i].end(), 0);
   }
   
-  printf("Line 469 \n");
   // carry out first step of algorithm
   double frwrd_sum = 0;
   double logLike = 0;
-  printf("Line 473 \n");
   for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-//    frwrd_mat[z][0] = 0.5; debug line
     frwrd_sum += frwrd_mat[z][0];
-    printf("Line 469 \n");
   }
   
   logLike += log(frwrd_sum);
   for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] /= frwrd_sum;
   }
+  
   // carry out remaining steps of algorithm
-
   for (int j=1; j<L; j++) {
     frwrd_sum = 0;
-    printf("Line 479 \n");
     for (int z=0; z<(z_max+1); z++) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
       for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
       }
       
-      // printf("This is the size of emm prob the array, should be size of J \n");
-      // print(emmission_lookup[m1-1][m2-1][z].size());
-      // printf("\n");
-      // 
-      // printf("This is the size of the df within the emm prob array, should be size of 16 always \n");
-      // print(emmission_lookup[m1-1][m2-1][z][j].size());
-      // printf("\n");
-      
-      // printf("We are now at this level of Z: \n");
-      // print(z);
-      // printf("\n");
-      // printf("Is emm finitie \n");
-      // int emmlevel = x[j]; //assign level of emmission prob for this loci
-      // printf("This is the EMM level for prob  "); print(emmlevel);
-      // print(isfinite(emmission_lookup[m1-1][m2-1][z][j][emmlevel]));
-      // 
-      // printf("This is the emm prob to be multiplied \n");
-      // print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
-      // printf("\n");
-      
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       frwrd_sum += frwrd_mat[z][j];
+      
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
-    // printf("This is iteration \n");
-    // print(j);
   }
   
   return(logLike);
@@ -609,8 +548,8 @@ void MCMC::get_IBD() {
     for (int z=0; z<(z_max+1); z++) {
       IBD_mat[z][j] /= IBD_sum;
     }
-  //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
-
+    //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
+    
     for (int z=1; z<(z_max+1); z++){
       f_ind += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
     }
@@ -618,9 +557,9 @@ void MCMC::get_IBD() {
     Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
     
   }
- //   f_ind /= double(L);  // original when only considering MOI 1,1
+  //   f_ind /= double(L);  // original when only considering MOI 1,1
   f_ind /= double(Lcomb); 
-
+  
   /*
   double state_prob_sum = 0;
   vector<double> state_prob(z_max+1);

@@ -24,14 +24,14 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
     }
     vcf <- vcfR
   } else if (!is.null(vcffile)){
-    vcf <- vcfR::read.vcfR(file=vcffile, verbose=T) # read vcf
+    vcf <- vcfR::read.vcfR(file=vcffile, verbose=F) # read vcf
   } else {
     stop("Must specify an input")
   }
   
   vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
   vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
-  
+  print(vcf)
   # -----------------------------------------------------
   # determine ploidy to determine genotype numeric placeholder  
   #------------------------------------------------------
