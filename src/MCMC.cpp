@@ -59,7 +59,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
     }
   
 
-  Rcpp::stop("End of emm probs");
+
   
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
@@ -334,8 +334,9 @@ void MCMC::define_emmission_lookup() {
     for (int m2=1; m2<=m_max; m2++) {
       
       // define k as 1 + maximum IBD
-      int k = m1 + 1;
-      k = (m1<m2) ? k : m2 + 1;
+      // int k = m1 + 1; //this is the original code
+      // k = (m1<m2) ? k : m2 + 1; //this is the original code
+      int k = m_max+1; // DEBUG -- this extends the z levels to reflect m_max since emission_lookup is called before M1 or M2 is even initialized
       
       // loop through z
       emmission_lookup[m1-1][m2-1] = vector< vector< vector<double> > >(k);
