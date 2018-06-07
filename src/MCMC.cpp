@@ -457,13 +457,12 @@ double MCMC::forward_alg(int m1, int m2) {
     fill(frwrd_mat[i].begin(), frwrd_mat[i].end(), 0);
   }
   
-  printf("Line 469");
-  Rcpp::stop("This is the error");
+  printf("Line 469 \n");
   // carry out first step of algorithm
   double frwrd_sum = 0;
   double logLike = 0;
-  printf("Line 473");
-  
+  printf("Line 473 \n");
+  Rcpp::stop("This is the error");
   for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
     frwrd_sum += frwrd_mat[z][0];
