@@ -503,20 +503,20 @@ double MCMC::forward_alg(int m1, int m2) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
       for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
-        
-      printf("Line 483 \n");
       }
       
-      printf("This is the size of emm prob the array, should be size of J \n");
-      print(emmission_lookup[m1-1][m2-1][z].size());
+      // printf("This is the size of emm prob the array, should be size of J \n");
+      // print(emmission_lookup[m1-1][m2-1][z].size());
+      // printf("\n");
+      // 
+      // printf("This is the size of the df within the emm prob array, should be size of 16 always \n");
+      // print(emmission_lookup[m1-1][m2-1][z][j].size());
+      // printf("\n");
+      
+      printf("We are now at this level of Z: \n");
+      print(z);
       printf("\n");
-      
-      printf("This is the size of the df within the emm prob array, should be size of 16 always \n");
-      print(emmission_lookup[m1-1][m2-1][z][j].size());
-      printf("\n");
-      
-      
-      printf("Is emm finitie");
+      printf("Is emm finitie \n");
       print(isfinite(emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       
       printf("This is the emm prob to be multiplied \n");
@@ -524,20 +524,11 @@ double MCMC::forward_alg(int m1, int m2) {
       printf("\n");
       
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
-      
-      
-      printf("Line 487 \n");
-      
-      
       frwrd_sum += frwrd_mat[z][j];
-      
-      
-      printf("Line 489 \n");
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
-      printf("Line 498 \n");
     }
     printf("This is iteration \n");
     print(lociiter);
