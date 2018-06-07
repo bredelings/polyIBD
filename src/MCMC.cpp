@@ -482,10 +482,11 @@ double MCMC::forward_alg(int m1, int m2) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
       }
       
-      printf("Line 484 \n");
+      printf("Line 485 \n");
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
-      printf("Line 486 \n");
+      printf("Line 487 \n");
       frwrd_sum += frwrd_mat[z][j];
+      printf("Line 489 \n");
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
