@@ -31,13 +31,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // define lookup tables
   // The emmission lookup table is fully defined here. 
   define_emmission_lookup();
-  printf("\n");
-  printf("\n");
-  printf("This is the x levels for the emm probs  "); print(x);
-  printf("\n");
-  printf("\n");
-    
-  // // debug potential non-real value in emm prob
+  // debug potential non-real value in emm prob
   // int m_max=5;
   // 
   // // loop through m1
@@ -63,7 +57,11 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   //       }
   //     }
   //   }
-
+printf("This is the x emm prob matrix");
+for(int i=0; i <= x.size(); i++){
+  print(x[i]);
+}
+printf("\n");
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
@@ -530,10 +528,10 @@ double MCMC::forward_alg(int m1, int m2) {
       printf("We are now at this level of Z: \n");
       print(z);
       printf("\n");
-      
+      printf("Is emm finitie \n");
       int emmlevel = x[j]; //assign level of emmission prob for this loci
       printf("This is the EMM level for prob  "); print(emmlevel);
-
+      print(isfinite(emmission_lookup[m1-1][m2-1][z][j][emmlevel]));
       
       printf("This is the emm prob to be multiplied \n");
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
