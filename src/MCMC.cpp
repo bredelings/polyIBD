@@ -488,7 +488,7 @@ double MCMC::forward_alg(int m1, int m2) {
       
       printf("Line 485 \n");
       printf("This is the emm prob to be multiplied");
-      print(emmission_lookup[m1-1][m2-1][z][j][x[j]]);
+      print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       
       
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
