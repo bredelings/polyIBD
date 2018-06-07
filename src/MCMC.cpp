@@ -491,6 +491,10 @@ double MCMC::forward_alg(int m1, int m2) {
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       printf("\n");
       
+      if(emmission_lookup[m1-1][m2-1][z][j][x[j]] < 1e-100){
+        emmission_lookup[m1-1][m2-1][z][j][x[j]] = 1e-100;
+      } // quick way to avoid underflo
+      
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       
       
