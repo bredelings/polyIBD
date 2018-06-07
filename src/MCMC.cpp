@@ -32,20 +32,20 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // The emmission lookup table is fully defined here. 
   define_emmission_lookup();
   // debug potential non-real value in emm prob
-  z_max = (m1<m2) ? m1 : m2;
-  for (int m1=1; m1<=m_max; m1++) {
-    for (int m2=1; m1<=m_max; m2++) {
-      for (int z=0; z<(z_max+1); z++){
-        for (int l=0; l<L; l++){
-          for(int e=0; e<=15; e++){
-            if(!isfinite(emmission_lookup[m1-1][m2-1][z][l][x[e]])){
-             Rcpp::stop("Non-finite value in the emmission look up table");
-            }
-          }
-        }
-      }
-    }
-  }
+  // z_max = (m1<m2) ? m1 : m2;
+  // for (int m1=1; m1<=m_max; m1++) {
+  //   for (int m2=1; m1<=m_max; m2++) {
+  //     for (int z=0; z<(z_max+1); z++){
+  //       for (int l=0; l<L; l++){
+  //         for(int e=0; e<=15; e++){
+  //           if(!isfinite(emmission_lookup[m1-1][m2-1][z][l][x[e]])){
+  //            Rcpp::stop("Non-finite value in the emmission look up table");
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
   
   
   
@@ -517,6 +517,10 @@ double MCMC::forward_alg(int m1, int m2) {
       
       
       printf("Line 485 \n");
+      if(!isfinite(emmission_lookup[m1-1][m2-1][z][j][x[j]])){
+        Rcpp::stop("error1");
+      }
+      
       printf("This is the emm prob to be multiplied \n");
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
       printf("\n");
