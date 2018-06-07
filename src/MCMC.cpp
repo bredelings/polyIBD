@@ -35,6 +35,10 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   z_max = (m1<m2) ? m1 : m2;
   for (int m1=1; m1<=m_max; m1++) {
     for (int m2=1; m1<=m_max; m2++) {
+      printf("This is M1 \n");
+      print(m1);
+      printf("This is M2 \n");
+      print(m2);
       print(emmission_lookup[m1-1][m2-1][0][0][x[0]]);
     }}
   
