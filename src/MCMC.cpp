@@ -461,15 +461,25 @@ double MCMC::forward_alg(int m1, int m2) {
   double frwrd_sum = 0;
   double logLike = 0;
   for (int z=0; z<(z_max+1); z++) {
+    
     if (frwrd_mat.size()<(z+1)) {
       Rcpp::stop("error1");
     }
+    if (emmission_lookup[m1-1][m2-1][z].size()< L) {
+      Rcpp::stop("error2");
+    }
+
     frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
     frwrd_sum += frwrd_mat[z][0];
   }
   
   logLike += log(frwrd_sum);
   for (int z=0; z<(z_max+1); z++) {
+    
+    if (frwrd_mat.size()<(z+1)) {
+      Rcpp::stop("error3");
+    }
+    
     frwrd_mat[z][0] /= frwrd_sum;
   }
   
@@ -479,6 +489,19 @@ double MCMC::forward_alg(int m1, int m2) {
     for (int z=0; z<(z_max+1); z++) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
       for (int i=0; i<(z_max+1); i++) {
+        
+        if (frwrd_mat.size()<(z+1)) {
+          Rcpp::stop("error4");
+        }
+        
+        if (transition_lookup[j-1][i].size()< (z+1)) {
+          Rcpp::stop("error5");
+        }
+        
+        if (emmission_lookup[m1-1][m2-1][z].size()< L) {
+          Rcpp::stop("error6");
+        }
+        
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
       }
       
@@ -488,6 +511,11 @@ double MCMC::forward_alg(int m1, int m2) {
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
+      
+      if (frwrd_sum < 0) {
+        Rcpp::stop("error7");
+      }
+      
       frwrd_mat[z][j] /= frwrd_sum;
     }
   }
