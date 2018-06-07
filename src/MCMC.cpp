@@ -33,23 +33,23 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   define_emmission_lookup();
   // debug potential non-real value in emm prob
   int m_max=5;
-  int k = m_max+1;
   
+  // loop through m1
   for (int m1=1; m1<=m_max; m1++) {
-    printf("\n");
-    printf("This is M1 \n");
-    print(m1);
-    printf("\n");
-
+    printf("This is M1 "); print(m1);
+    //loop through m2
     for (int m2=1; m2<=m_max; m2++) {
       printf("This is M2 "); print(m2); 
-      
+      // define k as 1 + maximum IBD
+      int k = m1 + 1;
+      k = (m1<m2) ? k : m2 + 1;
+      // loop through z
       for (int z=0; z<k; z++){
         printf("This is Z "); print(z); 
-        for (int l=0; l<L; l++){
-          printf("This is L "); print(l); 
+        for (int i=0; i<L; i++){
+          printf("This is L "); print(i); 
           for(int e=0; e<=15; e++){
-            printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
+            print(e); printf(" level, with prob: "); print(emmission_lookup[m1-1][m2-1][z][i][x[e]]);
             
            // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
             }
@@ -334,10 +334,9 @@ void MCMC::define_emmission_lookup() {
     for (int m2=1; m2<=m_max; m2++) {
       
       // define k as 1 + maximum IBD
-      // int k = m1 + 1; //this is the original code
-      // k = (m1<m2) ? k : m2 + 1; //this is the original code
-      int k = m_max+1; // DEBUG -- this extends the z levels to reflect m_max since emission_lookup is called before M1 or M2 is even initialized
-      
+      int k = m1 + 1; //this is the original code
+      k = (m1<m2) ? k : m2 + 1; //this is the original code
+
       // loop through z
       emmission_lookup[m1-1][m2-1] = vector< vector< vector<double> > >(k);
       for (int z=0; z<k; z++) {
