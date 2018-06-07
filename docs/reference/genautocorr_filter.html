@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Default multi-panel plot for polyIBD class — plot.polyIBD • polyIBD</title>
+<title>polyIBD filter for linkage disequilibrium — genautocorr_filter • polyIBD</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,9 +28,9 @@
 
 
 
-<meta property="og:title" content="Default multi-panel plot for polyIBD class — plot.polyIBD" />
+<meta property="og:title" content="polyIBD filter for linkage disequilibrium — genautocorr_filter" />
 
-<meta property="og:description" content="The default plot() function can be called on objects returned from polyIBD::runMCMC() (which are of class polyIBD), to produce a multi-panel plot giving important MCMC output." />
+<meta property="og:description" content="Filtering an object of class vcfR for linkage disequilibrium via genetic autocorrelation." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -97,25 +97,26 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Default multi-panel plot for polyIBD class</h1>
-    <small class="dont-index">Source: <a href='https://github.com/nickbrazeau/polyIBD/blob/master/R/plotting.R'><code>R/plotting.R</code></a></small>
-    <div class="hidden name"><code>plot.polyIBD.Rd</code></div>
+    <h1>polyIBD filter for linkage disequilibrium</h1>
+    <small class="dont-index">Source: <a href='https://github.com/nickbrazeau/polyIBD/blob/master/R/varfilters.R'><code>R/varfilters.R</code></a></small>
+    <div class="hidden name"><code>genautocorr_filter.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>The default <code>plot()</code> function can be called on objects returned from <code><a href='runMCMC.html'>polyIBD::runMCMC()</a></code> (which are of class <code>polyIBD</code>), to produce a multi-panel plot giving important MCMC output.</p>
+    <p>Filtering an object of class <code>vcfR</code> for linkage disequilibrium via genetic autocorrelation.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot.polyIBD</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>genautocorr_filter</span>(<span class='kw'>vcffile</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>vcfR</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>genautocorrresult</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>threshDist</span> <span class='kw'>=</span> <span class='fl'>1000</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>an object of class <code>polyIBD</code>, as produced by the function <code><a href='runMCMC.html'>polyIBD::runMCMC</a></code></p></td>
+      <th>vcffile</th>
+      <td><p>A variant call file (vcf) path. This VCF will be converted to an object of class <code>vcfR</code>.</p></td>
     </tr>
     </table>
     

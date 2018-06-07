@@ -4,9 +4,9 @@
 \alias{simData}
 \title{Simulate data from polyIBD model}
 \usage{
-simData(pos = list(contig1 = 1:1000, contig2 = 1:1000), m1 = 1, m2 = 1,
-  f = 0.5, rho = 1, p = NULL, p_shape1 = 0.1, p_shape2 = 0.1,
-  propMissing = 0)
+simData(pos = list(contig1 = sort(sample(1e+05, 100)), contig2 =
+  sort(sample(1e+05, 100))), m1 = 1, m2 = 1, f = 0.5, rho = 1e-07,
+  k = 5, p = NULL, p_shape1 = 0.1, p_shape2 = 0.1, propMissing = 0)
 }
 \arguments{
 \item{pos}{TODO}
@@ -19,6 +19,8 @@ simData(pos = list(contig1 = 1:1000, contig2 = 1:1000), m1 = 1, m2 = 1,
 
 \item{rho}{TODO}
 
+\item{k}{TODO}
+
 \item{p}{TODO}
 
 \item{p_shape1}{TODO}
@@ -26,8 +28,6 @@ simData(pos = list(contig1 = 1:1000, contig2 = 1:1000), m1 = 1, m2 = 1,
 \item{p_shape2}{TODO}
 
 \item{propMissing}{TODO}
-
-\item{n}{TODO}
 }
 \description{
 TODO

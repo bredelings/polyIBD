@@ -58,7 +58,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">polyIBD</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.5.0</span>
       </span>
     </div>
 
@@ -108,9 +108,9 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>simData</span>(<span class='kw'>pos</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>contig1</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>1000</span>, <span class='kw'>contig2</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>1000</span>), <span class='kw'>m1</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>m2</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>f</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>p</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>p_shape1</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>p_shape2</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>propMissing</span> <span class='kw'>=</span> <span class='fl'>0</span>)</pre>
+    <pre class="usage"><span class='fu'>simData</span>(<span class='kw'>pos</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>contig1</span> <span class='kw'>=</span> <span class='fu'>sort</span>(<span class='fu'>sample</span>(<span class='fl'>1e+05</span>, <span class='fl'>100</span>)), <span class='kw'>contig2</span> <span class='kw'>=</span>
+  <span class='fu'>sort</span>(<span class='fu'>sample</span>(<span class='fl'>1e+05</span>, <span class='fl'>100</span>))), <span class='kw'>m1</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>m2</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>f</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>1e-07</span>,
+  <span class='kw'>k</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>p</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>p_shape1</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>p_shape2</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>propMissing</span> <span class='kw'>=</span> <span class='fl'>0</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -136,6 +136,10 @@
       <td><p>TODO</p></td>
     </tr>
     <tr>
+      <th>k</th>
+      <td><p>TODO</p></td>
+    </tr>
+    <tr>
       <th>p</th>
       <td><p>TODO</p></td>
     </tr>
@@ -149,10 +153,6 @@
     </tr>
     <tr>
       <th>propMissing</th>
-      <td><p>TODO</p></td>
-    </tr>
-    <tr>
-      <th>n</th>
       <td><p>TODO</p></td>
     </tr>
     </table>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Default multi-panel plot for polyIBD class — plot.polyIBD • polyIBD</title>
+<title>Plot polyIBD outputs collectively — ggplot_IBDraster • polyIBD</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,9 +28,9 @@
 
 
 
-<meta property="og:title" content="Default multi-panel plot for polyIBD class — plot.polyIBD" />
+<meta property="og:title" content="Plot polyIBD outputs collectively — ggplot_IBDraster" />
 
-<meta property="og:description" content="The default plot() function can be called on objects returned from polyIBD::runMCMC() (which are of class polyIBD), to produce a multi-panel plot giving important MCMC output." />
+<meta property="og:description" content="Plots the MCMC chains for M1, M2, f, and k (generations), as well as the posterior distribution for the IBD matrix." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -97,18 +97,19 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Default multi-panel plot for polyIBD class</h1>
+    <h1>Plot polyIBD outputs collectively</h1>
     <small class="dont-index">Source: <a href='https://github.com/nickbrazeau/polyIBD/blob/master/R/plotting.R'><code>R/plotting.R</code></a></small>
-    <div class="hidden name"><code>plot.polyIBD.Rd</code></div>
+    <div class="hidden name"><code>ggplot_IBDraster.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>The default <code>plot()</code> function can be called on objects returned from <code><a href='runMCMC.html'>polyIBD::runMCMC()</a></code> (which are of class <code>polyIBD</code>), to produce a multi-panel plot giving important MCMC output.</p>
+    <p>Plots the MCMC chains for M1, M2, f, and k (generations), as well as the posterior distribution for the IBD matrix.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot.polyIBD</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>ggplot_IBDraster</span>(<span class='no'>x</span>, <span class='kw'>trueIBD</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truem1</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truem2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>truef</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>truek</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -116,6 +117,10 @@
     <tr>
       <th>x</th>
       <td><p>an object of class <code>polyIBD</code>, as produced by the function <code><a href='runMCMC.html'>polyIBD::runMCMC</a></code></p></td>
+    </tr>
+    <tr>
+      <th>trueIBD</th>
+      <td><p>option to overlay a line corresponding to the true IBD (for example if using simulated data)</p></td>
     </tr>
     </table>
     

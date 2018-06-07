@@ -4,10 +4,12 @@
 \alias{simIBD}
 \title{Simulate IBD sections between two samples}
 \usage{
-simIBD(f, rho, pos)
+simIBD(f, k, rho, pos)
 }
 \arguments{
 \item{f}{the average relatedness between the two samples}
+
+\item{k}{the number of generations separating the two lineages}
 
 \item{rho}{the recombination rate. TODO - units of this parameter}
 

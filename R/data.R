@@ -38,15 +38,15 @@ simIBD <- function(f, k, rho, pos) {
 #'
 #' @description TODO
 #'
-#' @param n TODO
+#' @param pos TODO
 #' @param m1 TODO
 #' @param m2 TODO
 #' @param f TODO
 #' @param rho TODO
+#' @param k TODO
 #' @param p TODO
 #' @param p_shape1 TODO
 #' @param p_shape2 TODO
-#' @param pos TODO
 #' @param propMissing TODO
 #' 
 #' @export

@@ -6,7 +6,7 @@
 
 #' @title polyIBD vcffilter
 #' @description Filtering a variant call file (VCF) using the vcfR package.
-#' @param vcffile is the file path that for the VCF. This VCF will be converted to an object of class \code{vcfR}.
+#' @param vcffile A variant call file (vcf) path. This VCF will be converted to an object of class \code{vcfR}.
 #'
 #' @export
 #' 
@@ -116,7 +116,7 @@ vcffilter <- function(vcffile = NULL,
 
 #' @title genautocorr calculates genetic autocorrelation for later linkage disequilibrium filtering
 #' @description From an object of class \code{vcfR}, calculate the genetic autocorrelation as the estimate of linkage disequilibrium by genetic distance.
-#' @param 
+#' @param vcffile A variant call file (vcf) path. This VCF will be converted to an object of class \code{vcfR}.
 #'
 #' @export
 #' 
@@ -216,7 +216,8 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
 
 #' @title polyIBD filter for linkage disequilibrium 
 #' @description Filtering an object of class \code{vcfR} for linkage disequilibrium via genetic autocorrelation.
-#' @param 
+#' @param vcffile A variant call file (vcf) path. This VCF will be converted to an object of class \code{vcfR}.
+#'
 #'
 #' @export
 #' 

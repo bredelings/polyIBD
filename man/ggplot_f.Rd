@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{ggplot_f}
 \alias{ggplot_f}
-\title{Trace ggplot of f}
+\title{Trace ggplot of f individual}
 \usage{
 ggplot_f(x, ...)
 }
@@ -10,5 +10,5 @@ ggplot_f(x, ...)
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
+Produces a simple MCMC trace ggplot2::geom_plot of the parameter \code{f}, which represents the individual draw of the posterior probability of identity by descent between two samples.
 }

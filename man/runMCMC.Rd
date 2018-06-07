@@ -4,15 +4,13 @@
 \alias{runMCMC}
 \title{Run polyIBD MCMC using Rcpp functions}
 \usage{
-runMCMC(vcf, p, m_max = 5, rho_max = 1e-05, burnin = 100,
-  samples = 1000, e1 = 0.05, e2 = 0.05, reportIteration = 1000)
+runMCMC(input = polyIBDinput, m_max = 5, k_max = 50, rho = 1e-05,
+  burnin = 100, samples = 1000, e1 = 0.05, e2 = 0.05,
+  reportIteration = 1000)
 }
 \arguments{
 \item{dat}{TODO}
 }
 \description{
-Run polyIBD MCMC using Rcpp functions.
-}
-\examples{
-runMCMC()
+Run polyIBD MCMC using Rcpp functions
 }

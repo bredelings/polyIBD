@@ -12,8 +12,7 @@ NULL
 #' @param dat TODO
 #'
 #' @export
-#' @examples
-#' runMCMC()
+
 
 runMCMC <- function(input=polyIBDinput,  m_max=5,
                     k_max=50, rho=1e-5, 

@@ -4,7 +4,7 @@
 \alias{getTransProbs}
 \title{Get transition probabilities}
 \usage{
-getTransProbs(f, rho, zmax)
+getTransProbs(f, rho, k, z_max)
 }
 \arguments{
 \item{f}{TODO}

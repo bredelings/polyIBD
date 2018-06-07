@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_f}
 \alias{plot_f}
-\title{Trace plot of f}
+\title{Trace plot of f posterior prob}
 \usage{
 plot_f(x, ...)
 }
@@ -10,5 +10,5 @@ plot_f(x, ...)
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
 }
 \description{
-Produces a simple MCMC trace plot of the parameter \code{f}, which represents the mean probability of identity by descent between two samples.
+Produces a simple MCMC trace plot of the parameter \code{f}, which represents the posterior probability of identity by descent between two samples.
 }

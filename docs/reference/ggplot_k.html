@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Default multi-panel plot for polyIBD class — plot.polyIBD • polyIBD</title>
+<title>Trace plot of k — ggplot_k • polyIBD</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -28,9 +28,9 @@
 
 
 
-<meta property="og:title" content="Default multi-panel plot for polyIBD class — plot.polyIBD" />
+<meta property="og:title" content="Trace plot of k — ggplot_k" />
 
-<meta property="og:description" content="The default plot() function can be called on objects returned from polyIBD::runMCMC() (which are of class polyIBD), to produce a multi-panel plot giving important MCMC output." />
+<meta property="og:description" content="Produces a simple MCMC trace plot of the parameter k, which represents the number of generations separating the two lineages (holding the recombination rate constant)." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -97,18 +97,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Default multi-panel plot for polyIBD class</h1>
+    <h1>Trace plot of k</h1>
     <small class="dont-index">Source: <a href='https://github.com/nickbrazeau/polyIBD/blob/master/R/plotting.R'><code>R/plotting.R</code></a></small>
-    <div class="hidden name"><code>plot.polyIBD.Rd</code></div>
+    <div class="hidden name"><code>ggplot_k.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>The default <code>plot()</code> function can be called on objects returned from <code><a href='runMCMC.html'>polyIBD::runMCMC()</a></code> (which are of class <code>polyIBD</code>), to produce a multi-panel plot giving important MCMC output.</p>
+    <p>Produces a simple MCMC trace plot of the parameter <code>k</code>, which represents the number of generations separating the two lineages (holding the recombination rate constant).</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot.polyIBD</span>(<span class='no'>x</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>ggplot_k</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

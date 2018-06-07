@@ -30,7 +30,7 @@
 
 <meta property="og:title" content="Run polyIBD MCMC using Rcpp functions — runMCMC" />
 
-<meta property="og:description" content="Run polyIBD MCMC using Rcpp functions." />
+<meta property="og:description" content="Run polyIBD MCMC using Rcpp functions" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -58,7 +58,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">polyIBD</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.8.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.5.0</span>
       </span>
     </div>
 
@@ -104,12 +104,13 @@
 
     <div class="ref-description">
     
-    <p>Run polyIBD MCMC using Rcpp functions.</p>
+    <p>Run polyIBD MCMC using Rcpp functions</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>runMCMC</span>(<span class='no'>vcf</span>, <span class='no'>p</span>, <span class='kw'>m_max</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>rho_max</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>, <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>e1</span> <span class='kw'>=</span> <span class='fl'>0.05</span>, <span class='kw'>e2</span> <span class='kw'>=</span> <span class='fl'>0.05</span>, <span class='kw'>reportIteration</span> <span class='kw'>=</span> <span class='fl'>1000</span>)</pre>
+    <pre class="usage"><span class='fu'>runMCMC</span>(<span class='kw'>input</span> <span class='kw'>=</span> <span class='no'>polyIBDinput</span>, <span class='kw'>m_max</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>k_max</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>burnin</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>e1</span> <span class='kw'>=</span> <span class='fl'>0.05</span>, <span class='kw'>e2</span> <span class='kw'>=</span> <span class='fl'>0.05</span>,
+  <span class='kw'>reportIteration</span> <span class='kw'>=</span> <span class='fl'>1000</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -121,21 +122,12 @@
     </table>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>runMCMC</span>()</div><div class='output co'>#&gt; <span class='message'>Loading required package: vcfR</span></div><div class='output co'>#&gt; <span class='message'></span>
-#&gt; <span class='message'>   *****       ***   vcfR   ***       *****</span>
-#&gt; <span class='message'>   This is vcfR 1.8.0 </span>
-#&gt; <span class='message'>     browseVignettes('vcfR') # Documentation</span>
-#&gt; <span class='message'>     citation('vcfR') # Citation</span>
-#&gt; <span class='message'>   *****       *****      *****       *****</span></div><div class='output co'>#&gt; <span class='error'>Error in runMCMC(): object 'polyIBDinput' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-            
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+                </ul>
 
   </div>
 </div>
