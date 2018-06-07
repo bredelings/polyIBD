@@ -32,21 +32,23 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // The emmission lookup table is fully defined here. 
   define_emmission_lookup();
   // debug potential non-real value in emm prob
-  // z_max = (m1<m2) ? m1 : m2;
-  // for (int m1=1; m1<=m_max; m1++) {
-  //   for (int m2=1; m1<=m_max; m2++) {
+  z_max = (m1<m2) ? m1 : m2;
+  for (int m1=1; m1<=m_max; m1++) {
+    for (int m2=1; m1<=m_max; m2++) {
+      print(emmission_lookup[m1-1][m2-1][0][0][x[0]]);
+    }}
+  
   //     for (int z=0; z<(z_max+1); z++){
   //       for (int l=0; l<L; l++){
   //         for(int e=0; e<=15; e++){
-  //           if(!isfinite(emmission_lookup[m1-1][m2-1][z][l][x[e]])){
-  //            Rcpp::stop("Non-finite value in the emmission look up table");
+  //           print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
   //           }
   //         }
   //       }
   //     }
   //   }
   // }
-  
+  // 
   
   
   
@@ -494,8 +496,7 @@ double MCMC::forward_alg(int m1, int m2) {
     frwrd_mat[z][0] /= frwrd_sum;
   }
   // carry out remaining steps of algorithm
-  int lociiter = 1; // debug
-  
+
   for (int j=1; j<L; j++) {
     frwrd_sum = 0;
     printf("Line 479 \n");
@@ -531,8 +532,7 @@ double MCMC::forward_alg(int m1, int m2) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
     printf("This is iteration \n");
-    print(lociiter);
-    lociiter++;
+    print(j);
   }
   
   return(logLike);
