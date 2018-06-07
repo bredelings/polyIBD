@@ -31,32 +31,38 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // define lookup tables
   // The emmission lookup table is fully defined here. 
   define_emmission_lookup();
-  // debug potential non-real value in emm prob
-  int m_max=5;
-  
-  // loop through m1
-  for (int m1=1; m1<=m_max; m1++) {
-    printf("This is M1 "); print(m1);
-    //loop through m2
-    for (int m2=1; m2<=m_max; m2++) {
-      printf("This is M2 "); print(m2); 
-      // define k as 1 + maximum IBD
-      int k = m1 + 1;
-      k = (m1<m2) ? k : m2 + 1;
-      // loop through z
-      for (int z=0; z<k; z++){
-        printf("This is Z "); print(z); 
-        for (int i=0; i<L; i++){
-          printf("This is L "); print(i); 
-          for(int e=0; e<=15; e++){
-            print(e); printf(" level, with prob: "); print(emmission_lookup[m1-1][m2-1][z][i][x[e]]);
-            
-           // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
-            }
-          }
-        }
-      }
-    }
+  printf("\n");
+  printf("\n");
+  printf("This is the x levels for the emm probs  "); print(x);
+  printf("\n");
+  printf("\n");
+    
+  // // debug potential non-real value in emm prob
+  // int m_max=5;
+  // 
+  // // loop through m1
+  // for (int m1=1; m1<=m_max; m1++) {
+  //   printf("This is M1 "); print(m1);
+  //   //loop through m2
+  //   for (int m2=1; m2<=m_max; m2++) {
+  //     printf("This is M2 "); print(m2); 
+  //     // define k as 1 + maximum IBD
+  //     int k = m1 + 1;
+  //     k = (m1<m2) ? k : m2 + 1;
+  //     // loop through z
+  //     for (int z=0; z<k; z++){
+  //       printf("This is Z "); print(z); 
+  //       for (int i=0; i<L; i++){
+  //         printf("This is L "); print(i); 
+  //         for(int e=0; e<=15; e++){
+  //           print(e); printf(" level, with prob: "); print(emmission_lookup[m1-1][m2-1][z][i][x[e]]);
+  //           
+  //          // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
 
   
   // The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
@@ -524,8 +530,10 @@ double MCMC::forward_alg(int m1, int m2) {
       printf("We are now at this level of Z: \n");
       print(z);
       printf("\n");
-      printf("Is emm finitie \n");
-      print(isfinite(emmission_lookup[m1-1][m2-1][z][j][x[j]]));
+      
+      int emmlevel = x[j]; //assign level of emmission prob for this loci
+      printf("This is the EMM level for prob  "); print(emmlevel);
+
       
       printf("This is the emm prob to be multiplied \n");
       print((emmission_lookup[m1-1][m2-1][z][j][x[j]]));
