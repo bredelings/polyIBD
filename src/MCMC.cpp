@@ -474,8 +474,8 @@ double MCMC::forward_alg(int m1, int m2) {
     frwrd_mat[z][0] /= frwrd_sum;
   }
   // carry out remaining steps of algorithm
+  int lociiter = 1; // debug
   for (int j=1; j<L; j++) {
-    int lociiter = 1; // debug
     frwrd_sum = 0;
     printf("Line 479 \n");
     for (int z=0; z<(z_max+1); z++) {
@@ -495,8 +495,9 @@ double MCMC::forward_alg(int m1, int m2) {
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
-      printf("Line 498");
+      printf("Line 498 \n");
     }
+    printf("This is iteration \n");
     print(lociiter);
     lociiter++;
   }
