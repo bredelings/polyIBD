@@ -466,26 +466,20 @@ double MCMC::forward_alg(int m1, int m2) {
   printf("This is the size of the forward matrix \n");
   print(frwrd_mat.size());
   
-  
+  printf("Line 469");
   // carry out first step of algorithm
   double frwrd_sum = 0;
   double logLike = 0;
   printf("Line 473");
   for (int z=0; z<(z_max+1); z++) {
-    if (frwrd_mat.size()<(z+1)) {
-      Rcpp::stop("error1");
-    }
     frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-    printf("line 478");
     frwrd_sum += frwrd_mat[z][0];
-  printf("Line 480");
   }
   
   logLike += log(frwrd_sum);
   for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] /= frwrd_sum;
   }
-  printf("Line 487");
   // carry out remaining steps of algorithm
   for (int j=1; j<L; j++) {
     frwrd_sum = 0;
@@ -493,18 +487,15 @@ double MCMC::forward_alg(int m1, int m2) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
       for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
-        printf("Line 495");
       }
       
       
       frwrd_mat[z][j] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
       frwrd_sum += frwrd_mat[z][j];
-      printf("Line 501");
     }
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
-      printf("Line 506");
     }
   }
   
