@@ -49,7 +49,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
         for (int l=0; l<L; l++){
           printf("This is L "); print(l); 
           for(int e=0; e<=15; e++){
-            printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][l][x[0]]);
+            printf(" prob: "); print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
             
            // print(emmission_lookup[m1-1][m2-1][z][l][x[e]]);
             }
