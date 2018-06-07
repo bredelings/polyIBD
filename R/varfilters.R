@@ -80,19 +80,22 @@ vcffilter <- function(vcffile = NULL,
   #--------------------------------------------------------
   # store format and filter fields
   vcfsample <- vcfR::extract.gt(vcf, element =  "GQ", as.numeric = T)
-  
-  # filter bad loci
-  vcfsample <- vcfsample[passedloci,]
-  
   if(!is.null(formatGQ)){
     vcfsample[vcfsample < formatGQ] <- NA
   }
+  vcfsample <- cbind.data.frame(vcf@gt[,1], vcfsample) # need to add format column so matrix vcf@gt will match
   
   #--------------------------------------------------------
   # Subset by loci, GQ
   #--------------------------------------------------------
-  vcf@gt <- vcf@gt[passedloci,]
   vcf@gt[is.na(vcfsample)] <- NA
+  
+  locimissingness <- apply(vcf@gt, 1, function(x){sum(is.na(x))})
+  locimissingness <- which(locimissingness == (ncol(vcf@gt)-1)) # in case a whole loci excluded by GQ
+  passedloci <- !passedloci %in% locimissingness
+  
+  # filter bad loci
+  vcf@gt <- vcf@gt[passedloci,]
 
   #--------------------------------------------------------
   # Drop samples with prop of loci missing
