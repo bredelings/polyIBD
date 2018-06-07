@@ -463,8 +463,8 @@ double MCMC::forward_alg(int m1, int m2) {
   double logLike = 0;
   printf("Line 473 \n");
   for (int z=0; z<(z_max+1); z++) {
-//    frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-    frwrd_mat[z][0] = 0.5;
+    frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
+//    frwrd_mat[z][0] = 0.5; debug line
     frwrd_sum += frwrd_mat[z][0];
     printf("Line 469 \n");
   }
@@ -475,11 +475,15 @@ double MCMC::forward_alg(int m1, int m2) {
   }
   // carry out remaining steps of algorithm
   for (int j=1; j<L; j++) {
+    int lociiter = 1; // debug
     frwrd_sum = 0;
+    printf("Line 479 \n");
     for (int z=0; z<(z_max+1); z++) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
       for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
+        
+      printf("Line 483 \n");
       }
       
       printf("Line 485 \n");
@@ -491,7 +495,10 @@ double MCMC::forward_alg(int m1, int m2) {
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
+      printf("Line 498");
     }
+    print(lociiter);
+    lociiter++;
   }
   
   return(logLike);
