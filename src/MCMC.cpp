@@ -33,12 +33,12 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   define_emmission_lookup();
   // debug potential non-real value in emm prob
   z_max = (m1<m2) ? m1 : m2;
-  for (int m1=0; m1<(m_max+1); m1++) {
-    for (int m2=0; m1<(m_max+1); m2++) {
+  for (int m1=0; m1<m_max; m1++) {
+    for (int m2=0; m1<m_max; m2++) {
       for (int z=0; z<(z_max+1); z++){
-        for (int L=0; L<(L+1); L++){
+        for (int l=0; l<L; l++){
           for(int e=0; e<=16; e++){
-            if(isfinite(emmission_lookup[m1-1][m2-1][z][L][x[e]])){
+            if(isfinite(emmission_lookup[m1-1][m2-1][z][l][x[e]])){
              Rcpp::stop("Non-finite value in the emmission look up table");
             }
           }
