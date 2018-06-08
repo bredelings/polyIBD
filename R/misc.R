@@ -39,7 +39,9 @@ checkConvergence <- function(burnin, samples) {
   # calculate Geweke diagnostic on combined chain
   chain <- coda::mcmc(c(burnin, samples))
   geweke_z <- coda::geweke.diag(chain, frac1=nburnin/(nburnin+nsamples), frac2=nsamples/(nburnin+nsamples))$z
-  
+  if(is.na(geweke_z)){
+    stop("NaN p-value was calculated from Geweke statistic")
+  }
   # convert to p-value
   geweke_p <- 2*pnorm(abs(geweke_z), lower.tail=FALSE)
   

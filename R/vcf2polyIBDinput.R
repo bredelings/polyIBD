@@ -76,7 +76,8 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
   #------------------------------------------------------
   
   retlist <- lapply(1:nrow(smpls), function(x){
-    list(snpmatrix = matrix(NA, ncol=4, nrow=nrow(snpmatrix)),
+    list(samples = rep(NA, 1),
+         snpmatrix = matrix(NA, ncol=4, nrow=nrow(snpmatrix)),
          p=rep(NA, nrow(snpmatrix)))
     })
     
@@ -85,6 +86,7 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
     snpmatrixsave <- cbind.data.frame(CHROM, POS, snpmatrixsave)
     retlist[[i]]$snpmatrix <- snpmatrixsave
     retlist[[i]]$p <- p
+    retlist[[i]]$samples <- paste(smpls[i,], collapse = "||")
     
   }
   

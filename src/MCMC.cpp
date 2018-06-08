@@ -542,7 +542,54 @@ void MCMC::get_IBD() {
   for (int j=0; j<L; j++) {
     IBD_sum = 0;
     for (int z=0; z<(z_max+1); z++) {
+      
+      if(isnan(bkwrd_mat[z][j])){
+        bkwrd_mat[z][j] = 1e-150; //1e-150 because the min of a cpp for a double is 4.9e-324
+      }
+      if(isnan(frwrd_mat[z][j])){
+        frwrd_mat[z][j] = 1e-150;
+      }
+      
+      /*
+       if(!isfinite(frwrd_mat[z][j])){
+        printf("this is the Z level    "); print(z);
+        printf("this is the J loci     "); print(j);
+        printf("this is the NAN in the forward     "); print(frwrd_mat[z][j]);
+        Rcpp::stop("This is the non-finite value in forward");
+       }
+      
+       if(!isfinite(bkwrd_mat[z][j])){
+        printf("this is the Z level    "); print(z);
+        printf("this is the J loci     "); print(j);
+        printf("this is the NAN in the backward    "); print(bkwrd_mat[z][j]);
+        Rcpp::stop("This is the non-finite value in backward");
+       }
+       
+       }
+       ^^ USED THESE to find the cuplrints 
+     
+       ------------------
+       FUTURE DEBUG -- The backward algorithm is where nan is being produced off of first iteration 
+        in some instances...I think this is due to underflow when it's done running through the algorirthm
+        as this is only coming up in the cross samples that have essentially no error call (filtered so well)
+        and are haploid...the blocks are too clear? which is causing underflow?
+        
+        Also hitting this in the forward (and therefore, IBD mat)...again at likely break points (same place if block out forward...) ?? 
+        
+        Temprorary solution is if we hit this value, make it a very small value
+       */
+      
+
+      
       IBD_mat[z][j] = frwrd_mat[z][j] * bkwrd_mat[z][j];
+      
+      if(!isfinite(IBD_mat[z][j])){
+        printf("this is the Z level    "); print(z);
+        printf("this is the J loci     "); print(j);
+        printf("this is the NAN in the IBD mat    "); print(IBD_mat[z][j]);
+        Rcpp::stop("This is the non-finite value in ibd_mat...means your underflow trick isn't working?");
+      }
+      
       IBD_sum += IBD_mat[z][j];
     }
     for (int z=0; z<(z_max+1); z++) {
@@ -585,6 +632,7 @@ void MCMC::get_IBD() {
   }
   */
 }
+
 
 //------------------------------------------------
 // MCMC::
