@@ -115,12 +115,6 @@ runMCMC <- function(input=polyIBDinput,  m_max=5,
   accept_rate <- output_raw$accept_rate/samples
   
   # calculate quantiles over parameters
-  # debug
-  saveRDS(raw_output, file=paste0("~/Desktop/scratch_raw_output/", format(Sys.time(), "%d-%b-%Y_%H.%M.%OS3"), ".RDS"))
-  if(any(is.na(raw_output))){
-    stop("There are NAs in the raw output")
-  }
-  # end debug
   quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
   quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "f_ind", "k"),]
   
