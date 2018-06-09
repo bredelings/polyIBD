@@ -33,7 +33,7 @@ runMCMC <- function(vcfgt=NULL, p=NULL,  m_max=5,
   # note - vcf must have 4 columns, samples in final two columns
   # better management of memory for p and vcf -- if you have it as one object, p continually gets copied and takes up way too much memory
   
-  vcf <- gtmat
+  vcf <- vcfgt
   p <- p
  
   
