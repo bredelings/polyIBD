@@ -14,7 +14,7 @@ NULL
 #' @export
 
 
-runMCMC <- function(gtmat=NULL, p=NULL,  m_max=5,
+runMCMC <- function(vcfgt=NULL, p=NULL,  m_max=5,
                     k_max=50, rho=1e-5, 
                     burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   

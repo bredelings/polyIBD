@@ -107,10 +107,10 @@ is.polyIBDinput <- function(x) {
 #' @export
 print.polyIBDinput <- function(x, ...) {
   
-  # print this outpot onle
+  # print this output line
   cat("**************** \n")
-  cat(paste("There are", length(x), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
-  cat(paste(nrow(x[[1]]$snpmatrix[[1]]), "Variants per Sample Combination"), "\n")
+  cat(paste("There are", length(x$samples), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
+  cat(paste(nrow(x$snpmatrix), "Variants per Sample Combination"), "\n")
   cat("**************** \n")
   # return invisibly
   invisible(x)
@@ -122,10 +122,10 @@ print.polyIBDinput <- function(x, ...) {
 #' @export
 summary.polyIBDinput <- function(x, ...) {
   
-  # print this outpot onle
+  # print this output line
   cat("**************** \n")
-  cat(paste("There are", length(x), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
-  cat(paste(nrow(x[[1]]$snpmatrix[[1]]), "Variants per Sample Combination"), "\n")
+  cat(paste("There are", length(x$samples), "Sample Combinations in this VCFsnpmatrix Object"), "\n")
+  cat(paste(nrow(x$snpmatrix), "Variants per Sample Combination"), "\n")
   cat("**************** \n")
   # return invisibly
   invisible(x)

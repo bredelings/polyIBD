@@ -57,7 +57,7 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
     stop("You have a ploidy that is less than 1 or greater than 3, which cannot be accomodated by polyIBD")
   }
   # -----------------------------------------------------
-  # Determine the number of samples and thier combinations 
+  # Determine the number of samples and their combinations 
   #------------------------------------------------------
   smpls <- factor(colnames(vcfR::extract.gt(vcf)))
   smpls <- t(combn(smpls, 2))
@@ -77,26 +77,13 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
   # -----------------------------------------------------
   # Attach Positions to the VCF GT Informative Loci
   #------------------------------------------------------
-  
-  GTlist <- lapply(1:nrow(smpls), function(x){
-    list(matrix(NA, ncol=4, nrow=nrow(snpmatrix)))
-    })
-  namelist <- as.list(rep(NA, nrow(smpls)))
-    
-  for(i in 1:nrow(smpls)){
-    snpmatrixsave <- snpmatrix[, colnames(snpmatrix) %in% smpls[i,]]
-    snpmatrixsave <- cbind.data.frame(CHROM, POS, snpmatrixsave)
-    GTlist[[i]] <- snpmatrixsave
-    namelist[[i]] <- paste(smpls[i,], collapse = "||")
-    
-  }
-  
-  names(GTlist) <- namelist
+  snpmatrixsave <- cbind.data.frame(CHROM, POS, snpmatrix)
   
   # -----------------------------------------------------
   # return
   #-----------------------------------------------------
-  retlist <- list(GTlist = GTlist,
+  retlist <- list(samples = smpls,
+                  snpmatrix = snpmatrixsave,
                   p=p)
   class(retlist) <- "polyIBDinput"
   return(retlist)
