@@ -166,9 +166,9 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
   vcfAD <- apply(vcfAD, 2, function(x){as.numeric(x)})
   
   # extract distances via positions from vcfR object
-  vcfpos <- vcfR::getFIX(vcf)
-  vcfpos <- vcfpos[,colnames(vcfpos) %in% c("CHROM", "POS")]
-  vcfpos[,2] <- as.numeric(vcfpos[,2])
+  CHROM <- vcfR::getCHROM(vcf)
+  POS <- vcfR::getPOS(vcf)
+  vcfpos <- cbind.data.frame(CHROM, POS)
   vcfdf <- cbind.data.frame(vcfpos, vcfAD)
   
   vcflist <- split(vcfdf, vcfdf$CHROM)
@@ -184,24 +184,7 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL){
     df2 <- vcfdf_fromlist[, colnames(vcfdf_fromlist) %in% c("POS")]
     gendist <- as.matrix(dist(df2))
     
-    
-    # ggplot distance vs correlation on log scale
-    plotdf <- data.frame(CHROM=rep(vcfdf_fromlist$CHROM[1], length(gendist)),
-                         correlation = c(c), 
-                         gendist = c(gendist))
-    
-    corrplot <- plotdf %>% 
-      dplyr::mutate(gendisttol = gendist+1) %>% 
-      ggplot(aes(x=gendisttol, y=correlation)) +
-      geom_point() + 
-      geom_hline(yintercept = 0, colour="#de2d26") +
-      scale_x_log10() +
-      xlab("log(base-pair distance + 1)") + ylab("correlation") + 
-      ggtitle(paste(vcfdf_fromlist$CHROM[1])) +
-      theme_minimal()
-    
-    
-    ret <- list(vcfAF = vcfdf_fromlist, corMat=c, gendist=gendist, corrplot = corrplot)
+    ret <- list(vcfAF = vcfdf_fromlist, corMat=c, gendist=gendist)
     return(ret)
   }
   
