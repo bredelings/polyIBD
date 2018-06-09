@@ -14,7 +14,7 @@ NULL
 #' @export
 
 
-runMCMC <- function(input=polyIBDinput,  m_max=5,
+runMCMC <- function(gtmat=NULL, p=NULL,  m_max=5,
                     k_max=50, rho=1e-5, 
                     burnin=1e2, samples=1e3, e1=0.05, e2=0.05, reportIteration=1e3) {
   
@@ -31,10 +31,10 @@ runMCMC <- function(input=polyIBDinput,  m_max=5,
   
   # TODO - input parameter checks
   # note - vcf must have 4 columns, samples in final two columns
-  # better management of memory for p 
+  # better management of memory for p and vcf -- if you have it as one object, p continually gets copied and takes up way too much memory
   
-  vcf <- input$snpmatrix
-  p <- input$p
+  vcf <- gtmat
+  p <- p
  
   
   # extract basic parameters

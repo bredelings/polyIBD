@@ -4,7 +4,7 @@
 \alias{plot.polyIBD}
 \title{Default multi-panel plot for polyIBD class}
 \usage{
-\method{plot}{polyIBD}(x, y = NULL, ...)
+plot.polyIBD(x, y = NULL, ...)
 }
 \arguments{
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}

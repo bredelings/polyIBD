@@ -29,9 +29,12 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
     stop("Must specify an input")
   }
   
+  # this is simply to protect polyIBD -- users should have already subsetted to biallelic SNPs
   vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
   vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
   print(vcf)
+  # add warning message ?
+  
   # -----------------------------------------------------
   # determine ploidy to determine genotype numeric placeholder  
   #------------------------------------------------------
@@ -75,25 +78,26 @@ vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
   # Attach Positions to the VCF GT Informative Loci
   #------------------------------------------------------
   
-  retlist <- lapply(1:nrow(smpls), function(x){
-    list(samples = rep(NA, 1),
-         snpmatrix = matrix(NA, ncol=4, nrow=nrow(snpmatrix)),
-         p=rep(NA, nrow(snpmatrix)))
+  GTlist <- lapply(1:nrow(smpls), function(x){
+    list(matrix(NA, ncol=4, nrow=nrow(snpmatrix)))
     })
+  namelist <- as.list(rep(NA, nrow(smpls)))
     
   for(i in 1:nrow(smpls)){
     snpmatrixsave <- snpmatrix[, colnames(snpmatrix) %in% smpls[i,]]
     snpmatrixsave <- cbind.data.frame(CHROM, POS, snpmatrixsave)
-    retlist[[i]]$snpmatrix <- snpmatrixsave
-    retlist[[i]]$p <- p
-    retlist[[i]]$samples <- paste(smpls[i,], collapse = "||")
+    GTlist[[i]] <- snpmatrixsave
+    namelist[[i]] <- paste(smpls[i,], collapse = "||")
     
   }
+  
+  names(GTlist) <- namelist
   
   # -----------------------------------------------------
   # return
   #-----------------------------------------------------
-  
+  retlist <- list(GTlist = GTlist,
+                  p=p)
   class(retlist) <- "polyIBDinput"
   return(retlist)
   

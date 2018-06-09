@@ -734,7 +734,32 @@ ggplot_SNPs_IBD <- function(x, trueIBD, snps){
 }
 
 
+#------------------------------------------------
+#' @title Plot Genetic Autocorrelation result
+#'
+#' @description Plots the autocorrelation between loci (calculated from population allele frequencies)
+#'
+#' @param genautocorrobj an object of class \code{genautocorr}, as produced by the function \code{polyIBD::genautocorr}
+#'
+#' do not export yet -- to do 
 
+plotgenautocorr <- function(genautocorrobj){
+  
+  plotdf <- data.frame(CHROM=rep(vcfdf_fromlist$CHROM[1], length(gendist)),
+                       correlation = c(c), 
+                       gendist = c(gendist))
+  
+  corrplot <- plotdf %>% 
+    dplyr::mutate(gendisttol = gendist+1) %>% 
+    ggplot(aes(x=gendisttol, y=correlation)) +
+    geom_point() + 
+    geom_hline(yintercept = 0, colour="#de2d26") +
+    scale_x_log10() +
+    xlab("log(base-pair distance + 1)") + ylab("correlation") + 
+    ggtitle(paste(vcfdf_fromlist$CHROM[1])) +
+    theme_minimal()
+
+}
 
 
 
