@@ -82,6 +82,8 @@ runMCMC <- function(gtmat=NULL, p=NULL,  m_max=5,
   # run efficient Rcpp function
   output_raw <- runMCMC_cpp(args, args_functions)
   
+  #saveRDS(output_raw, paste0("~/Desktop/scratch_output/output_raw",format(Sys.time(), "%d-%b-%Y_%H.%M.%OS3"),".RDS"))
+  
   # check for convergence
   checkConvergence(output_raw$logLike_burnin, output_raw$logLike)
   
