@@ -373,8 +373,8 @@ ggplot_trace <- function(mapping = NULL, data = NULL, stat = "identity", positio
           plot.title = element_text(size = 14, face = "bold", hjust = 0.5, family = "Arial"),
           axis.title.x=element_text(size=12, face="bold", family = "Arial"), 
           axis.text.x=element_text(size=10, family = "Arial", angle = 45, hjust = 1), 
-          axis.title.y=element_text(size=12, face="bold", family = "Arial"), 
-          axis.text.y=element_text(size=10, family = "Arial"),
+          axis.title.y=element_text(size=16.5, face="bold", family = "Arial"), 
+          axis.text.y=element_text(size=16, family = "Arial"),
           axis.ticks = element_blank()
     )
   
@@ -592,7 +592,7 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   
   plotobj <- ggplot() + 
     geom_rect(data=IBDdflong, mapping=aes(xmin=start, xmax=end, ymin=Znum-0.49, ymax=Znum+0.49, fill=Prob)) +
-    viridis::scale_fill_viridis("IBD Probability", alpha=0.2, option="plasma") +
+    viridis::scale_fill_viridis("IBD Probability", alpha=0.2, option="plasma", limits=c(0,1)) +
     scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
     xlab("POS") +
     facet_grid(~CHROM) + 
@@ -600,8 +600,8 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
           panel.grid.minor = element_blank(), 
           panel.background = element_blank(),
           axis.ticks = element_blank(),
-          axis.title.y = element_text(size=14, face="bold", family = "Arial"),
-          axis.text.y = element_text(size=10.5, face="bold", family = "Arial", margin = margin(r = 1)),
+          axis.title.y = element_text(size=18, face="bold", family = "Arial"),
+          axis.text.y = element_text(size=16, face="bold", family = "Arial", margin = margin(r = 1)),
           axis.title.x = element_text(size=12, face="bold", family = "Arial"),
           axis.text.x = element_text(size=9, family = "Arial", angle = 45, margin = margin(r = 1)),
           strip.text.x = element_text(size =12, face="bold", family = "Arial"),
