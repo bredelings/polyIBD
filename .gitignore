@@ -16,3 +16,7 @@ ignore/
 .Rproj.user
 polyIBD.Rproj
 inst/doc
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
