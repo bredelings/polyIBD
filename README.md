@@ -6,7 +6,7 @@
 ## Status
 This is the branch that was presented at the Genomic Epidemiology of Malaria (GEM) Conference on June 13, 2018. We have now branched to `devo` to work on the within relatedness (F<sub>ws</sub>) parameter and the other updates discussed at GEM.  
   
-For the time being, the `master` branch will be stable but is considered alpha-version of the software. 
+For the time being, the `master` branch will be stable but is considered an alpha-version of the software. 
 
 ## Purpose 
   
