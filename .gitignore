@@ -11,6 +11,7 @@
 # specific files and folders #
 ##############################
 ignore/
+scratch/
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .Rproj.user
