@@ -44,7 +44,7 @@ plot_m1 <- function(x, ...) {
   if (! "main" %in% argNames) {args$main <- "m1 trace"}
 
   # produce plot
-  do.call(plot_trace, c(list(x=unclass(x$raw$m1)), args))
+  do.call(plot_trace, c(list(x=unclass(x$iterations$m1)), args))
 }
 
 #------------------------------------------------
@@ -73,7 +73,7 @@ plot_m2 <- function(x, ...) {
   if (! "main" %in% argNames) {args$main <- "m2 trace"}
 
   # produce plot
-  do.call(plot_trace, c(list(x=unclass(x$raw$m2)), args))
+  do.call(plot_trace, c(list(x=unclass(x$iterations$m2)), args))
 }
 
 #------------------------------------------------
@@ -101,7 +101,7 @@ plot_f <- function(x, ...) {
   if (! "ylim" %in% argNames) {args$ylim <- c(0,1)}
 
   # produce plot
-  do.call(plot_trace, c(list(x=unclass(x$raw$f)), args))
+  do.call(plot_trace, c(list(x=unclass(x$iterations$f)), args))
 }
 
 #------------------------------------------------
@@ -129,10 +129,10 @@ plot_k <- function(x, ...) {
   # set defaults on undefined arguments
   if (! "ylab" %in% argNames) {args$ylab <- "k"}
   if (! "main" %in% argNames) {args$main <- "k trace"}
-  if (! "ylim" %in% argNames) {args$ylim <- c(0, max(unclass(x$raw$k)))}
+  if (! "ylim" %in% argNames) {args$ylim <- c(0, max(unclass(x$iterations$k)))}
 
   # produce plot
-  do.call(plot_trace, c(list(x = unclass(x$raw$k)), args))
+  do.call(plot_trace, c(list(x = unclass(x$iterations$k)), args))
 }
 
 #------------------------------------------------
@@ -198,8 +198,8 @@ plot.polyIBD <- function(x, y = NULL, ...) {
   })
 
   # plot m1 and m2 trace
-  plot_m1(x, ylim = c(0,max(x$raw$m1) + 1))
-  plot_m2(x, ylim = c(0,max(x$raw$m2) + 1))
+  plot_m1(x, ylim = c(0,max(x$iterations$m1) + 1))
+  plot_m2(x, ylim = c(0,max(x$iterations$m2) + 1))
 
   # plot f
   plot_f(x)

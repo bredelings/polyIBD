@@ -3,11 +3,8 @@ title: "Getting Started with `polyIBD`"
 author: "Nicholas F. Brazeau & Robert Verity"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: vignette
-    toc: true
-    fig_caption: yes
+  rmarkdown::html_vignette:
+  keep_md: TRUE
 vignette: >
   %\VignetteIndexEntry{"Getting Started with _polyIBD_"}
   %\VignetteEncoding{UTF-8}
@@ -17,12 +14,7 @@ editor_options:
 ---
 
 ```{r setup, include = F, echo=F}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-
-
+devtools::install_github("nickbrazeau/polyIBD")
 library(polyIBD)
 library(tidyverse)
 library(viridis)
@@ -94,9 +86,10 @@ The ouptut of the `simData` function is a list of two lists and two dataframes:
 ## Running the MCMC
 ```{r, echo=T, eval=T}
 # run MCMC
-ret <- runMCMC(vcf=sim$vcf, p=sim$p, rho=rho, k_max = 25,
-               burnin=5e3, samples=1e5, reportIteration=1e2) # turning off report iteration for space
+ret <- runMCMC(vcfgt=sim$snpmatrix, p=sim$p, rho=rho, k_max = 25,
+               burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
 ```
+
 
 From the MCMC, a polyIBD class object is returned that contians both summary statistics and raw data. The summary statistics and raw data can be interrogated directly.
 ### Summary Data

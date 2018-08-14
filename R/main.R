@@ -98,9 +98,9 @@ runMCMC <- function(vcfgt = NULL, p = NULL,  m_max = 5,
                      m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
                      f_ind = coda::mcmc(output_raw$f_ind),
-                     k = coda::mcmc(output_raw$k),
+                     k = coda::mcmc(output_raw$k)
                      #sim_trans_n = coda::mcmc(output_raw$sim_trans_n),
-                     runTime = output_raw$runTime)
+                     )
 
 
   # ------------------------------
@@ -115,14 +115,18 @@ runMCMC <- function(vcfgt = NULL, p = NULL,  m_max = 5,
   # get final acceptance rate
   accept_rate <- output_raw$accept_rate/samples
 
+  # get time it took MCMC to run
+  runTime <- output_raw$runTime
+
   # calculate quantiles over parameters
-  quants <- t(mapply(function(x){quantile(x, probs=c(0.05, 0.5, 0.95))}, raw_output))
+  quants <- t(mapply(function(x){quantile(x, probs=c(0.025, 0.5, 0.975))}, raw_output))
   quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "f_ind", "k"),]
 
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,
                          quantiles = quants,
-                         accept_rate = accept_rate)
+                         accept_rate = accept_rate,
+                         runTime = runTime)
 
 
   # ------------------------------
@@ -132,7 +136,7 @@ runMCMC <- function(vcfgt = NULL, p = NULL,  m_max = 5,
   # create output class polyIBD
   ret <- list(samples = colnames(vcf[3:4]),
               summary = summary_output,
-              raw = raw_output)
+              iterations = raw_output)
   class(ret) <- "polyIBD"
 
   # return

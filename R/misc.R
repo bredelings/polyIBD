@@ -1,5 +1,5 @@
 #------------------------------------------------
-# S4 object functions
+# S3 object functions
 #------------------------------------------------
 
 #------------------------------------------------
@@ -29,10 +29,10 @@ summary.polyIBD <- function(x, ...) {
 
   # print MCMC summary
   cat("# MCMC summary\n")
-  cat(paste("burn-in iterations:\t", length(x$raw$logLike_burnin)) ,"\n")
-  cat(paste("sampling iterations:\t", length(x$raw$logLike)) ,"\n")
+  cat(paste("burn-in iterations:\t", length(x$iterations$logLike_burnin)) ,"\n")
+  cat(paste("sampling iterations:\t", length(x$iterations$logLike)) ,"\n")
   cat(paste("acceptance rate:\t", x$summary$accept_rate) ,"\n")
-  cat(paste("run-time (seconds):\t", round(x$raw$runTime, 3)) ,"\n")
+  cat(paste("run-time (seconds):\t", round(x$summary$runTime, 3)) ,"\n")
   cat("\n")
 
   # print posterior parameter summary
