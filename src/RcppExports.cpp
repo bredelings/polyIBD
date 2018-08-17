@@ -18,8 +18,11 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP run_testthat_tests();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_polyIBD_runMCMC_cpp", (DL_FUNC) &_polyIBD_runMCMC_cpp, 2},
+    {"run_testthat_tests",   (DL_FUNC) &run_testthat_tests,   0},
     {NULL, NULL, 0}
 };
 

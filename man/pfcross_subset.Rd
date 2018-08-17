@@ -5,6 +5,9 @@
 \alias{pfcross_subset}
 \title{P. falciparum Cross Project Data}
 \format{A vcf containing 4 samples and 100 biallelic SNPs}
+\source{
+\url{ftp://ngs.sanger.ac.uk/production/malaria/pf-crosses/1.0/3d7_hb3.combined.final.vcf.gz}
+}
 \usage{
 pfcross_subset
 }

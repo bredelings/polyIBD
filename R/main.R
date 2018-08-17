@@ -1,7 +1,7 @@
 #------------------------------------------------
 # The following commands ensure that package dependencies are listed in the NAMESPACE file.
 
-#' @useDynLib polyIBD
+#' @useDynLib polyIBD, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @importFrom RcppParallel RcppParallelLibs
 NULL
