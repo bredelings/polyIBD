@@ -98,8 +98,10 @@ simIBD <- function(f, k, rho, pos) {
 
 simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
                              contig2=sort(sample(1e5, 1e2))),
-                    m1 = 1, m2 = 1, f = 0.5, rho = 1e-7, k = 5, p = NULL,
-                    p_shape1 = 0.1, p_shape2 = 0.1, propMissing = 0) {
+                    m1 = 1, m2 = 1,
+                    f = 0.5, rho = 1e-7, k = 5,
+                    p = NULL, p_shape1 = 0.1, p_shape2 = 0.1,
+                    propMissing = 0) {
 
   # get number of loci in each contig
   nc <- length(pos)
@@ -128,7 +130,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
   }
 
   # initialise objects over all contigs
-  haploid1_df <- haploid2_df <- IBD_df <- simvcf <- NULL
+  CHROMPOS <- haploid1_mat <- haploid2_mat <- IBD_mat <- simvcf <- NULL
 
   # loop over contigs
   zmax <- min(m1, m2)
@@ -149,7 +151,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
     }
     colnames(IBD) <- paste0("Genotype", 1:zmax)
 
-    # make this section of vcf
+    # make GT section of vcf
     vcf <- data.frame(Sample1=rep(1,n[i]), Sample2=rep(1,n[i]))
     vcf$Sample1[apply(haploid1, 1, function(x){all(x == 0)})] <- 0
     vcf$Sample1[apply(haploid1, 1, function(x){all(x == 2)})] <- 2
@@ -157,11 +159,11 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
     vcf$Sample2[apply(haploid2, 1, function(x){all(x == 2)})] <- 2
 
     # add to combined objects
-    df <-          data.frame(CHROM = names(pos)[i], POS = pos[[i]])
-    haploid1_df <- rbind(haploid1_df, cbind(df, haploid1))
-    haploid2_df <- rbind(haploid2_df, cbind(df, haploid2))
-    IBD_df <-      rbind(IBD_df, cbind(df, IBD))
-    simvcf <-      rbind(simvcf, cbind(df, vcf))
+    CHROMPOS <-    rbind(CHROMPOS, cbind.data.frame(CHROM = names(pos)[i], POS = pos[[i]]))
+    haploid1_mat <- rbind(haploid1_mat, haploid1)
+    haploid2_mat <- rbind(haploid2_mat, haploid2)
+    IBD_mat <-      rbind(IBD_mat, IBD)
+    simvcf <-      rbind(simvcf, vcf)
 
   }
 
@@ -173,10 +175,11 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
 
   # return output as list
 
-  retlist <- list(snpmatrix=simvcf,
+  retlist <- list(CHROMPOS = CHROMPOS,
+                  gtmatrix=simvcf,
                   p=p,
-                  haploid=list(haploid1=haploid1_df, haploid2=haploid2_df),
-                  IBD=IBD_df)
+                  haploid=list(haploid1=haploid1_mat, haploid2=haploid2_mat),
+                  IBD=IBD_mat)
 
   class(retlist) <- "polyIBDinput"
   return(retlist)
