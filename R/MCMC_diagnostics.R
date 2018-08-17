@@ -32,3 +32,6 @@ checkConvergence <- function(burnin, samples) {
 
 
 # TODO add more diagnostics
+# https://www2.stat.duke.edu/courses/Fall09/sta290/Lectures/Diagnostics/param-diag.pdf
+# consider adding ACF plots
+# effectiveSize(theta.MCMC)

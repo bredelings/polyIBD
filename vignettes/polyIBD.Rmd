@@ -16,8 +16,6 @@ editor_options:
 ```{r setup, include = F, echo=F}
 devtools::install_github("nickbrazeau/polyIBD")
 library(polyIBD)
-library(tidyverse)
-library(viridis)
 
 ```
 
@@ -95,3 +93,24 @@ From the MCMC, a polyIBD class object is returned that contians both summary sta
 ### Summary Data
 Summary of the user-specified parameters for the MCMC burn-in and sampling iterations, acceptance rate (*ideally should be around 23%*), and the run-time of the function.
 In addition, posterior estimates with median and 95% confidence intervals provided.
+
+
+
+## Real Data 
+```{r, echo=T, eval=T}
+data("pfcross_subset")
+class(pfcross_subset)
+
+# assumed this is already filtered and is ready to be analyzed
+pvcf <- polyIBD::vcf2polyIBDinput(vcfR=pfcross_subset)
+
+
+
+
+```
+
+
+
+
+
+

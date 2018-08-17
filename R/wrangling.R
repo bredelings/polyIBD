@@ -22,25 +22,30 @@
 
 vcf2polyIBDinput <- function(vcffile=NULL, vcfR=NULL) {
 
-  # -----------------------------------------------------
-  # Read and check input
-  #------------------------------------------------------
+
+  # check if input is vcfR
   if(is.null(vcffile)){
-    if(class(vcfR) != "vcfR"){
+    if(! class(vcfR) %in% "vcfR" ){
       stop("vcfR object must be of class vcfR")
     }
-    vcf <- vcfR
+  # consistent naming
+  vcf <- vcfR
+
+  # check if input is vcf file path
   } else if (!is.null(vcffile)){
     vcf <- vcfR::read.vcfR(file=vcffile, verbose=F) # read vcf
   } else {
     stop("Must specify an input")
   }
 
-  # this is simply to protect polyIBD -- users should have already subsetted to biallelic SNPs
-  vcf <-vcfR::extract.indels(vcf, return.indels = F) # subset to SNPs
-  vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
-  print(vcf)
-  # add warning message ?
+  if( ! identical( vcf, vcfR::extract.indels(vcf[vcfR::is.biallelic(vcf)], return.indels = F) ) ){
+    stop("Your vcf input contains variants that are not biallelic SNPs. polyIBD
+          is restricted to use cases with biallelic SNPs. To convert your vcfR
+          object to biallelic SNPs, you can use the following command:
+          vcfR::extract.indels(vcf[vcfR::is.biallelic(vcf)], return.indels = F)
+         ")
+  }
+
 
   # -----------------------------------------------------
   # determine ploidy to determine genotype numeric placeholder

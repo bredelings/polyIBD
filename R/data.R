@@ -28,12 +28,11 @@
 #'   \dontrun{
 #'   url <- "ftp://ngs.sanger.ac.uk/production/malaria/pf-crosses/1.0/3d7_hb3.combined.final.vcf.gz"
 #'   destfile <- "~/Desktop/temp/temp.vcf.gz"
-#'   httr::GET(url=url, write_disk(path=destfile, overwrite = F))
+#'   httr::GET(url=url, httr::write_disk(path=destfile, overwrite = F))
 #'   vcfRobject <- vcfR::read.vcfR(file=destfile)
-#'   vcfRobject <- vcfRobject[vcfR::is.biallelic(vcfRobject)] # biallelic
-#'   vcfRobject <-vcfR::extract.indels(vcfRobject, return.indels = F) # subset to SNPs
-#'   vcfRobject <- NFBtools::vcfR2segsites(vcfRobject)
-#'   vcfRobject <- vcfRobject[1:100, c("FORMAT", "3D7/PG0051-C/ERR019061", "HB3/PG0052-C/ERR019054", "C14/PG0060-C/ERR019058", "C01/PG0062-C/ERR019070")]
+#'   vcfRobject <- vcfR::extract.indels(vcfRobject[vcfR::is.biallelic(vcfRobject)], return.indels = F) # subset to SNPs
+#'   vcfRobject <- NFBtools::vcfR2SubsetChrom(vcfRobject = vcfRobject, chromvect = "Pf3D7_01_v3")
+#'   vcfRobject <- vcfRobject[, c("FORMAT", "3D7/PG0051-C/ERR019061", "HB3/PG0052-C/ERR019054", "C04/PG0061-C/ERR019059", "C02/PG0053-C/ERR019067")]
 #'   }
 #' }
 #'

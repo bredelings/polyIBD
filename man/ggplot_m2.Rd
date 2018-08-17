@@ -4,7 +4,7 @@
 \alias{ggplot_m2}
 \title{Trace ggplot of m2}
 \usage{
-ggplot_m2(x, ...)
+ggplot_m2(x)
 }
 \arguments{
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}

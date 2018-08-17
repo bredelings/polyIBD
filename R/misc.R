@@ -102,3 +102,12 @@ Rcpp_to_mat <- function(x) {
     ret <- matrix(unlist(x), nrow=length(x), byrow=TRUE)
     return(ret)
 }
+
+#------------------------------------------------
+# Best practices for Cpp in R  -- http://r-pkgs.had.co.nz/src.html
+#' @export
+#' @noRD
+.onUnload <- function (libpath) {
+  library.dynam.unload("polyIBD", libpath)
+}
+

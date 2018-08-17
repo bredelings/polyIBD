@@ -34,7 +34,8 @@ Suggests:
     covr
 LinkingTo:
     Rcpp,
-    RcppParallel
+    RcppParallel,
+    testthat
 SystemRequirements:
     C++11,
     GNU make

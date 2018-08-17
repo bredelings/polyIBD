@@ -4,7 +4,7 @@
 \alias{ggplot_f_postprob}
 \title{Trace ggplot of f posterior prob}
 \usage{
-ggplot_f_postprob(x, ...)
+ggplot_f_postprob(x)
 }
 \arguments{
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
