@@ -592,7 +592,7 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   
   plotobj <- ggplot() + 
     geom_rect(data=IBDdflong, mapping=aes(xmin=start, xmax=end, ymin=Znum-0.49, ymax=Znum+0.49, fill=Prob)) +
-    viridis::scale_fill_viridis("IBD Probability", alpha=0.2, option="plasma", limits=c(0,1)) +
+    viridis::scale_fill_viridis("IBD Probability", alpha=0.9, option="plasma", limits=c(0,1)) +
     scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
     xlab("POS") +
     facet_grid(~CHROM) + 
