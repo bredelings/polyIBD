@@ -75,13 +75,19 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m2_weight_stay = 1;
   m2_weight_move = 1;
   f_propSD = 0.2;
-  k_weight_stay = 1;
-  k_weight_move = 1;
+  k_lambda = 10;
 }
 
 //------------------------------------------------
 // MCMC::
-// Run burn-in phase of MCMC. Each iteration we alternate which parameters are updated. First, we give m1 and m2 a chance to update, based on the sampling weights. If m1 or m2 do change then we don't update the other parameters. If by chance m1 and m2 stay the same we choose one of the other parameters to update with equal probability. The advantage to this method is that, because only one parameter is updated each iteration, we can only change the proposal standard deviation relating to that parameter (by Robbins-Monro). If multiple parameters changed each iteration we could not change these proposal standard deviations independently.
+// Run burn-in phase of MCMC. Each iteration we alternate which parameters are updated.
+// First, we give m1 and m2 a chance to update, based on the sampling weights.
+// If m1 or m2 do change then we don't update the other parameters. If by chance m1 and m2 stay
+// the same we choose one of the other parameters to update with equal probability. The advantage
+// to this method is that, because only one parameter is updated each iteration, we can only change
+// the proposal standard deviation relating to that parameter (by Robbins-Monro). If multiple parameters
+// changed each iteration we could not change these proposal standard deviations independently.
+
 void MCMC::burnin_MCMC(Rcpp::List args_functions) {
   // announce burn-in phase
   print("Running MCMC");
@@ -103,14 +109,13 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     
     // if no change in m then propose either f or k
     double f_prop = f;
-    int k_prop = k;
+	int k_prop = k;
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
-        
       } else {
-        //some proposal distribution for k -- consider weights later
-        k_prop = propose_k(k, k_weight_move, k_weight_stay);
+        k_prop = rpois1(1, k_lambda); // TODO --- this proposal distribtuion is not symmetrical. Draw from rnbinom with k to define the number of successes and f as the prob of success
+//		k_prop = runif(1,100); // TODO -- this is obviously a temp holder
       }
     }
     
@@ -121,7 +126,8 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     
     
     // Metropolis-Hastings step
-    // note that all proposal distributions are symmetric, therefore no Hastings step is required
+    // note that all proposal distributions are symmetric, therefore no Hastings step is required -- we meet g(x | x') = g(x' | x)
+    // ^^ this was true but I just BROKE THIS -- TODO
     // if accept
     if (log(runif_0_1()) < (logLike_new-logLike_old)) {
       
@@ -129,14 +135,15 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       m1_weight_move = (m1==m1_prop) ? m1_weight_move : ++m1_weight_move;
       m2_weight_move = (m2==m2_prop) ? m2_weight_move : ++m2_weight_move;
       
+
       // or update f_propSD
       if (m1==m1_prop && m2==m2_prop && f_prop!=f) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
       
-      // or update k sample weights
+      // or update k lambda
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
+        k_lambda += k_lambda * (1-0.23)/sqrt(double(rep));
       }
       
       // update parameter values and likelihood
@@ -166,9 +173,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       
       // update k standard deviation
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_weight_stay = (k==k_prop) ? k_weight_stay : ++k_weight_stay;
-        // limit k sampling weights
-        k_weight_stay = (k_weight_stay > 100*k_weight_move) ? 100*k_weight_move : k_weight_stay;
+    	  k_lambda -= k_lambda * -0.23/sqrt(double(rep));
+    	  k_lambda = (k_lambda < 0) ? -k_lambda : k_lambda;
+
       }
       
     }
@@ -181,8 +188,10 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
 
 //------------------------------------------------
 // MCMC::
-// Run sampling phase of MCMC. Most of this function is very similar to the burn-in phase. Differences are that sampling weights and standard deviations are not updated by Robbins-Monro, and a greater number of outputs are stored.
-void MCMC::run_MCMC(Rcpp::List args_functions) {
+// Run sampling phase of MCMC. Most of this function is very similar to the burn-in phase.
+// Differences are that sampling weights and standard deviations are not updated by Robbins-Monro,
+// and a greater number of outputs are stored.
+void MCMC::samp_MCMC(Rcpp::List args_functions) {
   
   // announce burn-in phase
   print("   sampling phase");
@@ -212,7 +221,8 @@ void MCMC::run_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = propose_k(k, k_weight_move, k_weight_stay);
+    	  k_prop = rpois1(1, k_lambda);
+ //		k_prop = runif(1,100); // TODO -- this is obviously a temp holder
       }
     }
     
@@ -648,16 +658,3 @@ double MCMC::propose_m(double m_current, double weight_move, double weight_stay)
   return(m_prop);
 }
 
-//------------------------------------------------
-// MCMC::
-// New value cannot be 0 or greater than k_max and k is proposed given current k and sampling weights
-double MCMC::propose_k(double k_current, double weight_move, double weight_stay) {
-  
-  double k_prop = k_current;
-  if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
-    k_prop = rbernoulli1(0.5) ? k_current+1 : k_current-1;
-    k_prop = (k_prop==0 || k_prop>k_max) ? k_current : k_prop;
-  }
-  
-  return(k_prop);
-}

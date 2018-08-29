@@ -49,8 +49,8 @@ public:
   // temp objects
   double f_ind;
   std::vector<double> f_ind_store;
-  int sim_trans_n;
-  std::vector<int> sim_trans_n_store;
+ // int sim_trans_n;
+ // std::vector<int> sim_trans_n_store;
   
   // misc objects
   int m1_weight_stay;
@@ -58,8 +58,7 @@ public:
   int m2_weight_stay;
   int m2_weight_move;
   double f_propSD;
-  int k_weight_stay;
-  int k_weight_move;
+  double k_lambda;
   int IBD_index;
   
   
@@ -70,7 +69,7 @@ public:
   
   // other functions
   void burnin_MCMC(Rcpp::List args_functions);
-  void run_MCMC(Rcpp::List args_functions);
+  void samp_MCMC(Rcpp::List args_functions);
   void define_emmission_lookup();
   void update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs);
   double forward_alg(int m1, int m2);

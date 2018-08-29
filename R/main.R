@@ -16,7 +16,7 @@ NULL
 
 runMCMC <- function(input = NULL,
                     m_max = 5,
-                    k_max = 50,
+                    k_max = 10,
                     rho = 1e-5,
                     burnin = 1e2,
                     samples = 1e3,

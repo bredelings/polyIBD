@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with `polyIBD`"
+title: "`polyIBD` Overview"
 author: "Nicholas F. Brazeau & Robert Verity"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -49,9 +49,9 @@ n <- 1e3 # this is the number of loci we would like to simulate
 rho <- 7.4e-7 # this is the recombination rate that is assumed to be known
 k_true <- 2 # this is the number of generations that we are trying to infer
 f_true <- 0.4 # this is the proportion of genetic relatedness we are trying to infer 
-m1 <- 2 # this is the multiplicity of infection for sample1 that we are trying to infer
-m2 <- 2 # this is the multiplicity of infection for sample2 that we are trying to infer
-m_true <- c(m1,m2)
+m1 <- 1 # this is the multiplicity of infection for sample1 that we are trying to infer
+m2 <- 1 # this is the multiplicity of infection for sample2 that we are trying to infer
+m_true <- c(m1, m2)
 pos <- sort(sample(1.4e6, n)) # simulate some positions/genomic coordinates
 
 
@@ -69,12 +69,9 @@ sim <- simData(pos=list(contig1=pos),
 
 
 f_ind_true <- mean(unlist(sim$IBD[,1:ncol(sim$IBD)]))
+f_ind_true
 trueIBD <- data.frame(CHROM = sim$CHROMPOS$CHROM, POS=sim$CHROMPOS$POS,
                       z_true = rowSums(sim$IBD[,1:ncol(sim$IBD),drop=FALSE]))
-
-
-
-
 
 ```
 
@@ -94,9 +91,9 @@ The ouptut of the `simData` function is a list of two lists and two dataframes:
 ## Running the MCMC
 ```{r, echo=T, eval=T}
 # run MCMC
-ret <- runMCMC(input = sim, rho=rho, k_max = 25,
-               burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
-
+ret <- runMCMC(input = sim, rho=rho, k_max = 25, 
+               burnin=5e1, samples=1e4, reportIteration=1e2) # turning off report iteration for space
+ret
 
 polyIBD::ggplot_IBDraster(ret, trueIBD = trueIBD,
                           truem1 = m_true[1], truem2 = m_true[2],

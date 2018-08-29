@@ -1,0 +1,87 @@
+---
+title: "`polyIBD` Quick Start Guide"
+author: "Nicholas F. Brazeau & Robert Verity"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  rmarkdown::html_vignette:
+  keep_md: TRUE
+vignette: >
+  %\VignetteIndexEntry{"Getting Started with _polyIBD_"}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{prettydoc::html_pretty}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include = F, echo=F}
+devtools::install_github("nickbrazeau/polyIBD", ref="devo")
+library(polyIBD)
+
+```
+
+## Simulated Data 
+```{r, echo=T}
+# setup sim parameters
+n <- 1e3 # this is the number of loci we would like to simulate
+rho <- 7.4e-7 # this is the recombination rate that is assumed to be known
+k_true <- 2 # this is the number of generations that we are trying to infer
+f_true <- 0.4 # this is the proportion of genetic relatedness we are trying to infer 
+m1 <- 2 # this is the multiplicity of infection for sample1 that we are trying to infer
+m2 <- 2 # this is the multiplicity of infection for sample2 that we are trying to infer
+m_true <- c(m1, m2)
+pos <- list(contig1=sort(sample(1.4e6, n))) # simulate some positions/genomic coordinates
+
+# run the simulation 
+sim <- simData(pos=pos, 
+               m1=m_true[1], m2=m_true[2], k=k_true,
+               f=f_true, rho=rho, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing = 0)
+
+
+
+
+f_ind_true <- mean(unlist(sim$IBD[,1:ncol(sim$IBD)]))
+trueIBD <- data.frame(CHROM = sim$CHROMPOS$CHROM, POS=sim$CHROMPOS$POS,
+                      z_true = rowSums(sim$IBD[,1:ncol(sim$IBD),drop=FALSE]))
+
+
+# run MCMC 
+ret <- runMCMC(input = sim, rho=rho, k_max = 25,
+               burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
+
+ret 
+
+polyIBD::ggplot_IBDraster(ret, trueIBD = trueIBD,
+                          truem1 = m_true[1], truem2 = m_true[2],
+                          truef = f_ind_true)
+
+
+
+
+
+
+```
+
+
+
+
+
+## Real Data 
+```{r, echo=T}
+data("pfcross_subset")
+
+
+# assumed this is already filtered and is ready to be analyzed
+pvcf <- polyIBD::vcf2polyIBDinput(vcfR=pfcross_subset)
+
+retcross <- runMCMC(input = pvcf, rho=rho, k_max = 25,
+               burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
+
+
+polyIBD::ggplot_IBDraster(retcross)
+
+
+
+
+```
+

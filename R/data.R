@@ -108,7 +108,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
   n <- mapply(function(x){length(x)}, pos)
 
   # default contig names
-  if (is.null(names(pos)) | ""%in%names(pos)) {
+  if (is.null(names(pos)) | "" %in% names(pos)) {
     names(pos) <- paste0("contig", 1:nc)
   }
 
