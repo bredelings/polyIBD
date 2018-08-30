@@ -179,14 +179,6 @@ double dpois1(int n, double lambda, bool returnLog) {
 #endif
 
 //------------------------------------------------
-// draw from the poisson distribution n times with lambda equal to
-double rpois1(int n, double lambda) {
-    int ret = R::rpois(lambda);
-    return(ret);
-}
-
-
-//------------------------------------------------
 // draw from negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
 int rnbinom1(double lambda, double gamma) {
     double ret = R::rnbinom(lambda/(gamma-1), 1/gamma);
@@ -214,5 +206,3 @@ vector<double> rdirichlet1(double alpha, int n) {
     }
     return(ret);
 }
-
-
