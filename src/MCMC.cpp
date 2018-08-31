@@ -76,6 +76,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m2_weight_move = 1;
   f_propSD = 0.2;
   k_lambda = 10;
+  k_gamma = 10;
 }
 
 //------------------------------------------------
@@ -109,7 +110,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
 
     // if no change in m then propose either f or k
     double f_prop = f;
-	int k_prop = k;
+	  int k_prop = k;
     if (m1_prop==m1 && m2_prop==m2) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
@@ -142,7 +143,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
 
       // or update k lambda
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_lambda += k_lambda * (1-0.23)/sqrt(double(rep));
+        k_gamma += (1-0.23)/sqrt(double(rep));
       }
 
       // update parameter values and likelihood
@@ -172,8 +173,8 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
 
       // update k standard deviation
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-    	  k_lambda -= k_lambda * -0.23/sqrt(double(rep));
-    	  k_lambda = (k_lambda < 0) ? -k_lambda : k_lambda;
+    	  k_gamma -= k_gamma * -0.23/sqrt(double(rep));
+    	  k_gamma = (k_gamma < 0) ? -k_gamma : k_gamma;
 
       }
 
@@ -220,7 +221,7 @@ void MCMC::samp_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = rnbinom1(k_lambda, k_gamma);
+    	  k_prop = rnbinom1(k_lambda, k_gamma);
  //		k_prop = runif(1,100); // TODO -- this is obviously a temp holder
       }
     }
@@ -544,8 +545,10 @@ void MCMC::get_IBD() {
   // get z_max
   int z_max = (m1 < m2) ? m1 : m2;
 
+  // initialise values
   f_ind = 0;
   double Lcomb = 0;
+
   // take product of forward and backward matrices, and normalise
   double IBD_sum = 0;
   for (int j=0; j<L; j++) {

@@ -15,7 +15,7 @@ editor_options:
 
 
 ```{r setup, include = F, echo=F}
-devtools::install_github("nickbrazeau/polyIBD", ref="devo")
+devtools::install_github("nickbrazeau/polyIBD", ref="master")
 library(polyIBD)
 
 ```
@@ -40,13 +40,13 @@ sim <- simData(pos=pos,
 
 
 
-f_ind_true <- mean(unlist(sim$IBD[,1:ncol(sim$IBD)]))
-trueIBD <- data.frame(CHROM = sim$CHROMPOS$CHROM, POS=sim$CHROMPOS$POS,
-                      z_true = rowSums(sim$IBD[,1:ncol(sim$IBD),drop=FALSE]))
+f_ind_true <- mean(unlist(sim$IBD[,3:ncol(sim$IBD)]))
+trueIBD <- data.frame(CHROM = sim$IBD$CHROM, POS=sim$IBD$POS,
+                      z_true = rowSums(sim$IBD[,3:ncol(sim$IBD),drop=FALSE]))
 
 
 # run MCMC 
-ret <- runMCMC(input = sim, rho=rho, k_max = 25,
+ret <- runMCMC(vcfgt = sim$snpmatrix, p=sim$p, rho=rho, k_max = 25,
                burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
 
 ret 
