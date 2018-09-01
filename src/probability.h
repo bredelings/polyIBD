@@ -45,7 +45,7 @@ double dpois1(int n, double lambda, bool returnLog=true);
 
 //------------------------------------------------
 // draw from poisson with lambda mean and variance
-double rpois1(int n, double lambda);
+double rpois1(double lambda);
 
 //------------------------------------------------
 // draw from negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
@@ -58,4 +58,3 @@ double dnbinom1(int n, double lambda, double gamma, bool returnLog=true);
 //------------------------------------------------
 // draw from symmetric dichlet(alpha) distribution of length n
 std::vector<double> rdirichlet1(double alpha, int n);
-

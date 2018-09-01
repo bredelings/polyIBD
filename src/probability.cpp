@@ -179,6 +179,14 @@ double dpois1(int n, double lambda, bool returnLog) {
 #endif
 
 //------------------------------------------------
+// draw from poisson distribution with mean and var lambda
+double rpois1(double lambda) {
+    return(R::rpois(lambda));
+}
+
+
+
+//------------------------------------------------
 // draw from negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
 int rnbinom1(double lambda, double gamma) {
     double ret = R::rnbinom(lambda/(gamma-1), 1/gamma);

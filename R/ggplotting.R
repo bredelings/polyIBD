@@ -284,20 +284,29 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
 # TODO -- switch this to grid extra
 
 ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
-                             truem2=NULL, truef=NULL, truek=NULL) {
+                             truem2=NULL, truef=NULL, truek=NULL, truefpop=NULL) {
   if(!is.null(truem1)){
     plotm1 <- ggplot_m1(x)
     plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.1)
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
+  #
+  # if(!is.null(truem2)){
+  #   plotm2 <- ggplot_m2(x)
+  #   plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.1)
+  # } else {
+  #   plotm2 <- ggplot_m2(x)
+  # } # end m2 plot
 
-  if(!is.null(truem2)){
-    plotm2 <- ggplot_m2(x)
-    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.1)
+
+  if(!is.null(truefpop)){
+    plotfpop <- ggplot_f_postprob(x)
+    plotfpop <- plotfpop + geom_hline(yintercept=truefpop, colour="#de2d26", size=1.1)
   } else {
-    plotm2 <- ggplot_m2(x)
-  } # end m2 plot
+    plotfpop <- ggplot_f_postprob(x)
+  } # end fpop plot
+
 
   if(!is.null(truef)){
     plotf <- ggplot_f(x)
@@ -319,7 +328,7 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
     plotibd <- ggplot_IBD(x)
   } # end IBD plot
 
-  ggpubr::ggarrange(ggpubr::ggarrange(plotm1, plotm2,  plotf, plotk, nrow=2, ncol = 2),
+  ggpubr::ggarrange(ggpubr::ggarrange(plotfpop, plotf, plotm1, plotk, nrow=2, ncol = 2),
                     plotibd,
                     nrow = 2
   )

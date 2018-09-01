@@ -25,10 +25,10 @@ library(polyIBD)
 # setup sim parameters
 n <- 1e3 # this is the number of loci we would like to simulate
 rho <- 7.4e-7 # this is the recombination rate that is assumed to be known
-k_true <- 2 # this is the number of generations that we are trying to infer
+k_true <- 5 # this is the number of generations that we are trying to infer
 f_true <- 0.4 # this is the proportion of genetic relatedness we are trying to infer 
-m1 <- 2 # this is the multiplicity of infection for sample1 that we are trying to infer
-m2 <- 2 # this is the multiplicity of infection for sample2 that we are trying to infer
+m1 <- 1 # this is the multiplicity of infection for sample1 that we are trying to infer
+m2 <- 1 # this is the multiplicity of infection for sample2 that we are trying to infer
 m_true <- c(m1, m2)
 pos <- list(contig1=sort(sample(1.4e6, n))) # simulate some positions/genomic coordinates
 
@@ -40,29 +40,36 @@ sim <- simData(pos=pos,
 
 
 
-f_ind_true <- mean(unlist(sim$IBD[,3:ncol(sim$IBD)]))
-trueIBD <- data.frame(CHROM = sim$IBD$CHROM, POS=sim$IBD$POS,
-                      z_true = rowSums(sim$IBD[,3:ncol(sim$IBD),drop=FALSE]))
+f_ind_true <- mean(unlist(sim$IBD[,1:ncol(sim$IBD)]))
+trueIBD <- data.frame(CHROM = sim$CHROMPOS$CHROM, POS=sim$CHROMPOS$POS,
+                      z_true = rowSums(sim$IBD[,1:ncol(sim$IBD),drop=FALSE]))
 
 
 # run MCMC 
-ret <- runMCMC(vcfgt = sim$snpmatrix, p=sim$p, rho=rho, k_max = 25,
+ret <- runMCMC(input=sim, rho=rho, k_max = 25,
                burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
 
 ret 
 
 polyIBD::ggplot_IBDraster(ret, trueIBD = trueIBD,
                           truem1 = m_true[1], truem2 = m_true[2],
-                          truef = f_ind_true)
-
-
-
+                          truef = f_ind_true,
+                          truek = k_true,
+                          truefpop = f_true)
 
 
 
 ```
+```{r}
+plot(ret$iterations$logLike_burnin)
+plot(ret$iterations$logLike)
+plot(ret$iterations$f)
+plot(ret$iterations$f_ind)
+plot(ret$iterations$k)
 
+summary(ret$iterations$k)
 
+```
 
 
 
