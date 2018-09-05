@@ -16,11 +16,11 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   L = x.size();
   p_vec = Rcpp_to_vector_double(args["p"]);
   rho = Rcpp_to_double(args["rho"]);
-  k_max = Rcpp_to_double(args["k_max"]);
   SNP_dist = Rcpp_to_vector_int(args["SNP_dist"]);
   e1 = Rcpp_to_double(args["e1"]);
   e2 = Rcpp_to_double(args["e2"]);
   m_max = Rcpp_to_int(args["m_max"]);
+  k_max = Rcpp_to_int(args["k_max"]);
 
   // MCMC parameters
   burnin = Rcpp_to_int(args["burnin"]);
@@ -37,8 +37,6 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m2 = 1;
   z_max = (m1<m2) ? m1 : m2;
   f = 0.01;
-  k = 1;
-  k_max = 25;
   logLike_old = 0;
   frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
   bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
@@ -75,8 +73,6 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m2_weight_stay = 1;
   m2_weight_move = 1;
   f_propSD = 0.2;
-  k_lambda = 1;
-  k_gamma = 1;
 }
 
 //------------------------------------------------
@@ -115,14 +111,13 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = rnbinom1(k_lambda, k_gamma); // TODO --- this proposal distribtuion is not symmetrical. Draw from rnbinom with k to define the number of successes and f as the prob of success
+        k_prop = sample2(0, k_max);
       }
     }
 
     // update transition probabilities and calculate new likelihood
     update_transition_lookup(f_prop, rho, k_prop, m1_prop, m2_prop, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(m1_prop, m2_prop);
-
 
 
     // Metropolis-Hastings step
@@ -140,10 +135,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
 
-      // or update k lambda
+      // or update k_max (by doing nothing since we need irreducibility)
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-        k_lambda += (1-0.23)/sqrt(double(rep));
-        k_gamma += (1-0.23)/sqrt(double(rep));
+        k_max = k_max;
       }
 
       // update parameter values and likelihood
@@ -171,12 +165,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD = (f_propSD < 0) ? -f_propSD : f_propSD;
       }
 
-      // update k standard deviation
+      // update k (by doing nothing)
       if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
-    	  k_lambda -= 0.23/sqrt(double(rep));
-        k_lambda = (k_lambda < 0) ? -k_lambda : k_lambda;
-        k_gamma -= 0.23/sqrt(double(rep));
-        k_gamma = (k_gamma < 0) ? -k_gamma : k_gamma;
+    	  k_max = k_max;
       }
 
     }
@@ -222,7 +213,7 @@ void MCMC::samp_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-    	  k_prop = rnbinom1(k_lambda, k_gamma);
+    	  k_prop = sample2(0, k_max);
       }
     }
 
@@ -650,7 +641,6 @@ void MCMC::get_IBD() {
 // MCMC::
 // propose new value of m given current value and sampling weights. New value cannot be 0 or greater than m_max.
 double MCMC::propose_m(double m_current, double weight_move, double weight_stay) {
-
   double m_prop = m_current;
   if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
     m_prop = rbernoulli1(0.5) ? m_current+1 : m_current-1;

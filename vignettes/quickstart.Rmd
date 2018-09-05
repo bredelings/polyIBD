@@ -15,7 +15,7 @@ editor_options:
 
 
 ```{r setup, include = F, echo=F}
-devtools::install_github("nickbrazeau/polyIBD", ref="master")
+devtools::install_github("nickbrazeau/polyIBD", ref="devo")
 library(polyIBD)
 
 ```
@@ -25,7 +25,7 @@ library(polyIBD)
 # setup sim parameters
 n <- 1e3 # this is the number of loci we would like to simulate
 rho <- 7.4e-7 # this is the recombination rate that is assumed to be known
-k_true <- 5 # this is the number of generations that we are trying to infer
+k_true <- 10 # this is the number of generations that we are trying to infer
 f_true <- 0.4 # this is the proportion of genetic relatedness we are trying to infer 
 m1 <- 1 # this is the multiplicity of infection for sample1 that we are trying to infer
 m2 <- 1 # this is the multiplicity of infection for sample2 that we are trying to infer
@@ -38,15 +38,13 @@ sim <- simData(pos=pos,
                f=f_true, rho=rho, p=NULL, p_shape1=0.1, p_shape2=0.1, propMissing = 0)
 
 
-
-
 f_ind_true <- mean(unlist(sim$IBD[,1:ncol(sim$IBD)]))
 trueIBD <- data.frame(CHROM = sim$CHROMPOS$CHROM, POS=sim$CHROMPOS$POS,
                       z_true = rowSums(sim$IBD[,1:ncol(sim$IBD),drop=FALSE]))
 
 
 # run MCMC 
-ret <- runMCMC(input=sim, rho=rho, k_max = 25,
+ret <- runMCMC(input=sim, rho=rho, k_max = 15,
                burnin=5e3, samples=1e4, reportIteration=1e2) # turning off report iteration for space
 
 ret 
@@ -64,8 +62,13 @@ polyIBD::ggplot_IBDraster(ret, trueIBD = trueIBD,
 plot(ret$iterations$logLike_burnin)
 plot(ret$iterations$logLike)
 plot(ret$iterations$f)
-plot(ret$iterations$f_ind)
+hist(ret$iterations$f)
 plot(ret$iterations$k)
+hist(ret$iterations$k)
+NFBtools::polyIBDsim2GTcov(sim)
+
+
+plot(ret$iterations$f_ind)
 
 summary(ret$iterations$k)
 

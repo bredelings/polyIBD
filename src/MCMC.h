@@ -58,8 +58,6 @@ public:
   int m2_weight_stay;
   int m2_weight_move;
   double f_propSD;
-  double k_lambda;
-  double k_gamma;
   int IBD_index;
 
 
@@ -77,5 +75,4 @@ public:
   void backward_alg(int m1, int m2);
   void get_IBD();
   double propose_m(double m_current, double weight_move, double weight_stay);
-  double propose_k(double k_current, double weight_move, double weight_stay);
 };
