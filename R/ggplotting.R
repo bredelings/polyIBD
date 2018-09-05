@@ -291,13 +291,13 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
-  #
-  # if(!is.null(truem2)){
-  #   plotm2 <- ggplot_m2(x)
-  #   plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.1)
-  # } else {
-  #   plotm2 <- ggplot_m2(x)
-  # } # end m2 plot
+
+  if(!is.null(truem2)){
+    plotm2 <- ggplot_m2(x)
+    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.1)
+  } else {
+    plotm2 <- ggplot_m2(x)
+  } # end m2 plot
 
 
   if(!is.null(truefpop)){
@@ -316,11 +316,16 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
   } # end f plot
 
   if(!is.null(truek)){
-    plotk <- ggplot_k(x)
-    plotk <- plotk + geom_hline(yintercept=truek, colour="#de2d26", size=1.1)
+    plotkpop <- ggplot_k(x)
+    plotkpop <- plotk + geom_hline(yintercept=truek, colour="#de2d26", size=1.1)
   } else {
-    plotk <- ggplot_k(x)
+    plotkpop <- ggplot_k(x)
   } # end k plot
+
+  # placeholder for now
+  temp <- tibble::tibble(x=1, y=1)
+  plotk <- ggplot(data=temp, aes(x=x, y=y, label="placeholder")) +
+    geom_text() + theme_minimal() + ggtitle("K (Ind) Trace")
 
   if(!is.null(trueIBD)){
     plotibd <- ggplot_IBD(x, trueIBD)
@@ -328,9 +333,14 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
     plotibd <- ggplot_IBD(x)
   } # end IBD plot
 
-  ggpubr::ggarrange(ggpubr::ggarrange(plotfpop, plotf, plotm1, plotk, nrow=2, ncol = 2),
-                    plotibd,
-                    nrow = 2
-  )
+  lay <- rbind(c(1,1,2,2),
+               c(3,3,4,4),
+               c(5,5,6,6),
+               c(7,7,7,7),
+               c(7,7,7,7))
+
+  gridExtra::grid.arrange(plotm1, plotm2, plotfpop, plotkpop, plotf, plotk, plotibd,
+                          layout_matrix=lay)
+
 }
 
