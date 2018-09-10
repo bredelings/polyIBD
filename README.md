@@ -21,5 +21,5 @@ install.packages("devtools")
 
 Then download and build _polyIBD_ from Github with: 
 ``` r
-devtools::install_github("nickbrazeau/polyIBD")
+devtools::install_github("nickbrazeau/polyIBD", ref = "master")
 ```

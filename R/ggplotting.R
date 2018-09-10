@@ -317,7 +317,7 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
 
   if(!is.null(truek)){
     plotkpop <- ggplot_k(x)
-    plotkpop <- plotk + geom_hline(yintercept=truek, colour="#de2d26", size=1.1)
+    plotkpop <- plotkpop + geom_hline(yintercept=truek, colour="#de2d26", size=1.1)
   } else {
     plotkpop <- ggplot_k(x)
   } # end k plot
