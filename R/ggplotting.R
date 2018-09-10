@@ -325,11 +325,8 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
   # placeholder for now
   temp <- tibble::tibble(x=1, y=1)
   plotk <- ggplot(data=temp, aes(x=x, y=y, label="placeholder")) +
-<<<<<<< HEAD
     geom_text() + theme_minimal() + ggtitle("K (Ind) Trace")
-=======
-    geom_text() + theme_minimal()
->>>>>>> devo
+
 
   if(!is.null(trueIBD)){
     plotibd <- ggplot_IBD(x, trueIBD)
