@@ -647,7 +647,6 @@ double MCMC::propose_m(double m_current, double weight_move, double weight_stay)
     m_prop = rbernoulli1(0.5) ? m_current+1 : m_current-1;
     m_prop = (m_prop==0 || m_prop>m_max) ? m_current : m_prop;
   }
-
   return(m_prop);
 }
 
