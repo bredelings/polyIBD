@@ -1,24 +1,34 @@
 #------------------------------------------------
-# ggplot_trace
-# simple MCMC trace plot
-# (not exported)
+#' @title polyibdggtheme
+#'
+
+polyibdggtheme <- ggplot2::theme(panel.background = ggplot2::element_rect(fill = "white", colour = "grey50"),
+               panel.grid.major = ggplot2::element_blank(),
+               panel.grid.minor = ggplot2::element_blank(),
+               plot.title =       ggplot2::element_text(size = 14, face = "bold", hjust = 0.5, family = "Arial"),
+               axis.title.x =     ggplot2::element_text(size=12, face="bold", family = "Arial"),
+               axis.text.x =      ggplot2::element_text(size=10, family = "Arial", angle = 45, hjust = 1),
+               axis.title.y =     ggplot2::element_text(size=12, face="bold", family = "Arial"),
+               axis.text.y =      ggplot2::element_text(size=12, family = "Arial"),
+               axis.ticks =       ggplot2::element_blank()
+)
+
+#------------------------------------------------
+#' @title ggtrace
+#'
 
 
-ggplot_trace <- function(data=NULL, mapping=NULL) {
-    ggplot2::ggplot(data=data, mapping=mapping) +
-    ggplot2::geom_point(colour = "#252525", fill = "#969696", alpha=0.8) +
-    ggplot2::theme(panel.background=element_rect(fill = "white", colour = "grey50"),
-                   panel.grid.major = element_blank(),
-                   panel.grid.minor = element_blank(),
-                   plot.title = element_text(size = 14, face = "bold", hjust = 0.5, family = "Arial"),
-                   axis.title.x=element_text(size=12, face="bold", family = "Arial"),
-                   axis.text.x=element_text(size=10, family = "Arial", angle = 45, hjust = 1),
-                   axis.title.y=element_text(size=12, face="bold", family = "Arial"),
-                   axis.text.y=element_text(size=12, family = "Arial"),
-                   axis.ticks = element_blank()
-    )
-
-
+ggplot_trace <- function(data=NULL, mapping=NULL, stat="identity", position="identity", na.rm=FALSE, inherit.aes = TRUE, ...) {
+    ggplot2::layer(data=data,
+                   mapping=mapping,
+                   stat=stat,
+                   position = position,
+                   geom = ggplot2::GeomPoint,
+                   inherit.aes = inherit.aes,
+                   params = list( na.rm = na.rm,
+                                  colour = "#252525",
+                                  fill = "#969696",
+                                  alpha=0.8))
 }
 
 
@@ -52,10 +62,11 @@ ggplot_m1 <- function(x) {
 
   # call plot
   x %>%
-    ggplot_trace(data = ., mapping = aes(x=iteration, y=value)) +
+    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "M1 Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
-    ggplot2::ggtitle("M1 Trace")
+    ggplot2::ggtitle("M1 Trace") +
+    polyibdggtheme
 }
 
 
@@ -85,10 +96,11 @@ ggplot_m2 <- function(x) {
 
   # call plot
   x %>%
-    ggplot_trace(data = ., mapping = aes(x=iteration, y=value)) +
+    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "M2 Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
-    ggplot2::ggtitle("M2 Trace")
+    ggplot2::ggtitle("M2 Trace") +
+    polyibdggtheme
 }
 
 
@@ -121,10 +133,11 @@ ggplot_f_postprob <- function(x) {
 
     # call plot
     x %>%
-      ggplot_trace(data = ., mapping = aes(x=iteration, y=value)) +
+      ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
       ggplot2::scale_y_continuous(name = "F (Pop) Estimate", limits = c(0,1)) +
       ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
-      ggplot2::ggtitle("F (Pop) Trace")
+      ggplot2::ggtitle("F (Pop) Trace") +
+      polyibdggtheme
   }
 
 
@@ -155,10 +168,11 @@ ggplot_f <- function(x) {
 
   # call plot
   x %>%
-    ggplot_trace(data = ., mapping = aes(x=iteration, y=value)) +
+    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "F (Ind) Estimate", limits = c(0,1)) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
-    ggplot2::ggtitle("F (Ind) Trace")
+    ggplot2::ggtitle("F (Ind) Trace") +
+    polyibdggtheme
 }
 
 
@@ -189,10 +203,11 @@ ggplot_k <- function(x) {
 
   # call plot
   x %>%
-    ggplot_trace(data = ., mapping = aes(x=iteration, y=value)) +
+    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "K Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
-    ggplot2::ggtitle("K Trace")
+    ggplot2::ggtitle("K Trace") +
+    polyibdggtheme
 }
 
 
@@ -213,9 +228,6 @@ ggplot_k <- function(x) {
 # TODO this should have a better return -- am going to need that better return for selection anyways
 
 ggplot_IBD <- function(x, trueIBD=NULL, ...) {
-
-  require(tidyverse)
-  require(viridis)
 
   # only works on objects of class polyIBD
   stopifnot(is.polyIBD(x))
@@ -246,26 +258,18 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
     IBDdflong <- IBDdflong %>% dplyr::filter(! Znum %in% filtdf )
   }
 
-  plotobj <- ggplot() +
-    geom_rect(data=IBDdflong, mapping=aes(xmin=start, xmax=end, ymin=Znum-0.49, ymax=Znum+0.49, fill=Prob)) +
-    viridis::scale_fill_viridis("IBD Probability", option="plasma", limits=c(0,1)) +
-    scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
-    xlab("POS") +
-    facet_grid(~CHROM) +
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(),
-          axis.ticks = element_blank(),
-          axis.title.y = element_text(size=18, face="bold", family = "Arial"),
-          axis.text.y = element_text(size=16, face="bold", family = "Arial", margin = margin(r = 1)),
-          axis.title.x = element_text(size=12, face="bold", family = "Arial"),
-          axis.text.x = element_text(size=9, family = "Arial", angle = 45, margin = margin(r = 1)),
-          strip.text.x = element_text(size =12, face="bold", family = "Arial"),
-          legend.text=element_text(size = 10.5, face="bold", family = "Arial"),
-          legend.title=element_text(size = 11, face="bold", family = "Arial"))
+  plotobj <- ggplot2::ggplot() +
+    ggplot2::geom_rect(data = IBDdflong, mapping = ggplot2::aes(
+      xmin = start, xmax = end, ymin = Znum - 0.49, ymax = Znum + 0.49, fill = Prob)) +
+    viridis::scale_fill_viridis("IBD Probability", option = "plasma", limits = c(0,1)) +
+    ggplot2::scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
+    ggplot2::xlab("POS") +
+    ggplot2::facet_grid(~CHROM) +
+    polyibdggtheme
 
   if(!is.null(trueIBD)){
-    plotobj <- plotobj + geom_line(data=trueIBD, aes(x=POS, y=z_true), colour="#de2d26", size=0.75)
+    plotobj <- plotobj + ggplot2::geom_line(data = trueIBD, aes(x = POS, y = z_true),
+                                            colour = "#de2d26", size = 0.75)
   }
   return(plotobj)
 }
@@ -281,20 +285,20 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
 #'
 #' @export
 
-# TODO -- switch this to grid extra
 
-ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
-                             truem2=NULL, truef=NULL, truek=NULL, truefpop=NULL) {
+ggplot_IBDraster <- function(x, trueIBD = NULL, truem1 = NULL,
+                             truem2 = NULL, truef = NULL, truek = NULL, truefpop = NULL) {
   if(!is.null(truem1)){
     plotm1 <- ggplot_m1(x)
-    plotm1 <- plotm1 + geom_hline(yintercept=truem1, colour="#de2d26", size=1.1)
+    plotm1 <- plotm1 + ggplot2::geom_hline(yintercept = truem1, colour = "#de2d26", size = 1.1)
   } else {
     plotm1 <- ggplot_m1(x)
   } # end m1 plot
 
   if(!is.null(truem2)){
     plotm2 <- ggplot_m2(x)
-    plotm2 <- plotm2 + geom_hline(yintercept=truem2, colour="#de2d26", size=1.1)
+    plotm2 <- plotm2 + ggplot2::geom_hline(yintercept = truem2,
+                                           colour = "#de2d26", size = 1.1)
   } else {
     plotm2 <- ggplot_m2(x)
   } # end m2 plot
@@ -302,7 +306,8 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
 
   if(!is.null(truefpop)){
     plotfpop <- ggplot_f_postprob(x)
-    plotfpop <- plotfpop + geom_hline(yintercept=truefpop, colour="#de2d26", size=1.1)
+    plotfpop <- plotfpop + ggplot2::geom_hline(yintercept=truefpop,
+                                               colour = "#de2d26", size = 1.1)
   } else {
     plotfpop <- ggplot_f_postprob(x)
   } # end fpop plot
@@ -310,22 +315,24 @@ ggplot_IBDraster <- function(x, trueIBD=NULL, truem1=NULL,
 
   if(!is.null(truef)){
     plotf <- ggplot_f(x)
-    plotf <- plotf + geom_hline(yintercept=truef, colour="#de2d26", size=1.1)
+    plotf <- plotf + ggplot2::geom_hline(yintercept=truef,
+                                         colour = "#de2d26", size = 1.1)
   } else {
     plotf <- ggplot_f(x)
   } # end f plot
 
   if(!is.null(truek)){
     plotkpop <- ggplot_k(x)
-    plotkpop <- plotkpop + geom_hline(yintercept=truek, colour="#de2d26", size=1.1)
+    plotkpop <- plotkpop + ggplot2::geom_hline(yintercept=truek,
+                                               colour = "#de2d26", size = 1.1)
   } else {
     plotkpop <- ggplot_k(x)
   } # end k plot
 
   # placeholder for now
   temp <- tibble::tibble(x=1, y=1)
-  plotk <- ggplot(data=temp, aes(x=x, y=y, label="placeholder")) +
-    geom_text() + theme_minimal() + ggtitle("K (Ind) Trace")
+  plotk <- ggplot2::ggplot(data=temp, ggplot2::aes(x=x, y=y, label="placeholder")) +
+    ggplot2::geom_text() + ggplot2::theme_minimal() + ggplot2::ggtitle("K (Ind) Trace")
 
 
   if(!is.null(trueIBD)){

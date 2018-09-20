@@ -20,3 +20,5 @@ inst/doc
 .Rhistory
 .RData
 .Ruserdata
+
+NAMESPACE

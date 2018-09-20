@@ -5,7 +5,7 @@
 \title{Plot polyIBD outputs collectively}
 \usage{
 ggplot_IBDraster(x, trueIBD = NULL, truem1 = NULL, truem2 = NULL,
-  truef = NULL, truek = NULL)
+  truef = NULL, truek = NULL, truefpop = NULL)
 }
 \arguments{
 \item{x}{an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}}
