@@ -1,29 +1,29 @@
 Package: polyIBD
 Type: Package
 Title: Assessing Identity by Descent in Polyclonal Infections
+Description: R package for inferring blocks of identity by descent (IBD) from un-phased haplotypic data
 Version: 0.5.0
 Authors@R: c(
     person(c("Nicholas", "F"), "Brazeau", role = c("aut", "cre"), email = "nbrazeau@med.unc.edu"),
     person(c("Robert", "J"), "Verity", role = c("aut"), email = "r.verity@imperial.ac.uk")
     )
 Maintainer: Nicholas F Brazeau <nbrazeau@med.unc.edu>
-URL: https://github.com/nickbrazeau/polyIBD
+URL: https://github.com/nickbrazeau/polyIBD, https://nickbrazeau.github.io/polyIBD/
 BugReports: https://github.com/nickbrazeau/polyIBD/issues
-Description: R package for inferring blocks of identity by descent (IBD) from un-phased haplotypic data
 LazyData: TRUE
 Depends: R (>= 3.3.0)
 Imports:
+    coda (>= 0.19.1),
+    dplyr (>= 0.7.6),
+    fields (>= 9.6),
+    ggplot2 (>= 3.0.0),
+    gridExtra (>= 2.3),
+    magrittr (>= 1.5),
+    tidyr (>= 0.8.1),
     Rcpp (>= 0.12.12),
-    RcppParallel,
-    coda,
-    viridis,
-    fields,
-    vcfR,
-    tidyverse,
-    stringr,
-    prettydoc,
-    gridExtra,
-    ggpubr
+    RcppParallel (>= 4.4.1),
+    viridis (>= 0.5.1),
+    vcfR (>= 1.8.0),
 Suggests:
     knitr,
     testthat,
@@ -34,11 +34,12 @@ Suggests:
     covr
 LinkingTo:
     Rcpp,
-    RcppParallel
+    RcppParallel,
+    testthat
 SystemRequirements:
     C++11,
     GNU make
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr

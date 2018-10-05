@@ -1,3 +1,5 @@
+^polyIBD\.Rproj$
+^\.Rproj\.user$
 ^.*\.Rproj$         # Automatically added by RStudio,
 ^\.Rproj\.user$     # used for temporary files. 
 ^cran-comments\.md$ # Comments for CRAN submission
@@ -10,3 +12,5 @@
 ignore/
 R_ignore/
 figures/
+^.*\.Rproj$
+^\.Rproj\.user$

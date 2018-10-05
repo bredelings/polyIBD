@@ -22,7 +22,7 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
   mainMCMC.burnin_MCMC(args_functions);
   
   // sampling phase
-  mainMCMC.run_MCMC(args_functions);
+  mainMCMC.samp_MCMC(args_functions);
   
   // end timer
   chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();

@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 runMCMC_cpp <- function(args, args_functions) {
-    .Call('_polyIBD_runMCMC_cpp', PACKAGE = 'polyIBD', args, args_functions)
+    .Call(`_polyIBD_runMCMC_cpp`, args, args_functions)
 }
 

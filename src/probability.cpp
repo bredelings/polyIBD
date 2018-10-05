@@ -64,10 +64,10 @@ double rnorm1(double mean, double sd) {
 //------------------------------------------------
 // draw from univariate normal distribution and reflect to interval (a,b)
 double rnorm1_interval(double mean, double sd, double a, double b) {
-    
+
     // draw raw value relative to a
     double ret = rnorm1(mean, sd) - a;
-    
+
     // reflect off boundries at 0 and (b-a)
     if (ret<0 || ret>(b-a)) {
         // use multiple reflections to bring into range [-(b-a), 2(b-a)]
@@ -77,7 +77,7 @@ double rnorm1_interval(double mean, double sd, double a, double b) {
         while (ret > 2*(b-a)) {
             ret -= 2*(b-a);
         }
-        
+
         // use one more reflection to bring into range [0, (b-a)]
         if (ret < 0) {
             ret = -ret;
@@ -86,17 +86,17 @@ double rnorm1_interval(double mean, double sd, double a, double b) {
             ret = 2*(b-a) - ret;
         }
     }
-    
+
     // no longer relative to a
     ret += a;
-    
+
     // don't let ret equal exactly a or b
     if (ret==a) {
         ret += UNDERFLO;
     } else if (ret==b) {
         ret -= UNDERFLO;
     }
-    
+
     return(ret);
 }
 
@@ -127,7 +127,7 @@ int sample1(vector<double> &p, double pSum) {
 double rgamma1(double shape, double rate) {
     gamma_distribution<double> rgamma(shape,1.0/rate);
     double x = rgamma(generator);
-    
+
     // check for zero or infinite values (catches bug present in Visual Studio 2010)
     if (x==0) {
         x = UNDERFLO;
@@ -135,7 +135,7 @@ double rgamma1(double shape, double rate) {
     if ((1.0/x)==0) {
         x = 1.0/UNDERFLO;
     }
-    
+
     return(x);
 }
 
@@ -179,11 +179,20 @@ double dpois1(int n, double lambda, bool returnLog) {
 #endif
 
 //------------------------------------------------
+// draw from poisson distribution with mean and var lambda
+double rpois1(double lambda) {
+    return(R::rpois(lambda));
+}
+
+
+
+//------------------------------------------------
 // draw from negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
 int rnbinom1(double lambda, double gamma) {
     double ret = R::rnbinom(lambda/(gamma-1), 1/gamma);
     return(ret);
 }
+
 
 //------------------------------------------------
 // probability mass of negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
@@ -205,5 +214,3 @@ vector<double> rdirichlet1(double alpha, int n) {
     }
     return(ret);
 }
-
-
