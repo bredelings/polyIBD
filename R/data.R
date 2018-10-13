@@ -61,17 +61,17 @@ simIBD <- function(f, k, rho, pos) {
   # draw starting state
   n <- length(pos) # abs number of loci, not pos -- this is consistent with simData below
   ret <- rep(NA, n)
-  ret[1] <- sample( c(0,1), size = 1, prob = c(1-f,f) )
+  ret[1] <- sample( c(0,1), size = 1, prob = c(1-f,f) ) # start, P(S1 = U), P(S1 = I)
 
   # draw subsequent states
   for (i in 2:n) {
       d <- pos[i]-pos[i-1]
-      if (ret[i-1] == 0) {    # move from non-IBD state to non-IBD is t11
-          t11 <- 1 - f*( 1 - exp( -k*rho*d ) )
-          ret[i] <- sample( c(0,1), size = 1, prob = c(t11, 1 - t11) )
-      } else {  # move from IBD state to IBD is t22
-          t22 <- 1 - (1 - f)*( 1 - exp( -k*rho*d ) )
-          ret[i] <- sample( c(0,1), size = 1, prob = c(1 - t22, t22) )
+      if (ret[i-1] == 0) {    # move from non-IBD state to non-IBD is a22
+          a22 <- 1 - f*( 1 - exp( -k*rho*d ) )
+          ret[i] <- sample( c(0,1), size = 1, prob = c(a22, 1 - a22) )
+      } else {  # move from IBD state to IBD is a11
+          a11 <- 1 - (1 - f)*( 1 - exp( -k*rho*d ) )
+          ret[i] <- sample( c(0,1), size = 1, prob = c(1 - a11, a11) )
       }
   }
 
@@ -130,40 +130,65 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
   }
 
   # initialise objects over all contigs
-  CHROMPOS <- haploid1_mat <- haploid2_mat <- IBD_mat <- simvcf <- NULL
+  CHROMPOS <- haplotype1_mat <- haplotype2_mat <- IBD_wsmat1 <- IBD_wsmat2 <- IBD_bsmat <- simvcf <- NULL
 
   # loop over contigs
   zmax <- min(m1, m2)
   for (i in 1:nc) {
 
     # generate haploid genotypes for both individuals based on MOI and population allele frequencies. Here the REF allele is denoted 0 and the ALT allele 2.
-    haploid1 <- replicate(m1, 2*rbinom(n[i], 1, prob = 1 - p[[i]]))
-    haploid2 <- replicate(m2, 2*rbinom(n[i], 1, prob = 1 - p[[i]]))
-    colnames(haploid1) <- paste0("Genotype", 1:m1)
-    colnames(haploid2) <- paste0("Genotype", 1:m2)
+    haplotype1 <- replicate(m1, 2*rbinom(n[i], 1, prob = 1 - p[[i]]))
+    haplotype2 <- replicate(m2, 2*rbinom(n[i], 1, prob = 1 - p[[i]]))
+    colnames(haplotype1) <- paste0("Haplotype_", 1:m1)
+    colnames(haplotype2) <- paste0("Haplotype_", 1:m2)
 
-    # simulate IBD segments between individual haploid genotypes by drawing from the underlying Markov model
-    IBD <- matrix(NA, n[i], zmax)
-    for (j in 1:zmax) {
-        IBD[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
-        w <- which(IBD[,j] == 1)
-        haploid1[w,j] <- haploid2[w,j] # For regions that are IBD, set it to 1 between strains
+    # simulate IBD segments WITHIN individual haplotype by drawing from the underlying Markov model for SAMPLE 1
+    if(m1>1){
+      IBD_ws1 <- matrix(NA, n[i], m1-1)
+      for (j in 1:(m1-1)) {
+        IBD_ws1[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        w <- which(IBD_ws1[,j] == 1)
+        haplotype1[w,j+1] <- haplotype1[w,j] # For regions that are IBD, set it to 1 between strains
+      }
+      colnames(IBD_ws1) <- paste0("IBDws1_", 1:(m1-1))
     }
-    colnames(IBD) <- paste0("Genotype", 1:zmax)
+
+    # simulate IBD segments WITHIN individual haplotype by drawing from the underlying Markov model for SAMPLE 2
+    if(m2>1){
+      IBD_ws2 <- matrix(NA, n[i], m2-1)
+      for (j in 1:(m2-1)) {
+        IBD_ws2[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        w <- which(IBD_ws2[,j] == 1)
+        haplotype2[w,j+1] <- haplotype2[w,j] # For regions that are IBD, set it to 1 between strains
+      }
+      colnames(IBD_ws2) <- paste0("IBDws2_", 1:(m2-1))
+    }
+
+
+    # simulate IBD segments BETWEEN individual haplotypes by drawing from the underlying Markov model
+    IBD_bs <- matrix(NA, n[i], zmax)
+    for (j in 1:zmax) {
+        IBD_bs[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        w <- which(IBD_bs[,j] == 1)
+        haplotype1[w,j] <- haplotype2[w,j] # For regions that are IBD, set it to 1 between strains
+    }
+    colnames(IBD_bs) <- paste0("IBDbs_", 1:zmax)
 
     # make GT section of vcf
-    vcf <- data.frame(Sample1=rep(1,n[i]), Sample2=rep(1,n[i]))
-    vcf$Sample1[apply(haploid1, 1, function(x){all(x == 0)})] <- 0
-    vcf$Sample1[apply(haploid1, 1, function(x){all(x == 2)})] <- 2
-    vcf$Sample2[apply(haploid2, 1, function(x){all(x == 0)})] <- 0
-    vcf$Sample2[apply(haploid2, 1, function(x){all(x == 2)})] <- 2
+    vcf <- data.frame(Sample1=rep(1,n[i]), Sample2=rep(1,n[i])) # fill with het calls then overwrite to REF (0) or ALT (2)
+    vcf$Sample1[apply(haplotype1, 1, function(x){all(x == 0)})] <- 0
+    vcf$Sample1[apply(haplotype1, 1, function(x){all(x == 2)})] <- 2
+    vcf$Sample2[apply(haplotype1, 1, function(x){all(x == 0)})] <- 0
+    vcf$Sample2[apply(haplotype2, 1, function(x){all(x == 2)})] <- 2
 
     # add to combined objects
-    CHROMPOS <-    rbind(CHROMPOS, cbind.data.frame(CHROM = names(pos)[i], POS = pos[[i]]))
-    haploid1_mat <- rbind(haploid1_mat, haploid1)
-    haploid2_mat <- rbind(haploid2_mat, haploid2)
-    IBD_mat <-      rbind(IBD_mat, IBD)
-    simvcf <-      rbind(simvcf, vcf)
+    CHROMPOS <-       rbind(CHROMPOS, cbind.data.frame(CHROM = names(pos)[i], POS = pos[[i]]))
+    haplotype1_mat <- rbind(haplotype1_mat, haplotype1)
+    haplotype2_mat <- rbind(haplotype2_mat, haplotype2)
+    IBD_wsmat1 <-      rbind(IBD_wsmat1, IBD_ws1)
+    IBD_wsmat2 <-      rbind(IBD_wsmat2, IBD_ws2)
+    IBD_bsmat <-      rbind(IBD_bsmat, IBD_bs)
+    simvcf <-         rbind(simvcf, vcf)
 
   }
 
@@ -176,10 +201,11 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
   # return output as list
 
   retlist <- list(CHROMPOS = CHROMPOS,
-                  gtmatrix=simvcf,
-                  p=p,
-                  haploid=list(haploid1=haploid1_mat, haploid2=haploid2_mat),
-                  IBD=IBD_mat)
+                  gtmatrix = simvcf,
+                  p = p,
+                  SampleHaplotypes = list(Sample1=haplotype1_mat, Sample2=haplotype2_mat),
+                  IBDws = list(Sample1 = IBD_wsmat1, Sample2 = IBD_wsmat2),
+                  IBDbs = IBD_bsmat)
 
   class(retlist) <- "polyIBDinput"
   return(retlist)
