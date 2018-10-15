@@ -34,7 +34,8 @@ runMCMC <- function(input = NULL,
   #     Setup Input for Rcpp
   # ------------------------------
 
-  Rcppcompat <- polyIBDinput_to_Rcppcompat(input)
+  Rcppcompat <- polyIBDinput_to_Rcppcompat(polyIBDinput = input,
+                                           stage = "ws")
 
   # define list of arguments to pass to Rcpp
   args <- list(x = Rcppcompat[["x"]],

@@ -178,17 +178,26 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
     vcf <- data.frame(Sample1=rep(1,n[i]), Sample2=rep(1,n[i])) # fill with het calls then overwrite to REF (0) or ALT (2)
     vcf$Sample1[apply(haplotype1, 1, function(x){all(x == 0)})] <- 0
     vcf$Sample1[apply(haplotype1, 1, function(x){all(x == 2)})] <- 2
-    vcf$Sample2[apply(haplotype1, 1, function(x){all(x == 0)})] <- 0
+    vcf$Sample2[apply(haplotype2, 1, function(x){all(x == 0)})] <- 0
     vcf$Sample2[apply(haplotype2, 1, function(x){all(x == 2)})] <- 2
 
     # add to combined objects
     CHROMPOS <-       rbind(CHROMPOS, cbind.data.frame(CHROM = names(pos)[i], POS = pos[[i]]))
     haplotype1_mat <- rbind(haplotype1_mat, haplotype1)
     haplotype2_mat <- rbind(haplotype2_mat, haplotype2)
-    IBD_wsmat1 <-      rbind(IBD_wsmat1, IBD_ws1)
-    IBD_wsmat2 <-      rbind(IBD_wsmat2, IBD_ws2)
     IBD_bsmat <-      rbind(IBD_bsmat, IBD_bs)
     simvcf <-         rbind(simvcf, vcf)
+
+    if(m1>2){
+      IBD_wsmat1 <-   rbind(IBD_wsmat1, IBD_ws1)
+    } else{
+      IBD_wsmat1 <-   IBD_wsmat1
+    }
+    if(m2>2){
+      IBD_wsmat2 <-   rbind(IBD_wsmat2, IBD_ws2)
+    } else{
+      IBD_wsmat2 <-   IBD_wsmat2
+    }
 
   }
 
