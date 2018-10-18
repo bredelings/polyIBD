@@ -45,21 +45,12 @@
 
 
 # ------------------------------------------------------------------
-#' @title Simulate IBD sections between two samples
-#'
-#' @description Walks along a vector of genomic locations and swiches between two states that represent IBD and non-IBD using a Markov model. The parameters that dictate the chance of switching state at any point include the average level of relatedness (\code{f}), the physical distance between loci in units of base pairs (from \code{pos}), and the recombination rate (\code{rho}), which is assumed constant over all loci.
-#'
-#' @param f the average relatedness between the two samples
-#' @param rho the recombination rate. TODO - units of this parameter
-#' @param k the number of generations separating the two lineages
-#' @param pos the genomic positions of the sites of interest
-#'
-#' @export
+#' notexported
 
 simIBD <- function(f, k, rho, pos) {
 
   # draw starting state
-  n <- length(pos) # abs number of loci, not pos -- this is consistent with simData below
+  n <- length(pos)
   ret <- rep(NA, n)
   ret[1] <- sample( c(0,1), size = 1, prob = c(1-f,f) ) # start, P(S1 = U), P(S1 = I)
 
@@ -81,14 +72,19 @@ simIBD <- function(f, k, rho, pos) {
 # ------------------------------------------------------------------
 #' @title Simulate data from polyIBD model
 #'
-#' @description TODO
+#' TODO fix/update description
+#' @description Walks along a vector of genomic locations and swiches between two states that
+#' represent IBD and non-IBD using a Markov model. The parameters that dictate the chance of
+#' switching state at any point include the average level of relatedness (\code{f}), the physical
+#' distance between loci in units of base pairs (from \code{pos}), and the recombination rate
+#' (\code{rho}), which is assumed constant over all loci.
 #'
 #' @param pos TODO
 #' @param m1 TODO
 #' @param m2 TODO
-#' @param f TODO
-#' @param rho TODO
-#' @param k TODO
+#' @param f the average relatedness between the two samples
+#' @param rho the recombination rate. TODO - units of this parameter
+#' @param k the number of generations separating the two lineages
 #' @param p TODO
 #' @param p_shape1 TODO
 #' @param p_shape2 TODO
