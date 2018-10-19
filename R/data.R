@@ -90,6 +90,8 @@ simIBD <- function(f, k, rho, pos) {
 #' @param p_shape2 TODO
 #' @param propMissing TODO
 #'
+#' @importFrom magrittr %>%
+#'
 #' @export
 
 simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
@@ -184,12 +186,12 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
     IBD_bsmat <-      rbind(IBD_bsmat, IBD_bs)
     simvcf <-         rbind(simvcf, vcf)
 
-    if(m1>2){
+    if(m1>1){
       IBD_wsmat1 <-   rbind(IBD_wsmat1, IBD_ws1)
     } else{
       IBD_wsmat1 <-   IBD_wsmat1
     }
-    if(m2>2){
+    if(m2>1){
       IBD_wsmat2 <-   rbind(IBD_wsmat2, IBD_ws2)
     } else{
       IBD_wsmat2 <-   IBD_wsmat2

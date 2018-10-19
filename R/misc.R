@@ -37,7 +37,7 @@ summary.polyIBD <- function(x, ...) {
 
   # print posterior parameter summary
   cat("# Posterior estimates\n")
-  quants <- x$summary$quantiles
+  quants <- round(x$summary$quantiles, 3)
   print(quants)
 }
 
@@ -108,14 +108,14 @@ Rcpp_to_mat <- function(x) {
 }
 
 # -----------------------------------
-# polyIBDinput_to_Rcppcompat
-# Takes the polyIBDinput and makes it easier to be parsed for the Rcpp args.
+# polyIBDinput_to_stgIrunMCMC_compat
+# Takes the polyIBDinput and makes it easier to be parsed for the Rcpp args for the first stage MCMC.
 # (not exported)
 # TODO fix this input
 
 
-polyIBDinput_to_Rcppcompat <- function(polyIBDinput,
-                                       stage = NULL){
+polyIBDinput_to_stgIrunMCMC_compat <- function(polyIBDinput){
+
   p <- polyIBDinput[["p"]]
   gtmatrix <- polyIBDinput[["gtmatrix"]]
 
@@ -129,7 +129,47 @@ polyIBDinput_to_Rcppcompat <- function(polyIBDinput,
   SNP_dist <- diff(polyIBDinput$CHROMPOS[, 2]) # second column in this class is POS
   SNP_dist[cumsum(n)[1:(nc-1)]] <- -1
 
-if(stage == "bs"){
+
+  # compare within sample and save comparison type in vector x
+  # x is an integer vector with values in 0:3 These values indicate genotype combinations that cycle through the four options: {missing, homo REF, het, homo ALT}
+  # 0 = {NA} - remember NA is read in as -1
+  # 1 = {A}
+  # 2 = {Aa}
+  # 3 = {a}
+
+
+  x <- gtmatrix[,1]+1
+
+## return
+ret <- list(p=p,
+            x=x,
+            SNP_dist = SNP_dist)
+
+return(ret)
+
+}
+
+
+# -----------------------------------
+# polyIBDinput_to_stgIIrunMCMC_compat
+# Takes the polyIBDinput and makes it easier to be parsed for the Rcpp args for the second stage MCMC.
+# (not exported)
+# TODO fix this input
+
+polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
+  p <- polyIBDinput[["p"]]
+  gtmatrix <- polyIBDinput[["gtmatrix"]]
+
+  # extract basic parameters
+  CHROMtab <- table(polyIBDinput$CHROMPOS[, 1])
+  nc <- length(CHROMtab)
+  cnames <- names(CHROMtab)
+  n <- as.vector(CHROMtab)
+
+  # get distances between SNPs. Distance=-1 between contigs, indicating infinite distance
+  SNP_dist <- diff(polyIBDinput$CHROMPOS[, 2]) # second column in this class is POS
+  SNP_dist[cumsum(n)[1:(nc-1)]] <- -1
+
     # compare two samples and save comparison type in vector x
     # x is an integer vector with values in 0:15. These values indicate genotype combinations that cycle through the four options: {missing, homo REF, het, homo ALT} in the first sample, then the same four options in the second sample, leading to 16 options in total
     # 0 = {NA, NA}
@@ -151,18 +191,7 @@ if(stage == "bs"){
 
     x <- 4*(gtmatrix[,1]+1) + (gtmatrix[,2]+1)
 
-} else if(stage == "ws"){
-  # compare within sample and save comparison type in vector x
-  # x is an integer vector with values in 0:3 These values indicate genotype combinations that cycle through the four options: {missing, homo REF, het, homo ALT}
-  # 0 = {NA} - remember NA is read in as -1
-  # 1 = {A}
-  # 2 = {Aa}
-  # 3 = {a}
 
-
-  x <- gtmatrix[,1]+1
-
-}
   ## return
   ret <- list(p=p,
               x=x,

@@ -2,7 +2,9 @@
 % Please edit documentation in R/data.R
 \name{simData}
 \alias{simData}
-\title{Simulate data from polyIBD model}
+\title{Simulate data from polyIBD model
+
+TODO fix/update description}
 \usage{
 simData(pos = list(contig1 = sort(sample(1e+05, 100)), contig2 =
   sort(sample(1e+05, 100))), m1 = 1, m2 = 1, f = 0.5, rho = 1e-07,
@@ -16,11 +18,11 @@ simData(pos = list(contig1 = sort(sample(1e+05, 100)), contig2 =
 
 \item{m2}{TODO}
 
-\item{f}{TODO}
+\item{f}{the average relatedness between the two samples}
 
-\item{rho}{TODO}
+\item{rho}{the recombination rate. TODO - units of this parameter}
 
-\item{k}{TODO}
+\item{k}{the number of generations separating the two lineages}
 
 \item{p}{TODO}
 
@@ -31,5 +33,9 @@ simData(pos = list(contig1 = sort(sample(1e+05, 100)), contig2 =
 \item{propMissing}{TODO}
 }
 \description{
-TODO
+Walks along a vector of genomic locations and swiches between two states that
+represent IBD and non-IBD using a Markov model. The parameters that dictate the chance of
+switching state at any point include the average level of relatedness (\code{f}), the physical
+distance between loci in units of base pairs (from \code{pos}), and the recombination rate
+(\code{rho}), which is assumed constant over all loci.
 }

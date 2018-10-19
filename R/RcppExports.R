@@ -5,7 +5,7 @@ runMCMC_cpp <- function(args, args_functions) {
     .Call(`_polyIBD_runMCMC_cpp`, args, args_functions)
 }
 
-runstgIMCMC_cpp <- function(args, args_functions) {
-    .Call(`_polyIBD_runstgIMCMC_cpp`, args, args_functions)
+stgIrunMCMC_cpp <- function(args, args_functions) {
+    .Call(`_polyIBD_stgIrunMCMC_cpp`, args, args_functions)
 }
 

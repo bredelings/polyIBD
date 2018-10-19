@@ -10,7 +10,7 @@ using namespace std;
 
 //------------------------------------------------
 // [[Rcpp::export]]
-Rcpp::List runstgIMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
+Rcpp::List stgIrunMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
 
   // start timer
   chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();

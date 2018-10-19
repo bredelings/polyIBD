@@ -2,19 +2,10 @@
 % Please edit documentation in R/data.R
 \name{simIBD}
 \alias{simIBD}
-\title{Simulate IBD sections between two samples}
+\title{notexported}
 \usage{
 simIBD(f, k, rho, pos)
 }
-\arguments{
-\item{f}{the average relatedness between the two samples}
-
-\item{k}{the number of generations separating the two lineages}
-
-\item{rho}{the recombination rate. TODO - units of this parameter}
-
-\item{pos}{the genomic positions of the sites of interest}
-}
 \description{
-Walks along a vector of genomic locations and swiches between two states that represent IBD and non-IBD using a Markov model. The parameters that dictate the chance of switching state at any point include the average level of relatedness (\code{f}), the physical distance between loci in units of base pairs (from \code{pos}), and the recombination rate (\code{rho}), which is assumed constant over all loci.
+notexported
 }

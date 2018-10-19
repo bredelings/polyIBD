@@ -63,7 +63,7 @@ checkConvergence <- function(burnin, samples) {
 
   # report convergence
   if (geweke_p > 0.05) {
-    cat(paste0("convergence reached within defined burn-in period (Geweke p=", round(geweke_p, 3), ")"))
+    cat(paste0("convergence reached within defined burn-in period (Geweke p=", round(geweke_p, 3), ")", "\n"))
   } else {
     cat(paste0("WARNING: convergence not reached within defined burn-in period (Geweke p=", round(geweke_p,3), ")"))
   }

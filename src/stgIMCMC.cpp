@@ -38,6 +38,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // initialise transient MCMC objects
   m1 = 1;
   f = 0.01;
+  k=1;
   logLike_old = 0;
   frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
   bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
@@ -61,8 +62,11 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // calculate initial likelihood
   update_transition_lookup(f, rho, k, m1, args_functions["getTransProbs"]);
 
-
   logLike_old = forward_alg(m1);
+  if(!isfinite(logLike_old)){
+   Rcpp::stop("The first loglike is NaN");
+  }
+
   logLike_burnin_store[0] = logLike_old;
 
   // misc objects
@@ -71,8 +75,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   m1_weight_stay = 1;
   m1_weight_move = 1;
   f_propSD = 0.2;
-  k_weight_stay = 1;
-  k_weight_move = 1;
+  k_propSD = k_max/5;
 }
 
 
@@ -80,12 +83,6 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
 //------------------------------------------------
 // stgIMCMC::
 // Run burn-in phase of MCMC. Each iteration we alternate which parameters are updated.
-// First, we give m1 and m2 a chance to update, based on the sampling weights.
-// If m1 or m2 do change then we don't update the other parameters. If by chance m1 and m2 stay
-// the same we choose one of the other parameters to update with equal probability. The advantage
-// to this method is that, because only one parameter is updated each iteration, we can only change
-// the proposal standard deviation relating to that parameter (by Robbins-Monro). If multiple parameters
-// changed each iteration we could not change these proposal standard deviations independently.
 
 void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
   // announce burn-in phase
@@ -112,7 +109,7 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = propose_k(k, k_weight_move, k_weight_stay);
+        k_prop = rnorm1_interval(k, k_propSD, 1, k_max);
       }
     }
 
@@ -126,16 +123,16 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
     // if accept
     if (log(runif_0_1()) < (logLike_new-logLike_old)) {
 
-      // update m1 and m2 sampling weights
+      // update m1 sampling weights
       m1_weight_move = (m1==m1_prop) ? m1_weight_move : ++m1_weight_move;
 
       // or update f_propSD
       if (m1==m1_prop && f_prop!=f) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
-      // or update k_weight_move
+      // or update k_propSD
       if (m1==m1_prop && k_prop!=k) {
-        k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
+        k_propSD  += (1-0.23)/sqrt(double(rep));
       }
 
       // update parameter values and likelihood
@@ -148,10 +145,10 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
     // if reject
     else {
 
-      // update m1 and m2 sampling weights
+      // update m1 sampling weights
       m1_weight_stay = (m1==m1_prop) ? m1_weight_stay : ++m1_weight_stay;
 
-      // limit m1 and m2 sampling weights
+      // limit m1 sampling weights
       m1_weight_stay = (m1_weight_stay > 100*m1_weight_move) ? 100*m1_weight_move : m1_weight_stay;
 
       // update f_propSD
@@ -162,9 +159,8 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
 
       // update k move
       if (m1==m1_prop && k_prop!=k) {
-        k_weight_stay = (k==k_prop) ? k_weight_stay : ++k_weight_stay;
-        // limit k sampling weights
-        k_weight_stay = (k_weight_stay > 100*k_weight_move) ? 100*k_weight_move : k_weight_stay;
+        k_propSD  -= 0.23/sqrt(double(rep));
+        k_propSD = (k_propSD < 0) ? -k_propSD : k_propSD;
       }
     }
     // store logLike
@@ -209,7 +205,7 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-    	  k_prop = propose_k(k, k_weight_move, k_weight_stay);
+        k_prop = rnorm1_interval(k, k_propSD, 1, k_max);
       }
     }
 
@@ -264,8 +260,8 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
 //------------------------------------------------
 // stgIMCMC::
 // define emmission probability lookup table.
- // This table is essentially a list over m1, then k, where k
-// is the number of HMM states at each locus (i.e. k = 1 + the
+ // This table is essentially a list over m1, then h, where h
+// is the number of HMM states at each locus (i.e. h = 1 + the
 // maximum level of IBD between samples). At the final level of
 // the list is a matrix with L rows and 4 columns giving emmission probabilities for each locus.
 // The 4 columns correspond to the 4 possible genotypes combinations (NA means missing data):
@@ -283,13 +279,16 @@ void stgIMCMC::define_emmission_lookup() {
   // loop through m1
   emmission_lookup = vector< vector< vector< vector<double> > > > (m_max);
   for (int m1=1; m1<=m_max; m1++) {
-
-      // define k as 1 + maximum IBD
-      int k = m1 + 1;
+      printf("THIS IS THE MOI LEVEL       "); print(m1);
+      sleep(0.1);
+      // define h as 1 + maximum IBD
+      int h = m1;
 
       // loop through z
-      emmission_lookup[m1-1] = vector< vector< vector<double> > >(k);
-      for (int z=0; z<k; z++) {
+      emmission_lookup[m1-1] = vector< vector< vector<double> > >(h);
+      for (int z=0; z<h; z++) {
+      printf("THIS IS THE Z LEVEL       "); print(z);
+      sleep(0.1);
         emmission_lookup[m1-1][z] = vector< vector<double> >(L, vector<double>(4));
 
         // loop through loci
@@ -327,6 +326,15 @@ void stgIMCMC::define_emmission_lookup() {
 
           // save to table
           emmission_lookup[m1-1][z][i] = x_err;
+
+          printf("This is Loci:    "); print(i);
+          sleep(0.5);
+          //DEBUG
+          for(int i=0; i<int(x_err.size()); i++){
+            print(x_err[i]);
+            sleep(0.1);
+          }
+          printf("--------------------- \n");
       }
     }
   }
@@ -335,11 +343,24 @@ void stgIMCMC::define_emmission_lookup() {
 
 //------------------------------------------------
 // stgIMCMC::
-// update transition probability lookup table. This table is a list over L-1 loci, and each element of the list is a matrix of transition probabilities of going from one HMM state to another. Note, these probabilities give the chance of moving states from the current SNP to the next SNP, which is why we have L-1 matrices for L loci (i.e. there is no matrix for the final SNP because there is nowhere to move to). This function employs the R function getTransProbs() to get eigenvalues and eigenvectors of the rate matrix, then uses these values to calculate transition probabilities for any given distance between SNPs.
+// update transition probability lookup table. This table is a list over L-1 loci, and each
+// element of the list is a matrix of transition probabilities of going from one HMM state to another.
+// Note, these probabilities give the chance of moving states from the current SNP to the next SNP,
+// which is why we have L-1 matrices for L loci (i.e. there is no matrix for the final SNP because there
+// is nowhere to move to). This function employs the R function getTransProbs() to get eigenvalues and
+// eigenvectors of the rate matrix, then uses these values to calculate transition probabilities for any
+// given distance between SNPs.
+
 void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcpp::Function getTransProbs) {
 
+  // get z_max within
+  // remember because we are within the sample, there is really m1-1
+  // potential pairings (assuming poisson ind processes)
+
+  int z_max = m1-1;
+
   // get eigenvalue solutions to rate matrix
-  Rcpp::List Elist = getTransProbs(f, rho, k, m1);
+  Rcpp::List Elist = getTransProbs(f, rho, k, z_max);
   vector<double> Evalues = Rcpp_to_vector_double(Elist["Evalues"]);
   vector< vector<double> > Evectors = Rcpp_to_mat_double(Elist["Evectors"]);
   vector< vector<double> > Esolve = Rcpp_to_mat_double(Elist["Esolve"]);
@@ -351,11 +372,11 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
       fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 0);
     }
     // populate lookup table based on rate matrix solution
-    for (int z1=0; z1<(m1+1); z1++) {
-      for (int z2=0; z2<(m1+1); z2++) {
+    for (int z1=0; z1<(z_max+1); z1++) {
+      for (int z2=0; z2<(z_max+1); z2++) {
 
         // the probability of moving from state z1 to state z2 is the sum over some weighted exponentials
-        for (int i=0; i<(m1+1); i++) {
+        for (int i=0; i<(z_max+1); i++) {
           if (SNP_dist[j] > 0) {
             transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
           } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
@@ -382,6 +403,11 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
 
 double stgIMCMC::forward_alg(int m1) {
 
+  // get z_max within
+  // remember because we are within the sample, there is really m1-1
+  // potential pairings (assuming poisson ind processes)
+
+  int z_max = m1-1;
 
   // clear frwrd_mat
   for (int i=0; i<int(frwrd_mat.size()); i++) {
@@ -391,22 +417,22 @@ double stgIMCMC::forward_alg(int m1) {
   // carry out first step of algorithm
   double frwrd_sum = 0;
   double logLike = 0;
-  for (int z=0; z<(m1+1); z++) {
-    frwrd_mat[z][0] = R::dbinom(z,m1,f,false) * emmission_lookup[m1-1][z][0][x[0]];
+  for (int z=0; z<(z_max+1); z++) {
+    frwrd_mat[z][0] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][z][0][x[0]];
     frwrd_sum += frwrd_mat[z][0];
   }
 
   logLike += log(frwrd_sum);
-  for (int z=0; z<(m1+1); z++) {
+  for (int z=0; z<(z_max+1); z++) {
     frwrd_mat[z][0] /= frwrd_sum;
   }
 
   // carry out remaining steps of algorithm
   for (int j=1; j<L; j++) {
     frwrd_sum = 0;
-    for (int z=0; z<(m1+1); z++) {
+    for (int z=0; z<(z_max+1); z++) {
       // frwrd_mat[z][j] takes input from all states in iteration j-1
-      for (int i=0; i<(m1+1); i++) {
+      for (int i=0; i<(z_max+1); i++) {
         frwrd_mat[z][j] += frwrd_mat[i][j-1] * transition_lookup[j-1][i][z];
       }
 
@@ -415,7 +441,7 @@ double stgIMCMC::forward_alg(int m1) {
 
     }
     logLike += log(frwrd_sum);
-    for (int z=0; z<(m1+1); z++) {
+    for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
   }
@@ -432,6 +458,12 @@ double stgIMCMC::forward_alg(int m1) {
 
 void stgIMCMC::backward_alg(int m1) {
 
+  // get z_max within
+  // remember because we are within the sample, there is really m1-1
+  // potential pairings (assuming poisson ind processes)
+
+  int z_max = m1-1;
+
   // clear bkwrd_mat, set final value to 1
   for (int i=0; i<int(bkwrd_mat.size()); i++) {
     fill(bkwrd_mat[i].begin(), bkwrd_mat[i].end(), 0);
@@ -442,14 +474,14 @@ void stgIMCMC::backward_alg(int m1) {
   double bkwrd_sum = 0;
   for (int j=(L-2); j>=0; j--) {
     bkwrd_sum = 0;
-    for (int z=0; z<(m1+1); z++) {
+    for (int z=0; z<(z_max+1); z++) {
       // bkwrd_mat[z][j] contains the probability of all data after this point, and therefore takes input from all states that can be reached from this one
-      for (int i=0; i<(m1+1); i++) {
+      for (int i=0; i<(z_max+1); i++) {
         bkwrd_mat[z][j] += transition_lookup[j][z][i]*bkwrd_mat[i][j+1]*emmission_lookup[m1-1][i][j+1][x[j+1]];
       }
       bkwrd_sum += bkwrd_mat[z][j];
     }
-    for (int z=0; z<(m1+1); z++) {
+    for (int z=0; z<(z_max+1); z++) {
       bkwrd_mat[z][j] /= bkwrd_sum;
     }
   }
@@ -457,63 +489,115 @@ void stgIMCMC::backward_alg(int m1) {
 }
 
 //------------------------------------------------
-// stgIMCMC::
+// MCMC::
 // calculate IBD matrix from forward and backward matrices. This is simple product of matrices, but is normalised to sum to 1 over HMM states.
 void stgIMCMC::get_IBD() {
 
-  // initialise values
-  fws = 0;
-  double Lcomb = 0;
+  // get z_max within
+  // remember because we are within the sample, there is really m1-1
+  // potential pairings (assuming poisson ind processes)
 
-  // take product of forward and backward matrices, and normalise
-  double IBD_sum = 0;
-  for (int j=0; j<L; j++) {
-    IBD_sum = 0;
-    for (int z=0; z<(m1+1); z++) {
+  int z_max = m1-1;
 
-      IBD_mat[z][j] = frwrd_mat[z][j] * bkwrd_mat[z][j];
+    // initialise values
+    fws = 0;
+    double Lcomb = 0;
 
-      IBD_sum += IBD_mat[z][j];
+    // take product of forward and backward matrices, and normalise
+    double IBD_sum = 0;
+    for (int j=0; j<L; j++) {
+      IBD_sum = 0;
+      for (int z=0; z<(z_max+1); z++) {
+
+        if(isnan(bkwrd_mat[z][j])){
+          bkwrd_mat[z][j] = 1e-150; //1e-150 because the min of a cpp for a double is 4.9e-324
+        }
+        if(isnan(frwrd_mat[z][j])){
+          frwrd_mat[z][j] = 1e-150;
+        }
+
+        /*
+         if(!isfinite(frwrd_mat[z][j])){
+          printf("this is the Z level    "); print(z);
+          printf("this is the J loci     "); print(j);
+          printf("this is the NAN in the forward     "); print(frwrd_mat[z][j]);
+          Rcpp::stop("This is the non-finite value in forward");
+         }
+
+         if(!isfinite(bkwrd_mat[z][j])){
+          printf("this is the Z level    "); print(z);
+          printf("this is the J loci     "); print(j);
+          printf("this is the NAN in the backward    "); print(bkwrd_mat[z][j]);
+          Rcpp::stop("This is the non-finite value in backward");
+         }
+
+         }
+         ^^ USED THESE to find the cuplrints
+
+         ------------------
+         FUTURE DEBUG -- The backward algorithm is where nan is being produced off of first iteration
+          in some instances...I think this is due to underflow when it's done running through the algorirthm
+          as this is only coming up in the cross samples that have essentially no error call (filtered so well)
+          and are haploid...the blocks are too clear? which is causing underflow?
+
+          Also hitting this in the forward (and therefore, IBD mat)...again at likely break points (same place if block out forward...) ??
+
+          Temprorary solution is if we hit this value, make it a very small value
+         */
+
+
+
+        IBD_mat[z][j] = frwrd_mat[z][j] * bkwrd_mat[z][j];
+
+        if(!isfinite(IBD_mat[z][j])){
+          printf("this is the Z level    "); print(z);
+          printf("this is the J loci     "); print(j);
+          printf("this is the NAN in the IBD mat    "); print(IBD_mat[z][j]);
+          Rcpp::stop("This is the non-finite value in ibd_mat...means your underflow trick isn't working?");
+        }
+
+        IBD_sum += IBD_mat[z][j];
+      }
+      for (int z=0; z<(z_max+1); z++) {
+        IBD_mat[z][j] /= IBD_sum;
+      }
+      //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
+
+      for (int z=1; z<(z_max+1); z++){
+        fws += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
+      }
+
+      Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
+
     }
-    for (int z=0; z<(m1+1); z++) {
-      IBD_mat[z][j] /= IBD_sum;
+    //   f_ind /= double(L);  // original when only considering MOI 1,1
+    fws /= double(Lcomb);
+
+    /*
+    double state_prob_sum = 0;
+    vector<double> state_prob(z_max+1);
+    for (int z=0; z<(z_max+1); z++) {
+    state_prob[z] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
+    state_prob_sum += state_prob[z];
     }
+    int sim_state = sample1(state_prob, state_prob_sum) - 1;
 
-    for (int z=1; z<(m1+1); z++){
-      fws += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
+    sim_trans_n = 0;
+    for (int j=1; j<L; j++) {
+    state_prob_sum = 0;
+    for (int z=0; z<(z_max+1); z++) {
+    state_prob[z] = transition_lookup[j-1][sim_state][z];
+    state_prob[z] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
+    state_prob_sum += state_prob[z];
     }
-
-    Lcomb += m1*SNP_dist[j]; // AUC -- z+1 to include the zero level
-
+    int sim_state_new = sample1(state_prob, state_prob_sum) - 1;
+    if (sim_state_new != sim_state) {
+    sim_trans_n++;
+    }
+    sim_state = sim_state_new;
+    }
+    */
   }
-
-  fws /= double(Lcomb);
-
-  /*
-  double state_prob_sum = 0;
-  vector<double> state_prob(z_max+1);
-  for (int z=0; z<(z_max+1); z++) {
-  state_prob[z] = R::dbinom(z,z_max,f,false) * emmission_lookup[m1-1][m2-1][z][0][x[0]];
-  state_prob_sum += state_prob[z];
-  }
-  int sim_state = sample1(state_prob, state_prob_sum) - 1;
-
-  sim_trans_n = 0;
-  for (int j=1; j<L; j++) {
-  state_prob_sum = 0;
-  for (int z=0; z<(z_max+1); z++) {
-  state_prob[z] = transition_lookup[j-1][sim_state][z];
-  state_prob[z] *= emmission_lookup[m1-1][m2-1][z][j][x[j]];
-  state_prob_sum += state_prob[z];
-  }
-  int sim_state_new = sample1(state_prob, state_prob_sum) - 1;
-  if (sim_state_new != sim_state) {
-  sim_trans_n++;
-  }
-  sim_state = sim_state_new;
-  }
-  */
-}
 
 
 //------------------------------------------------
@@ -526,17 +610,4 @@ double stgIMCMC::propose_m(double m_current, double weight_move, double weight_s
     m_prop = (m_prop==0 || m_prop>m_max) ? m_current : m_prop;
   }
   return(m_prop);
-}
-
-
-//------------------------------------------------
-// stgIMCMC::
-// propose new value of K given current value and sampling weights. New value cannot be 0 or greater than m_max.
-double stgIMCMC::propose_k(double k_current, double weight_move, double weight_stay) {
-  double k_prop = k_current;
-  if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
-    k_prop = rbernoulli1(0.5) ? k_current+1 : k_current-1;
-    k_prop = (k_prop==0 || k_prop>k_max) ? k_current : k_prop;
-  }
-  return(k_prop);
 }
