@@ -33,7 +33,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // define lookup tables
   // The emmission lookup table is fully defined here. The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   define_emmission_lookup();
-  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max-1, vector<double> (m_max-1)));
+  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
 
   // initialise transient MCMC objects
   m1 = 1;
@@ -341,7 +341,7 @@ void stgIMCMC::define_emmission_lookup() {
 void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcpp::Function getTransProbs) {
 
     printf("this is the m1 for this update    "); print(m1);
-    
+
   // get z_max within
   // remember because we are within the sample, there is really m1-1
   // potential pairings (assuming poisson ind processes)
@@ -359,7 +359,7 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
     for (int j=0; j<(L-1); j++) {
 
       // clear existing values
-      for (int z1=0; z1<(m_max-1); z1++) {
+      for (int z1=0; z1<(m_max); z1++) {
         fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1); // first fill with 0s
         transition_lookup[j][1][1] = 1; // a11 is 1 becuase a strain is identical to itself
       }
@@ -380,7 +380,7 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
     for (int j=0; j<(L-1); j++) {
 
       // clear existing values
-      for (int z1=0; z1<(m_max-1); z1++) {
+      for (int z1=0; z1<(m_max); z1++) {
         fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 0);
       }
 
