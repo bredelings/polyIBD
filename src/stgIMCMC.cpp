@@ -33,7 +33,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // define lookup tables
   // The emmission lookup table is fully defined here. The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   define_emmission_lookup();
-  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
+  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max-1, vector<double> (m_max-1)));
 
   // initialise transient MCMC objects
   m1 = 1;
@@ -60,12 +60,11 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // sim_trans_n_store = vector<int>(samples);
 
   // calculate initial likelihood
+
   update_transition_lookup(f, rho, k, m1, args_functions["getTransProbs"]);
 
   logLike_old = forward_alg(m1);
-  if(!isfinite(logLike_old)){
-   Rcpp::stop("The first loglike is NaN");
-  }
+
 
   logLike_burnin_store[0] = logLike_old;
 
@@ -279,16 +278,12 @@ void stgIMCMC::define_emmission_lookup() {
   // loop through m1
   emmission_lookup = vector< vector< vector< vector<double> > > > (m_max);
   for (int m1=1; m1<=m_max; m1++) {
-      printf("THIS IS THE MOI LEVEL       "); print(m1);
-      sleep(0.1);
       // define h as 1 + maximum IBD
       int h = m1;
 
       // loop through z
       emmission_lookup[m1-1] = vector< vector< vector<double> > >(h);
       for (int z=0; z<h; z++) {
-      printf("THIS IS THE Z LEVEL       "); print(z);
-      sleep(0.1);
         emmission_lookup[m1-1][z] = vector< vector<double> >(L, vector<double>(4));
 
         // loop through loci
@@ -327,14 +322,6 @@ void stgIMCMC::define_emmission_lookup() {
           // save to table
           emmission_lookup[m1-1][z][i] = x_err;
 
-          printf("This is Loci:    "); print(i);
-          sleep(0.5);
-          //DEBUG
-          for(int i=0; i<int(x_err.size()); i++){
-            print(x_err[i]);
-            sleep(0.1);
-          }
-          printf("--------------------- \n");
       }
     }
   }
@@ -359,39 +346,62 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
 
   int z_max = m1-1;
 
-  // get eigenvalue solutions to rate matrix
-  Rcpp::List Elist = getTransProbs(f, rho, k, z_max);
-  vector<double> Evalues = Rcpp_to_vector_double(Elist["Evalues"]);
-  vector< vector<double> > Evectors = Rcpp_to_mat_double(Elist["Evectors"]);
-  vector< vector<double> > Esolve = Rcpp_to_mat_double(Elist["Esolve"]);
 
-  // populate transition matrix
-  for (int j=0; j<(L-1); j++) {
-    // clear existing values
-    for (int z1=0; z1<(m_max+1); z1++) {
-      fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 0);
-    }
-    // populate lookup table based on rate matrix solution
-    for (int z1=0; z1<(z_max+1); z1++) {
-      for (int z2=0; z2<(z_max+1); z2++) {
+  // however, this now poses the problem where if we have an MOI of 1 then there is no comparison
+  // of I and U to be made. Really, a sample is fully I with itself -- this is consistent with the
+  // previous notation of fws where fws > 0.95 has been used to indicate a monoclonal infxn
 
-        // the probability of moving from state z1 to state z2 is the sum over some weighted exponentials
-        for (int i=0; i<(z_max+1); i++) {
-          if (SNP_dist[j] > 0) {
-            transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
-          } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
-            if (Evalues[i]==0) {
-              transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
-            }
-          }
-        }
 
+  if(z_max == 0){
+    // populate transition matrix for this condition
+    for (int j=0; j<(L-1); j++) {
+
+      // clear existing values
+      for (int z1=0; z1<(m_max-1); z1++) {
+        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1); // first fill with 0s
+        transition_lookup[j][1][1] = 1; // a11 is 1 becuase a strain is identical to itself
       }
     }
-  }
 
-} // end of transition_update function
+  } else {
 
+
+
+    // get eigenvalue solutions to rate matrix
+    Rcpp::List Elist = getTransProbs(f, rho, k, z_max);
+    vector<double> Evalues = Rcpp_to_vector_double(Elist["Evalues"]);
+    vector< vector<double> > Evectors = Rcpp_to_mat_double(Elist["Evectors"]);
+    vector< vector<double> > Esolve = Rcpp_to_mat_double(Elist["Esolve"]);
+
+
+    // populate transition matrix
+    for (int j=0; j<(L-1); j++) {
+
+      // clear existing values
+      for (int z1=0; z1<(m_max-1); z1++) {
+        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 0);
+      }
+
+      // populate lookup table based on rate matrix solution
+      for (int z1=0; z1<(z_max+1); z1++) {
+        for (int z2=0; z2<(z_max+1); z2++) {
+          // the probability of moving from state z1 to state z2 is the sum over some weighted exponentials
+          for (int i=0; i<(z_max+1); i++) {
+            if (SNP_dist[j] > 0) {
+              transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
+            } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
+              if (Evalues[i]==0) {
+                transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
+              }
+            }
+          }
+
+        }
+      }
+    }
+
+  } // end of transition_update function
+} // end of if-else conditional
 
 //------------------------------------------------
 // stgIMCMC::
@@ -445,6 +455,10 @@ double stgIMCMC::forward_alg(int m1) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
   }
+
+  if(!isfinite(logLike)){
+   Rcpp::stop("The loglike from the fw algorithm is  "); print(logLike);
+    }
 
   return(logLike);
 }
@@ -509,69 +523,28 @@ void stgIMCMC::get_IBD() {
       IBD_sum = 0;
       for (int z=0; z<(z_max+1); z++) {
 
-        if(isnan(bkwrd_mat[z][j])){
-          bkwrd_mat[z][j] = 1e-150; //1e-150 because the min of a cpp for a double is 4.9e-324
-        }
-        if(isnan(frwrd_mat[z][j])){
-          frwrd_mat[z][j] = 1e-150;
-        }
-
-        /*
-         if(!isfinite(frwrd_mat[z][j])){
-          printf("this is the Z level    "); print(z);
-          printf("this is the J loci     "); print(j);
-          printf("this is the NAN in the forward     "); print(frwrd_mat[z][j]);
-          Rcpp::stop("This is the non-finite value in forward");
-         }
-
-         if(!isfinite(bkwrd_mat[z][j])){
-          printf("this is the Z level    "); print(z);
-          printf("this is the J loci     "); print(j);
-          printf("this is the NAN in the backward    "); print(bkwrd_mat[z][j]);
-          Rcpp::stop("This is the non-finite value in backward");
-         }
-
-         }
-         ^^ USED THESE to find the cuplrints
-
-         ------------------
-         FUTURE DEBUG -- The backward algorithm is where nan is being produced off of first iteration
-          in some instances...I think this is due to underflow when it's done running through the algorirthm
-          as this is only coming up in the cross samples that have essentially no error call (filtered so well)
-          and are haploid...the blocks are too clear? which is causing underflow?
-
-          Also hitting this in the forward (and therefore, IBD mat)...again at likely break points (same place if block out forward...) ??
-
-          Temprorary solution is if we hit this value, make it a very small value
-         */
-
-
-
         IBD_mat[z][j] = frwrd_mat[z][j] * bkwrd_mat[z][j];
-
-        if(!isfinite(IBD_mat[z][j])){
-          printf("this is the Z level    "); print(z);
-          printf("this is the J loci     "); print(j);
-          printf("this is the NAN in the IBD mat    "); print(IBD_mat[z][j]);
-          Rcpp::stop("This is the non-finite value in ibd_mat...means your underflow trick isn't working?");
-        }
 
         IBD_sum += IBD_mat[z][j];
       }
       for (int z=0; z<(z_max+1); z++) {
         IBD_mat[z][j] /= IBD_sum;
       }
-      //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
 
       for (int z=1; z<(z_max+1); z++){
         fws += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
       }
 
-      Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
+      //Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
 
     }
-    //   f_ind /= double(L);  // original when only considering MOI 1,1
-    fws /= double(Lcomb);
+
+    //fws /= double(Lcomb);
+    printf("This is the temporary fws non-standardized   "); print(fws);
+    sleep(0.2);
+
+
+
 
     /*
     double state_prob_sum = 0;
@@ -597,6 +570,9 @@ void stgIMCMC::get_IBD() {
     sim_state = sim_state_new;
     }
     */
+
+      printf("getibd alg works");
+
   }
 
 
