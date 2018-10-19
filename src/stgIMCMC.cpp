@@ -535,13 +535,16 @@ void stgIMCMC::get_IBD() {
         fws += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
       }
 
-      //Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
+      Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
 
     }
 
-    //fws /= double(Lcomb);
-    printf("This is the temporary fws non-standardized   "); print(fws);
-    sleep(0.2);
+    if(Lcomb == 0){
+      fws = fws; // here we are MOI of 1, so there is no AUC to calculate
+    } else {
+      fws /= double(Lcomb);
+    }
+
 
 
 
@@ -571,7 +574,6 @@ void stgIMCMC::get_IBD() {
     }
     */
 
-      printf("getibd alg works");
 
   }
 
