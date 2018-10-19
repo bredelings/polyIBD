@@ -340,6 +340,8 @@ void stgIMCMC::define_emmission_lookup() {
 
 void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcpp::Function getTransProbs) {
 
+    printf("this is the m1 for this update    "); print(m1);
+    
   // get z_max within
   // remember because we are within the sample, there is really m1-1
   // potential pairings (assuming poisson ind processes)
@@ -389,6 +391,18 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
           for (int i=0; i<(z_max+1); i++) {
             if (SNP_dist[j] > 0) {
               transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1] * exp(Evalues[i] * SNP_dist[j]);
+
+              if(!isfinite(transition_lookup[j][z1][z2])){
+                printf("the z1 level is  "); print(z1);
+                printf("the z2 level is  "); print(z2);
+                printf("the loci is      "); print(j);
+               Rcpp::stop("The backward alg has issues  "); print(transition_lookup[j][z1][z2]);
+                }
+
+
+
+
+
             } else {    // SNP_dist of -1 indicates jump over contigs, i.e. infinite distance
               if (Evalues[i]==0) {
                 transition_lookup[j][z1][z2] += Evectors[z2][i]*Esolve[i][z1];
@@ -453,12 +467,16 @@ double stgIMCMC::forward_alg(int m1) {
     logLike += log(frwrd_sum);
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
+
+      if(!isfinite(frwrd_mat[z][j])){
+        printf("the z level is  "); print(z);
+        printf("the loci is      "); print(j);
+       Rcpp::stop("The backward alg has issues  "); print(frwrd_mat[z][j]);
+        }
+
+
     }
   }
-
-  if(!isfinite(logLike)){
-   Rcpp::stop("The loglike from the fw algorithm is  "); print(logLike);
-    }
 
   return(logLike);
 }
@@ -497,6 +515,13 @@ void stgIMCMC::backward_alg(int m1) {
     }
     for (int z=0; z<(z_max+1); z++) {
       bkwrd_mat[z][j] /= bkwrd_sum;
+
+      if(!isfinite(bkwrd_mat[z][j])){
+        printf("the z level is  "); print(z);
+        printf("the loci is      "); print(j);
+       Rcpp::stop("The backward alg has issues  "); print(bkwrd_mat[z][j]);
+        }
+
     }
   }
 
@@ -540,12 +565,12 @@ void stgIMCMC::get_IBD() {
     }
 
     if(Lcomb == 0){
-      fws = fws; // here we are MOI of 1, so there is no AUC to calculate
+      fws = fws; // here we are MOI of 1 therefore no AUC to calculate
     } else {
       fws /= double(Lcomb);
     }
 
-
+    printf("This is the fws value:     "); print(fws);
 
 
 
