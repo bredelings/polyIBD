@@ -43,6 +43,7 @@ ggplot_trace <- function(data=NULL, mapping=NULL, stat="identity", position="ide
 #' \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -78,6 +79,7 @@ ggplot_m1 <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -115,6 +117,7 @@ ggplot_m2 <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -149,6 +152,7 @@ ggplot_f_postprob <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -184,6 +188,7 @@ ggplot_f <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -219,6 +224,8 @@ ggplot_k <- function(x) {
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
+#'
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
@@ -282,6 +289,8 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
 #'
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
+#'
+#' @importFrom ggplot2 ggplot aes
 #'
 #' @export
 
