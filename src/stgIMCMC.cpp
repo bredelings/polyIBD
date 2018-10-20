@@ -74,7 +74,8 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   m1_weight_stay = 1;
   m1_weight_move = 1;
   f_propSD = 0.2;
-  k_propSD = k_max/5;
+  k_weight_stay = 1;
+  k_weight_move = 1;
 }
 
 
@@ -108,7 +109,7 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = rnorm1_interval(k, k_propSD, 1, k_max);
+         k_prop = propose_k(k, k_weight_move, k_weight_stay);
       }
     }
 
@@ -131,7 +132,7 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
       }
       // or update k_propSD
       if (m1==m1_prop && k_prop!=k) {
-        k_propSD  += (1-0.23)/sqrt(double(rep));
+        k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
       }
 
       // update parameter values and likelihood
@@ -158,8 +159,9 @@ void stgIMCMC::burnin_MCMC(Rcpp::List args_functions) {
 
       // update k move
       if (m1==m1_prop && k_prop!=k) {
-        k_propSD  -= 0.23/sqrt(double(rep));
-        k_propSD = (k_propSD < 0) ? -k_propSD : k_propSD;
+        k_weight_stay = (k==k_prop) ? k_weight_stay : ++k_weight_stay;
+        // limit k sampling weights
+        k_weight_stay = (k_weight_stay > 100*k_weight_move) ? 100*k_weight_move : k_weight_stay;
       }
     }
     // store logLike
@@ -204,7 +206,7 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
       if (rbernoulli1(0.5)) {
         f_prop = rnorm1_interval(f, f_propSD, 0, 1);
       } else {
-        k_prop = rnorm1_interval(k, k_propSD, 1, k_max);
+        k_prop = propose_k(k, k_weight_move, k_weight_stay);
       }
     }
 
@@ -554,4 +556,17 @@ double stgIMCMC::propose_m(double m_current, double weight_move, double weight_s
     m_prop = (m_prop==0 || m_prop>m_max) ? m_current : m_prop;
   }
   return(m_prop);
+}
+
+
+//------------------------------------------------
+// stgIMCMC::
+// propose new value of K given current value and sampling weights. New value cannot be 0 or greater than m_max.
+double stgIMCMC::propose_k(double k_current, double weight_move, double weight_stay) {
+  double k_prop = k_current;
+  if (rbernoulli1( weight_move/double(weight_move + weight_stay) )) {
+    k_prop = rbernoulli1(0.5) ? k_current+1 : k_current-1;
+    k_prop = (k_prop==0 || k_prop>k_max) ? k_current : k_prop;
+  }
+  return(k_prop);
 }

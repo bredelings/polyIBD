@@ -53,7 +53,8 @@ public:
   int m1_weight_stay;
   int m1_weight_move;
   double f_propSD;
-  int k_propSD;
+  int k_weight_stay;
+  int k_weight_move;
   int IBD_index;
 
 
