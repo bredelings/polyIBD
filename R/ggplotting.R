@@ -15,7 +15,7 @@ polyibdggtheme <- ggplot2::theme(panel.background = ggplot2::element_rect(fill =
 
 #------------------------------------------------
 #' @title ggtrace
-#'
+#' @importFrom ggplot2 ggplot aes
 
 
 ggplot_trace <- function(data=NULL, mapping=NULL, stat="identity", position="identity", na.rm=FALSE, inherit.aes = TRUE, ...) {
@@ -63,7 +63,7 @@ ggplot_m1 <- function(x) {
 
   # call plot
   x %>%
-    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
+    ggplot2::ggplot(mapping = aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "M1 Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
     ggplot2::ggtitle("M1 Trace") +
@@ -98,7 +98,7 @@ ggplot_m2 <- function(x) {
 
   # call plot
   x %>%
-    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
+    ggplot2::ggplot(mapping = aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "M2 Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
     ggplot2::ggtitle("M2 Trace") +
@@ -136,7 +136,7 @@ ggplot_f_postprob <- function(x) {
 
     # call plot
     x %>%
-      ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
+      ggplot2::ggplot(mapping = aes(x=iteration, y=value)) + ggplot_trace() +
       ggplot2::scale_y_continuous(name = "F (Pop) Estimate", limits = c(0,1)) +
       ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
       ggplot2::ggtitle("F (Pop) Trace") +
@@ -152,6 +152,7 @@ ggplot_f_postprob <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#'
 #' @importFrom ggplot2 ggplot aes
 #'
 #' @export
@@ -172,7 +173,7 @@ ggplot_f <- function(x) {
 
   # call plot
   x %>%
-    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
+    ggplot2::ggplot(mapping = aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "F (Ind) Estimate", limits = c(0,1)) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
     ggplot2::ggtitle("F (Ind) Trace") +
@@ -188,6 +189,7 @@ ggplot_f <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #'
 #' @importFrom magrittr %>%
+#'
 #' @importFrom ggplot2 ggplot aes
 #'
 #' @export
@@ -208,7 +210,7 @@ ggplot_k <- function(x) {
 
   # call plot
   x %>%
-    ggplot2::ggplot(mapping = ggplot2::aes(x=iteration, y=value)) + ggplot_trace() +
+    ggplot2::ggplot(mapping = aes(x=iteration, y=value)) + ggplot_trace() +
     ggplot2::scale_y_continuous(name = "K Estimate", breaks = ybreaks, limits = c(0, max(ybreaks))) +
     ggplot2::scale_x_continuous(name = "MCMC Chain Iteration", breaks = xbreaks) +
     ggplot2::ggtitle("K Trace") +
@@ -225,7 +227,7 @@ ggplot_k <- function(x) {
 #' @param x an object of class \code{polyIBD}, as produced by the function \code{polyIBD::runMCMC}
 #' @param trueIBD option to overlay a line corresponding to the true IBD (for example if using simulated data)
 #'
-#' @importFrom ggplot2 ggplot aes
+#' @importFrom ggplot2 ggplot, aes
 #'
 #' @export
 
@@ -266,7 +268,7 @@ ggplot_IBD <- function(x, trueIBD=NULL, ...) {
   }
 
   plotobj <- ggplot2::ggplot() +
-    ggplot2::geom_rect(data = IBDdflong, mapping = ggplot2::aes(
+    ggplot2::geom_rect(data = IBDdflong, mapping = aes(
       xmin = start, xmax = end, ymin = Znum - 0.49, ymax = Znum + 0.49, fill = Prob)) +
     viridis::scale_fill_viridis("IBD Probability", option = "plasma", limits = c(0,1)) +
     ggplot2::scale_y_continuous("Number of IBD Genotypes", breaks = seq(1:max(IBDdflong$Znum+1))-1) +
