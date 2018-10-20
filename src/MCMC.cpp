@@ -137,7 +137,7 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
         f_propSD  += (1-0.23)/sqrt(double(rep));
       }
       // or update k_propSD
-      if (m1==m1_prop && k_prop!=k) {
+      if (m1==m1_prop && m2==m2_prop && k_prop!=k) {
         k_weight_move = (k==k_prop) ? k_weight_move : ++k_weight_move;
       }
 
