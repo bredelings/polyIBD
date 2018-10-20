@@ -36,6 +36,7 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   m1 = 1;
   m2 = 1;
   z_max = (m1<m2) ? m1 : m2;
+  k = 1;
   f = 0.01;
   logLike_old = 0;
   frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
