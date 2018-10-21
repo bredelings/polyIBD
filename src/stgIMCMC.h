@@ -37,6 +37,8 @@ public:
   std::vector< std::vector<  double> > frwrd_mat;
   std::vector< std::vector<  double> > bkwrd_mat;
   std::vector< std::vector< double> > IBD_mat;
+  std::vector< double> z_maxvec;
+
 
   // objects for storing MCMC results
   std::vector< double> logLike_burnin_store;
@@ -45,6 +47,7 @@ public:
   std::vector<double> f_store;
   std::vector<double> k_store;
   std::vector< std::vector<  double> > IBD_marginal;
+  std::vector< std::vector<  double> > effMOI;
   int accept_rate;
   std::vector<double> fws_store;
  // std::vector<int> sim_trans_n_store;

@@ -5,8 +5,8 @@
 
 //------------------------------------------------
 // draw z probabilitiy distribution to get at effMOI
-double psamp(vector<double> p);
-int sampleZ(vector<double> p);
+double psamp(std::vector<double> p);
+int sampleZ(std::vector<double> p);
 
 //------------------------------------------------
 // draw from continuous uniform distribution on interval [0,1)

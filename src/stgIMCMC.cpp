@@ -44,6 +44,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
   IBD_mat = vector< vector< double> >(m_max+1, vector<double>(L));
 
+
   // objects for storing MCMC results
   logLike_burnin_store = vector< double>(burnin);
   logLike_store = vector< double>(samples);
@@ -51,6 +52,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   f_store = vector<double>(samples);
   k_store = vector<double>(samples);
   IBD_marginal = vector< vector< double> >(m_max+1, vector< double>(L));
+  effMOI = vector< vector< double> >(samples, vector<double>(L));
   accept_rate = 0;
 
   // temp objects
@@ -247,6 +249,20 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
         IBD_marginal[i][j] += IBD_mat[i][j];
       }
     }
+
+    // determine the effective MOI for this report
+    // defined z_max in forward, backward, and get_IBD as m1-1
+    // m1 - zlvl to get the effective MOI estimate
+    z_maxvec = vector< double>(m1);
+
+    for(int j=0; j<L; j++){
+      for(int i=0; i<m1; i++){
+        fill(z_maxvec.begin(), z_maxvec.end(), 0);
+        z_maxvec[i] = IBD_mat[i][j];
+      }
+      effMOI[rep][j] = m1 - sampleZ(z_maxvec);
+    }
+
 
   }   // end MCMC loop
 

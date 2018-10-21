@@ -90,6 +90,12 @@ stgIrunMCMC <- function(input = NULL,
   colnames(IBD_marginal) <- paste0("z", 0:(ncol(IBD_marginal)-1))
   IBD_marginal <- cbind(input$CHROMPOS, IBD_marginal)
 
+  # get effective MOI matrix
+  effMOI <- t(Rcpp_to_mat(output_raw$effMOI))
+  colnames(effMOI) <- "effectiveMOI"
+  effMOI <- cbind(input$CHROMPOS, effMOI)
+
+
   # get final acceptance rate
   accept_rate <- output_raw$accept_rate/samples
 
