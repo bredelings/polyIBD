@@ -13,6 +13,34 @@ using namespace std;
 random_device rd;
 default_random_engine generator(rd());
 
+//--------------------------------------------------------
+// sample from vector of probabilities w/ respect to weights
+// return the prob found
+double psamp(vector<double> p){
+  double rand = runif_0_1();
+  sort(p.begin(), p.end());
+  // compare
+  for(int i=0; i<int(p.size()); i++){
+    if(rand <= p[i]){
+      return p[i];
+      break;
+    }
+  }
+}
+
+//--------------------------------------------------------
+// find the index (i.e. the z-level) that matches the prob sampled
+int sampleZ(vector<double> p) {
+  double pc = psamp(p);
+  for(int z=0; z<int(p.size()); z++){
+    if(pc == p[z]){
+      return z;
+      break;
+    }
+  }
+}
+
+
 //------------------------------------------------
 // draw from continuous uniform distribution on interval [0,1)
 #ifdef USE_MY_RANDOM
