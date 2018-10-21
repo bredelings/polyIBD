@@ -30,14 +30,14 @@ public:
   std::vector< std::vector< std::vector<double> > > transition_lookup;
 
   // transient MCMC objects
-  int m1, m2, k, z_max;
+  int m1, k, z_max;
   double f, logLike_old;
   double fws;
   // int sim_trans_n;
   std::vector< std::vector<  double> > frwrd_mat;
   std::vector< std::vector<  double> > bkwrd_mat;
   std::vector< std::vector< double> > IBD_mat;
-  std::vector< double> z_maxvec;
+  std::vector< double> z_probvec;
 
 
   // objects for storing MCMC results
@@ -47,7 +47,7 @@ public:
   std::vector<double> f_store;
   std::vector<double> k_store;
   std::vector< std::vector<  double> > IBD_marginal;
-  std::vector< std::vector<  double> > effMOI;
+  std::vector< std::vector<  int> > effMOI;
   int accept_rate;
   std::vector<double> fws_store;
  // std::vector<int> sim_trans_n_store;

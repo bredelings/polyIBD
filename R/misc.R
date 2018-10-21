@@ -138,7 +138,7 @@ polyIBDinput_to_stgIrunMCMC_compat <- function(polyIBDinput){
   # 3 = {a}
 
 
-  x <- gtmatrix[,1]+1
+  x <- gtmatrix[,2]+1
 
 ## return
 ret <- list(p=p,

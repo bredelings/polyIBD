@@ -3,6 +3,7 @@
 #include <cmath>
 #include "probability.h"
 #include "misc.h"
+#include <unistd.h>
 
 using namespace std;
 
@@ -18,11 +19,24 @@ default_random_engine generator(rd());
 // return the prob found
 double psamp(vector<double> p){
   double rand = runif_0_1();
+  double pback = 0;
+
+  // sort
   sort(p.begin(), p.end());
+
+  // compute cumulative probabilities
+  vector<double> cump = p;
+  for(int i=1; i<int(cump.size()); i++){
+    cump[i] += cump[i-1];
+  }
   // compare
-  for(int i=0; i<int(p.size()); i++){
-    if(rand <= p[i]){
-      return p[i];
+  for(int i=0; i<int(cump.size()); i++){
+    if(rand <= cump[i]){
+      for(int j=0; j < i; j++ ){
+        pback += p[j];
+      }
+      // return original vector value
+      return cump[i] - pback;
       break;
     }
   }

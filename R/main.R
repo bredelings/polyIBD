@@ -92,7 +92,6 @@ stgIrunMCMC <- function(input = NULL,
 
   # get effective MOI matrix
   effMOI <- t(Rcpp_to_mat(output_raw$effMOI))
-  colnames(effMOI) <- "effectiveMOI"
   effMOI <- cbind(input$CHROMPOS, effMOI)
 
 
@@ -108,6 +107,7 @@ stgIrunMCMC <- function(input = NULL,
 
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,
+                         effMOI = effMOI,
                          quantiles = quants,
                          accept_rate = accept_rate,
                          runTime = runTime)
