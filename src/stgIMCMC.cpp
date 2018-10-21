@@ -417,10 +417,10 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
 
         }
       }
-    }
+    } // end of transition_update function
 
-  } // end of transition_update function
-} // end of if-else conditional
+  } // end of if-else conditional
+}
 
 //------------------------------------------------
 // stgIMCMC::
