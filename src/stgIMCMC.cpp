@@ -538,9 +538,7 @@ void stgIMCMC::get_IBD() {
 
     }
 
-    if(Lcomb == 0){
-      fws = fws; // here we are MOI of 1 therefore no AUC to calculate
-    } else {
+    if(Lcomb != 0){
       fws /= double(Lcomb);
     }
   }
