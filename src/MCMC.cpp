@@ -21,8 +21,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   e2 = Rcpp_to_double(args["e2"]);
   m_max = Rcpp_to_int(args["m_max"]);
   k_max = Rcpp_to_int(args["k_max"]);
-  m1_mat = Rcpp_to_mat_int(args["m1_mat"]);
-  m2_mat = Rcpp_to_mat_int(args["m2_mat"]);
+//  m1_mat = Rcpp_to_mat_int(args["m1_mat"]);
+//  m2_mat = Rcpp_to_mat_int(args["m2_mat"]);
 
   // MCMC parameters
   burnin = Rcpp_to_int(args["burnin"]);
@@ -60,33 +60,35 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   // sim_trans_n_store = vector<int>(samples);
 
   // calculate initial likelihood
-  update_transition_lookup(f, rho, k, z_max_eff, args_functions["getTransProbs"]);
+//   update_transition_lookup(f, rho, k, z_max_eff, args_functions["getTransProbs"]);
+//
+// // Fill the z_max_eff, m1_eff, and m2_eff vectors for initialisation
+//   fill(m1_eff.begin(), m1_eff.end(), 1); // fill with 1 for first iteration
+//   fill(m2_eff.begin(), m2_eff.end(), 1); // fill with 1 for first iteration
+//   fill(z_max_eff.begin(), z_max_eff.end(), 1); // fill with 1 for first iteration
+//   for(int i = 0; i<L; i++){
+//     z_max_eff[i] = (m1_eff[i] < m2_eff[i]) ? m1_eff[i] : m2_eff[i] ;
+//   }
+//
+// // DEBUG
+//  for(int j; j < int(transition_lookup.size()); j++){
+//   for(int z1; z1 < int(transition_lookup[j].size()); z1++){
+//     for(int z2; z2 < int(transition_lookup[j][z1].size()); z2++){
+//       printf("Transprob"); print(transition_lookup[j][z1][z2]);
+//     }
+//    }
+//   }
+//
+//
+// // more DEBUG
+//  for(int k; k < int(z_max_eff.size()); k++){
+//   printf("z_max_eff"); print(z_max_eff[k]);
+// }
+//
 
-// Fill the z_max_eff, m1_eff, and m2_eff vectors for initialisation
-  fill(m1_eff.begin(), m1_eff.end(), 1); // fill with 1 for first iteration
-  fill(m2_eff.begin(), m2_eff.end(), 1); // fill with 1 for first iteration
-  fill(z_max_eff.begin(), z_max_eff.end(), 1); // fill with 1 for first iteration
-  for(int i = 0; i<L; i++){
-    z_max_eff[i] = (m1_eff[i] < m2_eff[i]) ? m1_eff[i] : m2_eff[i] ;
-  }
+printf("Do we get to here");
 
-// DEBUG
- for(int j; j < int(transition_lookup.size()); j++){
-  for(int z1; z1 < int(transition_lookup[j].size()); z1++){
-    for(int z2; z2 < int(transition_lookup[j][z1].size()); z2++){
-      printf("Transprob"); print(transition_lookup[j][z1][z2]);
-    }
-   }
-  }
-
-
-// more DEBUG
- for(int k; k < int(z_max_eff.size()); k++){
-  printf("z_max_eff"); print(z_max_eff[k]);
-}
-
-
-  logLike_old = forward_alg(z_max_eff, m1_eff, m2_eff);
+  logLike_old = forward_alg(vector<int>(L,1), vector<int>(L,1), vector<int>(L,1));
   logLike_burnin_store[0] = logLike_old;
 
   // misc objects

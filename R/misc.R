@@ -164,10 +164,10 @@ return(ret)
 # (not exported)
 # TODO fix this input
 
-polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput, retsmpl1, retsmpl2){
+polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
   # TODO this is a temporary way to store these matrices
-  effm1_mat <- retsmpl1$summary$effMOI[,3:ncol(retsmpl1$summary$effMOI)]
-  effm2_mat <- retsmpl2$summary$effMOI[,3:ncol(retsmpl2$summary$effMOI)]
+ # effm1_mat <- retsmpl1$summary$effMOI[,3:ncol(retsmpl1$summary$effMOI)]
+ # effm2_mat <- retsmpl2$summary$effMOI[,3:ncol(retsmpl2$summary$effMOI)]
 
   p <- polyIBDinput[["p"]]
   gtmatrix <- polyIBDinput[["gtmatrix"]]
@@ -207,9 +207,7 @@ polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput, retsmpl1, retsmpl2
   ## return
   ret <- list(p=p,
               x=x,
-              SNP_dist = SNP_dist,
-              effm1_mat = effm1_mat,
-              effm2_mat = effm2_mat)
+              SNP_dist = SNP_dist)
 
   return(ret)
 
