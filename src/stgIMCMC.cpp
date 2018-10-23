@@ -33,16 +33,16 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   // define lookup tables
   // The emmission lookup table is fully defined here. The transition lookup table is defined as empty, and will be updated with new values throughout the MCMC.
   define_emmission_lookup();
-  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
+  transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max, vector<double> (m_max)));
 
   // initialise transient MCMC objects
   m1 = 1;
   f = 0.01;
   k=1;
   logLike_old = 0;
-  frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
-  bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
-  IBD_mat = vector< vector< double> >(m_max+1, vector<double>(L));
+  frwrd_mat = vector< vector< double> >(m_max, vector< double>(L));
+  bkwrd_mat = vector< vector< double> >(m_max, vector< double>(L));
+  IBD_mat = vector< vector< double> >(m_max, vector<double>(L));
 
 
   // objects for storing MCMC results
@@ -51,7 +51,7 @@ stgIMCMC::stgIMCMC(Rcpp::List args, Rcpp::List args_functions) {
   m1_store = vector<int>(samples);
   f_store = vector<double>(samples);
   k_store = vector<double>(samples);
-  IBD_marginal = vector< vector< double> >(m_max+1, vector< double>(L));
+  IBD_marginal = vector< vector< double> >(m_max, vector< double>(L));
   effMOI = vector< vector< int> >(samples, vector<int>(L));
   accept_rate = 0;
 
@@ -244,7 +244,7 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
     //sim_trans_n_store[rep] = sim_trans_n;
 
     // add current IBD_mat to running estimate
-    for (int i=0; i<(m_max+1); i++) {
+    for (int i=0; i<(m_max); i++) {
       for (int j=0; j<L; j++) {
         IBD_marginal[i][j] += IBD_mat[i][j];
       }
@@ -269,7 +269,7 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
   }   // end MCMC loop
 
   // finalise IBD_mat
-  for (int i=0; i<(m_max+1); i++) {
+  for (int i=0; i<(m_max); i++) {
     for (int j=0; j<L; j++) {
       IBD_marginal[i][j] /= double(samples);
     }
@@ -321,12 +321,20 @@ void stgIMCMC::define_emmission_lookup() {
             x_raw[3] = pow(q,m1);
 
           }
-          // if some IBD
+          // if all IBD
+          else if (z == (h-1)){ // we have m-1 pairs. Within a sample then we cannot have a het call if all are IBD
+
+            x_raw[0] = 1;
+            x_raw[1] = pow(p,m1-z);
+            x_raw[2] = 0;
+            x_raw[3] = pow(q,m1-z);
+          }
+          // if some IBD but not all IBD
           else {
 
             x_raw[0] = 1;
             x_raw[1] = pow(p,m1-z);
-            x_raw[2] = (1 - pow(p,m1-z) - pow(q,m1-z));
+            x_raw[2] = 0;
             x_raw[3] = pow(q,m1-z);
           }
 

@@ -19,6 +19,8 @@ public:
   double e2;
   int m_max;
   int k_max;
+  std::vector< std::vector<  int> > m1_mat;
+  std::vector< std::vector<  int> > m2_mat;
 
   // MCMC parameters
   int burnin;
@@ -30,17 +32,18 @@ public:
   std::vector< std::vector< std::vector<double> > > transition_lookup;
 
   // transient MCMC objects
-  int m1, m2, k, z_max;
+  int k, z_max;
   double f, logLike_old;
+  std::vector<int> m1_eff;
+  std::vector<int> m2_eff;
+  std::vector<int> z_max_eff;
   std::vector< std::vector<  double> > frwrd_mat;
   std::vector< std::vector<  double> > bkwrd_mat;
   std::vector< std::vector< double> > IBD_mat;
 
   // objects for storing MCMC results
-  std::vector< double> logLike_burnin_store;
-  std::vector< double> logLike_store;
-  std::vector<int> m1_store;
-  std::vector<int> m2_store;
+  std::vector<double> logLike_burnin_store;
+  std::vector<double> logLike_store;
   std::vector<double> f_store;
   std::vector<double> k_store;
   std::vector< std::vector<  double> > IBD_marginal;
@@ -53,10 +56,6 @@ public:
  // std::vector<int> sim_trans_n_store;
 
   // misc objects
-  int m1_weight_stay;
-  int m1_weight_move;
-  int m2_weight_stay;
-  int m2_weight_move;
   double f_propSD;
   int k_weight_stay;
   int k_weight_move;
@@ -72,10 +71,9 @@ public:
   void burnin_MCMC(Rcpp::List args_functions);
   void samp_MCMC(Rcpp::List args_functions);
   void define_emmission_lookup();
-  void update_transition_lookup(double f, double rho, int k, int m1, int m2, Rcpp::Function getTransProbs);
-  double forward_alg(int m1, int m2);
-  void backward_alg(int m1, int m2);
+  void update_transition_lookup(double f, double rho, int k, std::vector<int> z_max_eff, Rcpp::Function getTransProbs);
+  double forward_alg(std::vector<int> z_max_eff, std::vector<int> m1_eff, std::vector<int> m2_eff);
+  void backward_alg(std::vector<int> z_max_eff, std::vector<int> m1_eff, std::vector<int> m2_eff);
   void get_IBD();
-  double propose_m(double m_current, double weight_move, double weight_stay);
   double propose_k(double k_current, double weight_move, double weight_stay);
 };

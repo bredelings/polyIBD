@@ -16,7 +16,8 @@ NULL
 #' @export
 
 
-stgIrunMCMC <- function(input = NULL,
+stgIrunMCMC <- function(sample = NULL,
+                        input = NULL,
                         m_max = 5,
                         k_max = 10,
                         rho = 1e-5,
@@ -36,7 +37,7 @@ stgIrunMCMC <- function(input = NULL,
   #     Setup Input for Rcpp
   # ------------------------------
 
-  Rcppcompat <- polyIBDinput_to_stgIrunMCMC_compat(polyIBDinput = input)
+  Rcppcompat <- polyIBDinput_to_stgIrunMCMC_compat(polyIBDinput = input, sample=sample)
 
   # define list of arguments to pass to Rcpp
   args <- list(x = Rcppcompat[["x"]],
@@ -139,6 +140,7 @@ stgIrunMCMC <- function(input = NULL,
 
 
 runMCMC <- function(input = NULL,
+                    retsmpl1, retsmpl2,
                     m_max = 5,
                     k_max = 10,
                     rho = 1e-5,
@@ -158,7 +160,7 @@ runMCMC <- function(input = NULL,
   #     Setup Input for Rcpp
   # ------------------------------
 
-  Rcppcompat <- polyIBDinput_to_stgIIrunMCMC_compat(input)
+  Rcppcompat <- polyIBDinput_to_stgIIrunMCMC_compat(input, retsmpl1, retsmpl2)
 
   # define list of arguments to pass to Rcpp
   args <- list(x = Rcppcompat[["x"]],
@@ -171,7 +173,10 @@ runMCMC <- function(input = NULL,
                samples = samples,
                e1 = e1,
                e2 = e2,
-               reportIteration = reportIteration)
+               reportIteration = reportIteration,
+               m1_mat =  mat_to_Rcpp(t(Rcppcompat[["effm1_mat"]])), # transpose here so that loci are cols
+               m2_mat =  mat_to_Rcpp(t(Rcppcompat[["effm2_mat"]]))
+  )
 
   # R functions to pass to Rcpp
   args_functions <- list(getTransProbs = polyIBD::getTransProbs)

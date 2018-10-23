@@ -114,7 +114,7 @@ Rcpp_to_mat <- function(x) {
 # TODO fix this input
 
 
-polyIBDinput_to_stgIrunMCMC_compat <- function(polyIBDinput){
+polyIBDinput_to_stgIrunMCMC_compat <- function(polyIBDinput, sample = NULL){
 
   p <- polyIBDinput[["p"]]
   gtmatrix <- polyIBDinput[["gtmatrix"]]
@@ -137,8 +137,16 @@ polyIBDinput_to_stgIrunMCMC_compat <- function(polyIBDinput){
   # 2 = {Aa}
   # 3 = {a}
 
-
+# TODO
+# This is a temporary hold on a better way to parse
+if(sample == 1){
+  x <- gtmatrix[,1]+1
+} else if(sample == 2){
   x <- gtmatrix[,2]+1
+} else {
+  stop("You must provide a sample number, either 1 or 2")
+}
+
 
 ## return
 ret <- list(p=p,
@@ -156,7 +164,11 @@ return(ret)
 # (not exported)
 # TODO fix this input
 
-polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
+polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput, retsmpl1, retsmpl2){
+  # TODO this is a temporary way to store these matrices
+  effm1_mat <- retsmpl1$summary$effMOI[,3:ncol(retsmpl1$summary$effMOI)]
+  effm2_mat <- retsmpl2$summary$effMOI[,3:ncol(retsmpl2$summary$effMOI)]
+
   p <- polyIBDinput[["p"]]
   gtmatrix <- polyIBDinput[["gtmatrix"]]
 
@@ -195,7 +207,9 @@ polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
   ## return
   ret <- list(p=p,
               x=x,
-              SNP_dist = SNP_dist)
+              SNP_dist = SNP_dist,
+              effm1_mat = effm1_mat,
+              effm2_mat = effm2_mat)
 
   return(ret)
 

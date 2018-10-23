@@ -166,7 +166,7 @@ simData <- function(pos=list(contig1=sort(sample(1e5, 1e2)),
     # simulate IBD segments BETWEEN individual haplotypes by drawing from the underlying Markov model
     IBD_bs <- matrix(NA, n[i], zmax)
     for (j in 1:zmax) {
-        IBD_bs[,j] <- simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
+        IBD_bs[,j] <- 0 # simIBD(f, k, rho, pos[[i]]) # are two strains in IBD (yes/no)
         w <- which(IBD_bs[,j] == 1)
         haplotype1[w,j] <- haplotype2[w,j] # For regions that are IBD, set it to 1 between strains
     }
