@@ -165,9 +165,7 @@ return(ret)
 # TODO fix this input
 
 polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
-  # TODO this is a temporary way to store these matrices
- # effm1_mat <- retsmpl1$summary$effMOI[,3:ncol(retsmpl1$summary$effMOI)]
- # effm2_mat <- retsmpl2$summary$effMOI[,3:ncol(retsmpl2$summary$effMOI)]
+
 
   p <- polyIBDinput[["p"]]
   gtmatrix <- polyIBDinput[["gtmatrix"]]
@@ -207,7 +205,8 @@ polyIBDinput_to_stgIIrunMCMC_compat <- function(polyIBDinput){
   ## return
   ret <- list(p=p,
               x=x,
-              SNP_dist = SNP_dist)
+              SNP_dist = SNP_dist
+              )
 
   return(ret)
 

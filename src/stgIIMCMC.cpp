@@ -1,6 +1,6 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
-#include "MCMC.h"
+#include "stgIIMCMC.h"
 #include "misc.h"
 #include "probability.h"
 
@@ -21,8 +21,8 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   e2 = Rcpp_to_double(args["e2"]);
   m_max = Rcpp_to_int(args["m_max"]);
   k_max = Rcpp_to_int(args["k_max"]);
-//  m1_mat = Rcpp_to_mat_int(args["m1_mat"]);
-//  m2_mat = Rcpp_to_mat_int(args["m2_mat"]);
+  m1_mat = Rcpp_to_mat_int(args["m1_mat"]);
+  m2_mat = Rcpp_to_mat_int(args["m2_mat"]);
 
   // MCMC parameters
   burnin = Rcpp_to_int(args["burnin"]);
@@ -35,15 +35,18 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   transition_lookup = vector< vector< vector<double> > >(L-1, vector< vector<double> >(m_max+1, vector<double> (m_max+1)));
 
   // initialise transient MCMC objects
-  m1_eff = vector<int>(L); // effective MOI for sample 1
-  m2_eff = vector<int>(L);
-  z_max_eff = vector<int>(L);
   f = 0.01;
   k=1;
   logLike_old = 0;
   frwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
   bkwrd_mat = vector< vector< double> >(m_max+1, vector< double>(L));
   IBD_mat = vector< vector< double> >(m_max+1, vector<double>(L));
+
+  // initialise transient MCMC effMOI
+  m1_eff = vector<int>(L, 1); // effective MOI for sample 1
+  m2_eff = vector<int>(L, 1);
+  z_max_eff = vector<int>(L, 1);
+
 
   // objects for storing MCMC results
   logLike_burnin_store = vector< double>(burnin);
@@ -54,41 +57,14 @@ MCMC::MCMC(Rcpp::List args, Rcpp::List args_functions) {
   accept_rate = 0;
 
   // temp objects
-  f_ind = 0;
-  f_ind_store = vector<double>(samples);
+  fbs = 0;
+  fbs_store = vector<double>(samples);
   // sim_trans_n = 0;
   // sim_trans_n_store = vector<int>(samples);
 
   // calculate initial likelihood
-//   update_transition_lookup(f, rho, k, z_max_eff, args_functions["getTransProbs"]);
-//
-// // Fill the z_max_eff, m1_eff, and m2_eff vectors for initialisation
-//   fill(m1_eff.begin(), m1_eff.end(), 1); // fill with 1 for first iteration
-//   fill(m2_eff.begin(), m2_eff.end(), 1); // fill with 1 for first iteration
-//   fill(z_max_eff.begin(), z_max_eff.end(), 1); // fill with 1 for first iteration
-//   for(int i = 0; i<L; i++){
-//     z_max_eff[i] = (m1_eff[i] < m2_eff[i]) ? m1_eff[i] : m2_eff[i] ;
-//   }
-//
-// // DEBUG
-//  for(int j; j < int(transition_lookup.size()); j++){
-//   for(int z1; z1 < int(transition_lookup[j].size()); z1++){
-//     for(int z2; z2 < int(transition_lookup[j][z1].size()); z2++){
-//       printf("Transprob"); print(transition_lookup[j][z1][z2]);
-//     }
-//    }
-//   }
-//
-//
-// // more DEBUG
-//  for(int k; k < int(z_max_eff.size()); k++){
-//   printf("z_max_eff"); print(z_max_eff[k]);
-// }
-//
-
-printf("Do we get to here");
-
-  logLike_old = forward_alg(vector<int>(L,1), vector<int>(L,1), vector<int>(L,1));
+   update_transition_lookup(f, rho, k, z_max_eff, args_functions["getTransProbs"]);
+  logLike_old = forward_alg(m1_eff, m2_eff, z_max_eff);
   logLike_burnin_store[0] = logLike_old;
 
   // misc objects
@@ -97,6 +73,7 @@ printf("Do we get to here");
   f_propSD = 0.2;
   k_weight_stay = 1;
   k_weight_move = 1;
+
 }
 
 //------------------------------------------------
@@ -124,11 +101,10 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       }
     }
 
+
     // find z_max vector
-    int b1 = m1_mat.size();
-    int m1rand = sample2(0, (b1-1)); // randomly sample a row from matrix
-    int b2 = m2_mat.size();
-    int m2rand = sample2(0, (b2-1));
+    int m1rand = sample2(0, m1_mat.size()-1); // randomly sample a row from matrix
+    int m2rand = sample2(0, m2_mat.size()-1);
     m1_eff = m1_mat[m1rand];
     m2_eff = m2_mat[m2rand];
     for(int i = 0; i<L; i++){
@@ -143,11 +119,9 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     int k_prop = k;
     k_prop = propose_k(k, k_weight_move, k_weight_stay);
 
-
     // update transition probabilities and calculate new likelihood
     update_transition_lookup(f_prop, rho, k_prop, z_max_eff, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(z_max_eff, m1_eff, m2_eff);
-
 
     // Metropolis-Hastings step
     // note that all proposal distributions are symmetric, therefore no Hastings step is required -- we meet g(x | x') = g(x' | x)
@@ -189,7 +163,6 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     logLike_burnin_store[rep] = logLike_old;
 
   }   // end MCMC loop
-
 }
 
 //------------------------------------------------
@@ -205,7 +178,6 @@ void MCMC::samp_MCMC(Rcpp::List args_functions) {
   // calculate initial IBD matrix
   backward_alg(z_max_eff, m1_eff, m2_eff);
   get_IBD();
-
   // loop through sampling iterations
   for (int rep=0; rep<samples; rep++) {
 
@@ -217,10 +189,8 @@ void MCMC::samp_MCMC(Rcpp::List args_functions) {
     }
 
     // find z_max vector
-    int b1 = m1_mat.size();
-    int m1rand = sample2(1, b1); // randomly sample a row from matrix
-    int b2 = m2_mat.size();
-    int m2rand = sample2(1, b2);
+    int m1rand = sample2(0, m1_mat.size()-1); // randomly sample a row from matrix
+    int m2rand = sample2(0, m2_mat.size()-1);
     m1_eff = m1_mat[m1rand];
     m2_eff = m2_mat[m2rand];
     for(int i = 0; i<L; i++){
@@ -261,7 +231,7 @@ void MCMC::samp_MCMC(Rcpp::List args_functions) {
     // store current values
     logLike_store[rep] = logLike_old;
     f_store[rep] = f;
-    f_ind_store[rep] = f_ind;
+    fbs_store[rep] = fbs;
     k_store[rep] = k;
     //sim_trans_n_store[rep] = sim_trans_n;
 
@@ -492,6 +462,7 @@ double MCMC::forward_alg(vector<int> z_maxvect, vector<int> m1_eff, vector<int> 
     frwrd_mat[z][0] /= frwrd_sum;
   }
 
+
   // carry out remaining steps of algorithm
   for (int j=1; j<L; j++) {
 
@@ -511,6 +482,7 @@ double MCMC::forward_alg(vector<int> z_maxvect, vector<int> m1_eff, vector<int> 
 
     }
     logLike += log(frwrd_sum);
+
     for (int z=0; z<(z_max+1); z++) {
       frwrd_mat[z][j] /= frwrd_sum;
     }
@@ -566,7 +538,7 @@ void MCMC::get_IBD() {
 
 
   // initialise values
-  f_ind = 0;
+  fbs = 0;
   double Lcomb = 0;
 
   // take product of forward and backward matrices, and normalise
@@ -588,17 +560,16 @@ void MCMC::get_IBD() {
     for (int z=0; z<(z_max+1); z++) {
       IBD_mat[z][j] /= IBD_sum;
     }
-    //    f_ind += IBD_mat[1][j]; // original when only considering MOI 1,1
 
     for (int z=1; z<(z_max+1); z++){
-      f_ind += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
+      fbs += IBD_mat[z][j] * z * SNP_dist[j]; // AUC -- z+1 to include the zero level
     }
 
     Lcomb += z_max*SNP_dist[j]; // AUC -- z+1 to include the zero level
 
   }
 
-  f_ind /= double(Lcomb);
+  fbs /= double(Lcomb);
 
   /*
   double state_prob_sum = 0;

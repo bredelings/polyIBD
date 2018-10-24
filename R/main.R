@@ -140,7 +140,8 @@ stgIrunMCMC <- function(sample = NULL,
 
 
 runMCMC <- function(input = NULL,
- #                   retsmpl1, retsmpl2,
+                    effm1_mat,
+                    effm2_mat,
                     m_max = 5,
                     k_max = 10,
                     rho = 1e-5,
@@ -173,9 +174,9 @@ runMCMC <- function(input = NULL,
                samples = samples,
                e1 = e1,
                e2 = e2,
-               reportIteration = reportIteration
-   #            m1_mat =  mat_to_Rcpp(t(Rcppcompat[["effm1_mat"]])), # transpose here so that loci are cols
-   #            m2_mat =  mat_to_Rcpp(t(Rcppcompat[["effm2_mat"]]))
+               reportIteration = reportIteration,
+               m1_mat =  mat_to_Rcpp(t(effm1_mat)), # transpose here so that loci are cols
+               m2_mat =  mat_to_Rcpp(t(effm2_mat))
   )
 
   # R functions to pass to Rcpp
@@ -200,10 +201,8 @@ runMCMC <- function(input = NULL,
   # list of raw output
   raw_output <- list(logLike_burnin = coda::mcmc(output_raw$logLike_burnin),
                      logLike = coda::mcmc(output_raw$logLike),
-                     m1 = coda::mcmc(output_raw$m1),
-                     m2 = coda::mcmc(output_raw$m2),
                      f = coda::mcmc(output_raw$f),
-                     f_ind = coda::mcmc(output_raw$f_ind),
+                     fbs = coda::mcmc(output_raw$fbs),
                      k = coda::mcmc(output_raw$k)
                      #sim_trans_n = coda::mcmc(output_raw$sim_trans_n),
                      )
@@ -226,7 +225,7 @@ runMCMC <- function(input = NULL,
 
   # calculate quantiles over parameters
   quants <- t(mapply(function(x){quantile(x, probs=c(0.025, 0.5, 0.975))}, raw_output))
-  quants <- quants[rownames(quants) %in% c("m1", "m2", "f", "f_ind", "k"),]
+  quants <- quants[rownames(quants) %in% c("f", "fbs", "k"),]
 
   # list of summary output
   summary_output <- list(IBD_marginal = IBD_marginal,

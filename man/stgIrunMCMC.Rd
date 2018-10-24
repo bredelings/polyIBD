@@ -4,9 +4,9 @@
 \alias{stgIrunMCMC}
 \title{Run polyIBD Stage I MCMC using Rcpp functions}
 \usage{
-stgIrunMCMC(input = NULL, m_max = 5, k_max = 10, rho = 1e-05,
-  burnin = 100, samples = 1000, e1 = 0.05, e2 = 0.05,
-  reportIteration = 1000)
+stgIrunMCMC(sample = NULL, input = NULL, m_max = 5, k_max = 10,
+  rho = 1e-05, burnin = 100, samples = 1000, e1 = 0.05,
+  e2 = 0.05, reportIteration = 1000)
 }
 \arguments{
 \item{dat}{TODO}

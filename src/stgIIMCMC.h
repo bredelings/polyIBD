@@ -50,8 +50,8 @@ public:
   int accept_rate;
 
   // temp objects
-  double f_ind;
-  std::vector<double> f_ind_store;
+  double fbs;
+  std::vector<double> fbs_store;
  // int sim_trans_n;
  // std::vector<int> sim_trans_n_store;
 

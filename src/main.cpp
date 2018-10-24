@@ -4,7 +4,7 @@
 #include <chrono>
 #include "misc.h"
 #include "probability.h"
-#include "MCMC.h"
+#include "stgIIMCMC.h"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
   ret.push_back(Rcpp::wrap( mainMCMC.logLike_burnin_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.logLike_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.f_store ));
-  ret.push_back(Rcpp::wrap( mainMCMC.f_ind_store ));
+  ret.push_back(Rcpp::wrap( mainMCMC.fbs_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.k_store ));
   //ret.push_back(Rcpp::wrap( mainMCMC.sim_trans_n_store ));
   ret.push_back(Rcpp::wrap( mainMCMC.IBD_marginal ));
@@ -45,7 +45,7 @@ Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions) {
   ret_names.push_back("logLike_burnin");
   ret_names.push_back("logLike");
   ret_names.push_back("f");
-  ret_names.push_back("f_ind");
+  ret_names.push_back("fbs");
   ret_names.push_back("k");
 //ret_names.push_back("sim_trans_n");
   ret_names.push_back("IBD_marginal");
