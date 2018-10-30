@@ -255,17 +255,14 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
     // m1 - zlvl to get the effective MOI estimate
     z_probvec = vector< double>(m1);
     for(int j=0; j<L; j++){
+      fill(z_probvec.begin(), z_probvec.end(), 0);
       for(int i=0; i<m1; i++){
-        fill(z_probvec.begin(), z_probvec.end(), 0);
         z_probvec[i] = IBD_mat[i][j];
-
       }
       int result = sampleZ(z_probvec);
 
       effMOI[rep][j] = result;
     }
-
-
   }   // end MCMC loop
 
   // finalise IBD_mat
@@ -322,19 +319,19 @@ void stgIMCMC::define_emmission_lookup() {
 
           }
           // if all IBD
-          else if (z == (h-1)){ // we have m-1 pairs. Within a sample then we cannot have a het call if all are IBD
-
-            x_raw[0] = 1;
-            x_raw[1] = pow(p,m1-z);
-            x_raw[2] = 0;
-            x_raw[3] = pow(q,m1-z);
-          }
+//          else if (z == (h-1)){ // we have m-1 pairs. Within a sample then we cannot have a het call if all are IBD
+//
+//            x_raw[0] = 1;
+//            x_raw[1] = pow(p,m1-z);
+//            x_raw[2] = 0;
+//            x_raw[3] = pow(q,m1-z);
+//          }
           // if some IBD but not all IBD
           else {
 
             x_raw[0] = 1;
             x_raw[1] = pow(p,m1-z);
-            x_raw[2] = 0;
+            x_raw[2] = 1 - pow(p,m1-z) - pow(q,m1-z);
             x_raw[3] = pow(q,m1-z);
           }
 

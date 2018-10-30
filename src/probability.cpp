@@ -19,6 +19,8 @@ default_random_engine generator(rd());
 // return the prob found
 double psamp(vector<double> p){
   double rand = runif_0_1();
+//  printf("randnum"); print(rand);
+//  sleep(2);
   double pback = 0;
 
   // sort
@@ -32,10 +34,16 @@ double psamp(vector<double> p){
   // compare
   for(int i=0; i<int(cump.size()); i++){
     if(rand <= cump[i]){
-      for(int j=0; j < i; j++ ){
+      for(int j=0; j<i; j++ ){
         pback += p[j];
       }
       // return original vector value
+       // printf("cumpi"); print(cump[i]);
+       // sleep(2);
+       // printf("pback"); print(pback);
+       // sleep(2);
+       // printf("ret"); print(cump[i] - pback);
+       // sleep(2);
       return cump[i] - pback;
       break;
     }
