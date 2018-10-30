@@ -19,8 +19,8 @@ default_random_engine generator(rd());
 // return the prob found
 double psamp(vector<double> p){
   double rand = runif_0_1();
-//  printf("randnum"); print(rand);
-//  sleep(2);
+  // printf("randnum"); print(rand);
+  // sleep(2);
   double pback = 0;
 
   // sort

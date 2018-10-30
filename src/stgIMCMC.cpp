@@ -258,11 +258,34 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
       fill(z_probvec.begin(), z_probvec.end(), 0);
       for(int i=0; i<m1; i++){
         z_probvec[i] = IBD_mat[i][j];
+        // printf("i"); print(i);
+        // sleep(2);
+        // printf("z_probvec"); print(z_probvec[i]);
+        // sleep(2);
       }
       int result = sampleZ(z_probvec);
+      // printf("this_is_zret"); print(result);
+      // sleep(2);
 
-      effMOI[rep][j] = result;
+      // FUTURE DEBUG THIS MAKES NO SENSE
+//      double cond = 0;
+//      if((m1 - result) == cond){
+
+        // for(int i = 0; i<int(z_probvec.size()); i++){
+        //   printf("i"); print(i);
+        //   printf("z_probvec"); print(z_probvec[i]);
+        // }
+        //
+        //
+        // printf("m1_"); print(m1);
+        // printf("result_"); print(result);
+        // Rcpp::stop("thisshouldnthappen");
+
+//    }
+
+      effMOI[rep][j] = m1 - result;
     }
+
   }   // end MCMC loop
 
   // finalise IBD_mat

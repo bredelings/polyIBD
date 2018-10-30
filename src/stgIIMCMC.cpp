@@ -101,12 +101,13 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
       }
     }
 
-
     // find z_max vector
     int m1rand = sample2(0, m1_mat.size()-1); // randomly sample a row from matrix
     int m2rand = sample2(0, m2_mat.size()-1);
     m1_eff = m1_mat[m1rand];
     m2_eff = m2_mat[m2rand];
+    printf("m1rand"); print(m1rand);
+    printf("m2rand"); print(m2rand);
     for(int i = 0; i<L; i++){
       z_max_eff[i] = (m1_eff[i] < m2_eff[i]) ? m1_eff[i] : m2_eff[i] ;
     }
@@ -122,7 +123,6 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     // update transition probabilities and calculate new likelihood
     update_transition_lookup(f_prop, rho, k_prop, z_max_eff, args_functions["getTransProbs"]);
     double logLike_new = forward_alg(z_max_eff, m1_eff, m2_eff);
-
     // Metropolis-Hastings step
     // note that all proposal distributions are symmetric, therefore no Hastings step is required -- we meet g(x | x') = g(x' | x)
     // if accept
