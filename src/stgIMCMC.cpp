@@ -263,7 +263,8 @@ void stgIMCMC::samp_MCMC(Rcpp::List args_functions) {
         // printf("z_probvec"); print(z_probvec[i]);
         // sleep(2);
       }
-      int result = sampleZ(z_probvec);
+
+      int result = psamp(z_probvec);
       // printf("this_is_zret"); print(result);
       // sleep(2);
 
@@ -407,8 +408,7 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
 
       // clear existing values
       for (int z1=0; z1<(m_max); z1++) {
-        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1); // first fill with 0s
-        transition_lookup[j][1][1] = 1; // a11 is 1 becuase a strain is identical to itself
+        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1); 
       }
     }
 

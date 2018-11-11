@@ -106,8 +106,6 @@ void MCMC::burnin_MCMC(Rcpp::List args_functions) {
     int m2rand = sample2(0, m2_mat.size()-1);
     m1_eff = m1_mat[m1rand];
     m2_eff = m2_mat[m2rand];
-    printf("m1rand"); print(m1rand);
-    printf("m2rand"); print(m2rand);
     for(int i = 0; i<L; i++){
       z_max_eff[i] = (m1_eff[i] < m2_eff[i]) ? m1_eff[i] : m2_eff[i] ;
     }

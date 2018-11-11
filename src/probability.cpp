@@ -18,16 +18,20 @@ default_random_engine generator(rd());
 // sample from vector of probabilities w/ respect to weights
 // return the prob found
 double psamp(vector<double> p){
+
+  // inits
   double rand = runif_0_1();
   // printf("randnum"); print(rand);
   // sleep(2);
   double pback = 0;
+  double pc = 0;
+  vector<double> origp = p;
+  vector<double> cump = p;
 
   // sort
   sort(p.begin(), p.end());
 
   // compute cumulative probabilities
-  vector<double> cump = p;
   for(int i=1; i<int(cump.size()); i++){
     cump[i] += cump[i-1];
   }
@@ -37,30 +41,20 @@ double psamp(vector<double> p){
       for(int j=0; j<i; j++ ){
         pback += p[j];
       }
-      // return original vector value
-       // printf("cumpi"); print(cump[i]);
-       // sleep(2);
-       // printf("pback"); print(pback);
-       // sleep(2);
-       // printf("ret"); print(cump[i] - pback);
-       // sleep(2);
-      return cump[i] - pback;
+      double pc = cump[i] - pback;
       break;
     }
   }
-}
-
-//--------------------------------------------------------
-// find the index (i.e. the z-level) that matches the prob sampled
-int sampleZ(vector<double> p) {
-  double pc = psamp(p);
+  // now find original value in vector
   for(int z=0; z<int(p.size()); z++){
-    if(pc == p[z]){
+    if(pc == origp[z]){
       return z;
       break;
     }
   }
+
 }
+
 
 
 //------------------------------------------------

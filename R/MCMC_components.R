@@ -2,7 +2,6 @@
 #------------------------------------------------
 # Trans Probs
 #------------------------------------------------
-# ------------------------------------------------------------------
 #' @title Get transition probabilities
 #'
 #' @description Takes values of f, rho, and zmax. Produces rate matrix and calculates eigen values and vectors.

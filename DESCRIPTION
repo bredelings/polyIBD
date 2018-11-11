@@ -22,6 +22,7 @@ Imports:
     tidyr (>= 0.8.1),
     Rcpp (>= 0.12.12),
     RcppParallel (>= 4.4.1),
+    RcppArmadillo (>= 0.9.100),
     viridis (>= 0.5.1),
     vcfR (>= 1.8.0),
 Suggests:
@@ -35,6 +36,7 @@ Suggests:
 LinkingTo:
     Rcpp,
     RcppParallel,
+    RcppArmadillo,
     testthat
 SystemRequirements:
     C++11,
