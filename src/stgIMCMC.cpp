@@ -408,7 +408,9 @@ void stgIMCMC::update_transition_lookup(double f, double rho, int k, int m1, Rcp
 
       // clear existing values
       for (int z1=0; z1<(m_max); z1++) {
-        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1); 
+        fill(transition_lookup[j][z1].begin(), transition_lookup[j][z1].end(), 1);
+        // transition_lookup[j][1][1] = 1;
+        // transition_lookup[j][2][2] = 1;
       }
     }
 
