@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "probability.h"
 #include "MCMC.h"
+#include "SMC.h"
 
 using namespace std;
 
