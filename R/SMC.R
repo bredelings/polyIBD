@@ -9,8 +9,8 @@
 #' @param loci genomic positions of loci.
 #' @param N (haploid) population size.
 #' @param rho recombination rate.
-#' @param max_time number of generations to simulate. If 0 then run until all
-#'   loci have coalesced.
+#' @param generations number of generations to simulate. If -1 then run until
+#'   all loci have coalesced (or until hard limit of 1e9 generation is reached).
 #'
 #' @export
 
@@ -18,7 +18,7 @@ wrightfisher_ARG <- function(n = 2,
                              loci = seq(0,1000,100),
                              N = 100,
                              rho = 1e-3,
-                             generations = 0) {
+                             generations = -1) {
   
   # TODO - checks on inputs
   

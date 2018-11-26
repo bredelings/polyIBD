@@ -1,4 +1,3 @@
-
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include "SMC.h"
@@ -15,17 +14,10 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
   // get inputs
   int n = Rcpp_to_int(args["n"]);
   vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int L = int(loci.size());
   int N = Rcpp_to_int(args["N"]);
   double rho = Rcpp_to_double(args["rho"]);
   int generations = Rcpp_to_int(args["generations"]);
-  bool generations_infinite = (generations == 0);
-  
-  // get genetic distances
-  int L = int(loci.size());
-  vector<int> delta(L);
-  for (int l=1; l<L; ++l) {
-    delta[l] = loci[l]-loci[l-1];
-  }
   
   // initialise samples. The value in x[i][j] indicates the member of the
   // population that sample i at locus j occupies
@@ -47,12 +39,12 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
   vector<vector<bool>> active(n, vector<bool>(L, true));
   
   // loop backwards through time
-  int t = -1;
-  while (true) {
-    t++;
+  map<int, pair<int, int>> locus_map;
+  for (int t=0; t<int(1e9); ++t) {
     
     // draw events in all samples and loci
     for (int i=0; i<n; ++i) {
+      locus_map.clear();
       for (int l=0; l<L; ++l) {
         
         // skip if inactive
@@ -60,22 +52,41 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
           continue;
         }
         
-        // draw whether recombination breakpoint since previous locus
-        double prob_break = 1 - exp(-rho*delta[l]);
-        if (l == 0) {
-          prob_break = 1;
-        }
-        if (rbernoulli1(prob_break)) {
+        // if first time seeing this value in this sample then always draw new
+        // parent. Otherwise draw new parent based on recombination probability
+        // and distance since previous locus of this type
+        int new_value = 0;
+        if (locus_map.count(x[i][l]) != 1) {  // first time seeing this value
           
           // draw new parent
-          x[i][l] = sample2(0,N-1);
+          new_value = sample2(0,N-1);
           
-        } else {
+        } else {  // seen before
           
-          // parent equals previous locus
-          x[i][l] = x[i][l-1];
+          // get probability of recombination
+          int delta = loci[l] - locus_map[x[i][l]].first;
+          double prob_break = 1 - exp(-rho*delta);
+          
+          // if recombination then draw new parent, otherwise same parent as
+          // previous locus with this value
+          if (rbernoulli1(prob_break)) {
+            
+            // draw new parent
+            new_value = sample2(0,N-1);
+            
+          } else {
+            
+            // parent equals previous locus with this value
+            new_value = locus_map[x[i][l]].second;
+            
+          }
           
         }
+        
+        // store position of this locus
+        locus_map[x[i][l]] = {loci[l], new_value};
+        x[i][l] = new_value;
+        
       }
     }
     
@@ -104,7 +115,7 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
     }
     
     // break if all coalesced or if reached max time
-    if (total_coalesced == (n-1)*L || (!generations_infinite && t == (generations-1))) {
+    if (total_coalesced == (n-1)*L || t == (generations-1)) {
       break;
     }
   }
