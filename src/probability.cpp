@@ -42,9 +42,13 @@ double runif1(double a, double b) {
 
 //------------------------------------------------
 // draw from Bernoulli(p) distribution
-bool rbernoulli1(double p) {
-    bernoulli_distribution dist_bernoulli(p);
-    return(dist_bernoulli(generator));
+bool rbernoulli1(const double p) {
+#ifdef USE_MY_RANDOM
+  bernoulli_distribution dist_bernoulli(p);
+  return dist_bernoulli(generator);
+#else
+  return R::rbinom(1, p);
+#endif
 }
 
 //------------------------------------------------
@@ -54,7 +58,6 @@ double rnorm1(double mean, double sd) {
     normal_distribution<double> dist_norm(mean,sd);
     return(dist_norm(generator));
 }
-
 #else
 double rnorm1(double mean, double sd) {
     return(R::rnorm(mean, sd));
@@ -114,11 +117,22 @@ int sample1(vector<double> &p, double pSum) {
     double z = 0;
     for (int i=0; i<int(p.size()); i++) {
         z += p[i];
-        if (rand<z) {
+        if (rand < z) {
             return i+1;
         }
     }
     return(0);
+}
+int sample1(vector<int> &p, int pSum) {
+  int rand = sample2(1,pSum);
+  int z = 0;
+  for (int i=0; i<int(p.size()); i++) {
+    z += p[i];
+    if (rand <= z) {
+      return i+1;
+    }
+  }
+  return(0);
 }
 
 //------------------------------------------------
@@ -184,8 +198,6 @@ double rpois1(double lambda) {
     return(R::rpois(lambda));
 }
 
-
-
 //------------------------------------------------
 // draw from negative binomial distribution with mean lambda and variance gamma*lambda (gamma must be >1)
 int rnbinom1(double lambda, double gamma) {
@@ -213,4 +225,26 @@ vector<double> rdirichlet1(double alpha, int n) {
         ret[i] /= retSum;
     }
     return(ret);
+}
+
+//------------------------------------------------
+// draw from Geometric(p) distribution, with mean (1-p)/p
+int rgeom1(const double p) {
+#ifdef USE_MY_RANDOM
+  geometric_distribution<int> dist_geom(p);
+  return dist_geom(generator);
+#else
+  return R::rgeom(p);
+#endif
+}
+
+//------------------------------------------------
+// draw from exponential(r) distribution
+double rexp1(const double r) {
+#ifdef USE_MY_RANDOM
+  exponential_distribution<double> dist_exponential(r);
+  return dist_exponential(generator);
+#else
+  return R::rexp(1/r);
+#endif
 }

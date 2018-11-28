@@ -2,23 +2,24 @@
 % Please edit documentation in R/SMC.R
 \name{wrightfisher_ARG}
 \alias{wrightfisher_ARG}
-\title{Simulate ancestral recombination graph from Wright-Fisher model}
+\title{Simulate ancestral recombination graph under Wright-Fisher model}
 \usage{
-wrightfisher_ARG(n, loci, N, rho, generations = 0)
+wrightfisher_ARG(n = 2, loci = seq(0, 1000, 100), N = 100,
+  rho = 0.001, generations = -1)
 }
 \arguments{
 \item{n}{number of haploid samples.}
 
 \item{loci}{genomic positions of loci.}
 
-\item{N}{(haploid) population size.}
+\item{N}{haploid population size.}
 
 \item{rho}{recombination rate.}
 
-\item{max_time}{number of generations to simulate. If 0 then run until all
-loci have coalesced.}
+\item{generations}{number of generations to simulate. If -1 then run until
+all loci have coalesced (or until hard limit of 1e9 generation is reached).}
 }
 \description{
-Simulate ancestral recombination graph from (haploid)
+Simulate ancestral recombination graph under haploid
   Wright-Fisher model.
 }

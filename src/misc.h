@@ -54,21 +54,36 @@ void push_back_multiple(std::vector<TYPE> &lhs, std::vector<TYPE> &rhs) {
 double logSum(double logA, double logB);
 
 //------------------------------------------------
-// helper function for printing a single value (templated for different data types)
-template<typename TYPE>
+// helper function for printing a single value or series of values (templated for different data types)
+template<class TYPE>
 void print(TYPE x) {
-    Rcpp::Rcout << x << "\n";
-    R_FlushConsole();
+  Rcpp::Rcout << x << "\n";
+  R_FlushConsole();
 }
 template<class TYPE1, class TYPE2>
 void print(TYPE1 x1, TYPE2 x2) {
-    Rcpp::Rcout << x1 << " " << x2 << "\n";
-    R_FlushConsole();
+  Rcpp::Rcout << x1 << " " << x2 << "\n";
+  R_FlushConsole();
 }
 template<class TYPE1, class TYPE2, class TYPE3>
 void print(TYPE1 x1, TYPE2 x2, TYPE3 x3) {
-    Rcpp::Rcout << x1 << " " << x2 << " " << x3 << "\n";
-    R_FlushConsole();
+  Rcpp::Rcout << x1 << " " << x2 << " " << x3 << "\n";
+  R_FlushConsole();
+}
+template<class TYPE1, class TYPE2, class TYPE3, class TYPE4>
+void print(TYPE1 x1, TYPE2 x2, TYPE3 x3, TYPE4 x4) {
+  Rcpp::Rcout << x1 << " " << x2 << " " << x3 << " " << x4 << "\n";
+  R_FlushConsole();
+}
+template<class TYPE1, class TYPE2, class TYPE3, class TYPE4, class TYPE5>
+void print(TYPE1 x1, TYPE2 x2, TYPE3 x3, TYPE4 x4, TYPE5 x5) {
+  Rcpp::Rcout << x1 << " " << x2 << " " << x3 << " " << x4 << " " << x5 << "\n";
+  R_FlushConsole();
+}
+template<class TYPE1, class TYPE2, class TYPE3, class TYPE4, class TYPE5, class TYPE6>
+void print(TYPE1 x1, TYPE2 x2, TYPE3 x3, TYPE4 x4, TYPE5 x5, TYPE6 x6) {
+  Rcpp::Rcout << x1 << " " << x2 << " " << x3 << " " << x4 << " " << x5 << " " << x6 << "\n";
+  R_FlushConsole();
 }
 
 //------------------------------------------------

@@ -30,6 +30,7 @@ int sample2(int a, int b);
 //------------------------------------------------
 // sample single value from given probability vector (that sums to pSum)
 int sample1(std::vector<double> &p, double pSum=1.0);
+int sample1(std::vector<int> &p, int pSum=100);
 
 //------------------------------------------------
 // draw from gamma(shape,rate) distribution
@@ -58,3 +59,11 @@ double dnbinom1(int n, double lambda, double gamma, bool returnLog=true);
 //------------------------------------------------
 // draw from symmetric dichlet(alpha) distribution of length n
 std::vector<double> rdirichlet1(double alpha, int n);
+
+//------------------------------------------------
+// draw from Geometric(p) distribution, with mean (1-p)/p
+int rgeom1(const double p);
+
+//------------------------------------------------
+// draw from exponential(r) distribution
+double rexp1(const double r);
