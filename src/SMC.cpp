@@ -20,27 +20,31 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
   int generations = Rcpp_to_int(args["generations"]);
   
   // initialise samples. The value in x[i][j] indicates the member of the
-  // population that sample i at locus j occupies
+  // population that the genetic element in sample i at locus j occupies
   vector<vector<int>> x(n);
   for (int i=0; i<n; ++i) {
     x[i] = vector<int>(L, i);
   }
   
-  // store whether sample has coalesced or mutated at each locus, plus timing of
-  // these events
+  // store whether lineage has coalesced, which lineage it coalesced with, and
+  // when coalescence occured
   vector<vector<bool>> coalesced(n, vector<bool>(L, false));
+  vector<vector<int>> coalesced_with(n, vector<int>(L));
   vector<vector<int>> coalesced_time(n, vector<int>(L));
-  int total_coalesced = 0;
   
-  // a map is used to keep track of unique values in each sample
-  map<int, pair<int, int>> locus_map;
+  // a map is used to keep track of recombination events (see below)
+  map<int, pair<int, int>> recom_map;
   
   // loop backwards through time
-  for (int t=0; t<int(1e9); ++t) {
+  for (int t=0; t<generations; ++t) {
     
-    // draw events in all samples and loci
+    // loop through all samples
     for (int i=0; i<n; ++i) {
-      locus_map.clear();
+      
+      // clear the recombination map for this sample
+      recom_map.clear();
+      
+      // loop through all loci
       for (int l=0; l<L; ++l) {
         
         // skip if already coalesced
@@ -48,11 +52,14 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
           continue;
         }
         
-        // if first time seeing this value in this sample then always draw new
-        // parent. Otherwise draw new parent based on recombination probability
-        // and distance since previous locus of this type
+        // if first time seeing the value x[i][l] as we scan across loci then we
+        // are essentially jumping to a new host, therefore draw new parent. If
+        // we have seen x[i][l] before then we have already drawn a new parent
+        // for the genetic material in this host. which will be stored in the
+        // recom_map. Therefore, draw new or existing parent based on
+        // recombination probability and distance since previous value
         int new_value = 0;
-        if (locus_map.count(x[i][l]) != 1) {  // first time seeing this value
+        if (recom_map.count(x[i][l]) != 1) {  // first time seeing this value
           
           // draw new parent
           new_value = sample2(0,N-1);
@@ -60,7 +67,7 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
         } else {  // seen before
           
           // get probability of recombination
-          int delta = loci[l] - locus_map[x[i][l]].first;
+          int delta = loci[l] - recom_map[x[i][l]].first;  // distance since previous value
           double prob_break = 1 - exp(-rho*delta);
           
           // if recombination then draw new parent, otherwise same parent as
@@ -68,13 +75,13 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
           if (rbernoulli1(prob_break)) {
             new_value = sample2(0,N-1);
           } else {
-            new_value = locus_map[x[i][l]].second;
+            new_value = recom_map[x[i][l]].second;  // the stored parent
           }
           
         }
         
-        // store new value and latest position
-        locus_map[x[i][l]] = {loci[l], new_value};
+        // update recom_map and x
+        recom_map[x[i][l]] = {loci[l], new_value};
         x[i][l] = new_value;
         
       }
@@ -95,26 +102,24 @@ Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args) {
             
             // register coalescence
             coalesced[i][l] = true;
+            coalesced_with[i][l] = j;
             coalesced_time[i][l] = t;
             if (j == 0) {
               coalesced[j][l] = true;
+              coalesced_with[j][l] = -1;
               coalesced_time[j][l] = t;
             }
-            total_coalesced++;
             
           }
         }
       }
     }
     
-    // break if all coalesced or if reached max time
-    if (total_coalesced == (n-1)*L || t == (generations-1)) {
-      break;
-    }
-  }
+  } // end loop through time
   
   // return list
   return Rcpp::List::create(Rcpp::Named("coalesced") = coalesced,
+                            Rcpp::Named("coalesced_with") = coalesced_with,
                             Rcpp::Named("coalesced_time") = coalesced_time);
   
 }
@@ -162,7 +167,7 @@ Rcpp::List wrightfisher_SMC_cpp(Rcpp::List args) {
     double p = loci[l-1] + rexp1(rho*T[l]);
     while (p < loci[l]) {
       
-      // draw timing of recombination event uniformally over branch lengths
+      // draw timing of recombination event uniformly over branch lengths
       int recom_lineage = sample1(ct[l], T[l])-1;
       int recom_t1 = sample2(0,ct[l][recom_lineage]);
       
@@ -260,5 +265,235 @@ Rcpp::List wrightfisher_SMC_cpp(Rcpp::List args) {
   
   // return list
   return Rcpp::List::create(Rcpp::Named("coalesced_time") = ct);
+}
+
+//------------------------------------------------
+// draw from SMC under wright-fisher model by looping through discrete
+// generations
+// [[Rcpp::export]]
+Rcpp::List wrightfisher_SMC_naive_cpp(Rcpp::List args) {
   
+  // get inputs
+  int n = Rcpp_to_int(args["n"]);
+  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int L = int(loci.size());
+  int N = Rcpp_to_int(args["N"]);
+  double rho = Rcpp_to_double(args["rho"]);
+  int generations = Rcpp_to_int(args["generations"]);
+  
+  // get distance between loci
+  vector<int> delta(L);
+  for (int l=1; l<L; ++l) {
+    delta[l] = loci[l] - loci[l-1];
+  }
+  
+  // initialise samples. The value in x[i][j] indicates the member of the
+  // population that sample i at locus j occupies
+  vector<vector<int>> x(n);
+  for (int i=0; i<n; ++i) {
+    x[i] = vector<int>(L, i);
+  }
+  
+  // store whether sample has coalesced or mutated at each locus, plus timing of
+  // these events
+  vector<vector<bool>> coalesced(n, vector<bool>(L, false));
+  vector<vector<int>> coalesced_time(n, vector<int>(L));
+  
+  // loop backwards through time
+  for (int t=0; t<generations; ++t) {
+    
+    // implement recombination/independent sampling
+    for (int i=0; i<n; ++i) {
+      int prev_locus = x[i][0];
+      int prev_locus_new_value = 0;
+      for (int l=0; l<L; ++l) {
+        
+        // skip if already coalesced
+        if (coalesced[i][l]) {
+          continue;
+        }
+        
+        // draw recombination
+        double prob_recom = 1;
+        if (l > 0 && x[i][l] == prev_locus) {
+          prob_recom = 1 - exp(-rho*delta[l]);
+        }
+        if (rbernoulli1(prob_recom)) {
+          prev_locus_new_value = sample2(0,N-1);
+          prev_locus = x[i][l];
+        }
+        x[i][l] = prev_locus_new_value;
+      }
+    }
+    
+    // check for coalescence
+    for (int l=0; l<L; ++l) {
+      for (int i=1; i<n; ++i) {
+        
+        // skip if already coalesced
+        if (coalesced[i][l]) {
+          continue;
+        }
+        
+        // compare against all other samples
+        for (int j=0; j<i; ++j) {
+          if (x[i][l] == x[j][l]) {
+            
+            // register coalescence
+            coalesced[i][l] = true;
+            coalesced_time[i][l] = t;
+            if (j == 0) {
+              coalesced[j][l] = true;
+              coalesced_time[j][l] = t;
+            }
+            
+          }
+        }
+      }
+    }
+    
+  }  // end loop over time
+  
+  // return list
+  return Rcpp::List::create(Rcpp::Named("coalesced") = coalesced,
+                            Rcpp::Named("coalesced_time") = coalesced_time);
+}
+
+//------------------------------------------------
+// draw from SMC under wright-fisher model by layering haplotypes one at a time
+// [[Rcpp::export]]
+Rcpp::List wrightfisher_SMC_layer_cpp(Rcpp::List args) {
+  
+  // get inputs
+  int n = Rcpp_to_int(args["n"]);
+  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int L = int(loci.size());
+  int N = Rcpp_to_int(args["N"]);
+  double rho = Rcpp_to_double(args["rho"]);
+  
+  // get distance between loci
+  vector<int> delta(L);
+  for (int l=1; l<L; ++l) {
+    delta[l] = loci[l] - loci[l-1];
+  }
+  
+  // cw = coalesce with. Integer value giving which other lineage a given
+  // lineage coalesces to
+  // ct = coalesce time. Time at which coalescence occurs
+  vector<vector<int>> cw(L, vector<int>(n-1,-1));
+  vector<vector<int>> ct(L, vector<int>(n-1,-1));
+  
+  // loop through samples
+  vector<int> ct_sort;
+  for (int i=0; i<(n-1); ++i) {
+    
+    // draw first locus from standard coalescent process
+    ct_sort = ct[0];
+    sort(ct_sort.begin(), ct_sort.begin()+i);
+    int j = 0;
+    int k = i+1;
+    int coalesce_time = rgeom1(k/double(N));
+    while (coalesce_time >= ct_sort[j] && k > 1) {
+      j++;
+      k--;
+      while (ct_sort[j] == ct_sort[j-1] && k > 1) {
+        j++;
+        k--;
+      }
+      coalesce_time = ct_sort[j-1] + rgeom1(k/double(N));
+    }
+    ct[0][i] = coalesce_time;
+    
+    // choose random lineage to coalesce with
+    int coalesce_with = 1;
+    int tmp1 = sample2(0,k-1);
+    for (int j=0; j<i; ++j) {
+      if (ct[0][j] > coalesce_time) {
+        if (tmp1 == 0) {
+          coalesce_with = j+2;
+          break;
+        }
+        tmp1--;
+      }
+    }
+    cw[0][i] = coalesce_with;
+    
+    // loop through remaining loci
+    for (int l=1; l<L; ++l) {
+      
+      // get maximum coalescent time ignoring lineage i
+      int t_max = 0;
+      for (int j=0; j<i; ++j) {
+        if (ct[l][j] > t_max) {
+          t_max = ct[l][j];
+        }
+      }
+      
+      // use t_max to calculate overhang
+      int overhang = (ct[l-1][i] > t_max) ? ct[l-1][i] - t_max : 0;
+      
+      // draw whether there is recombination event since previous locus
+      double prob_recom = 1 - exp(-rho*(ct[l-1][i] + overhang + 1)*delta[l]);
+      if (rbernoulli1(prob_recom)) {
+        
+        // draw recombination split time uniformly over overhang or this branch
+        double prob_overhang = 0;
+        if (overhang > 0) {
+          prob_overhang = overhang/double(overhang + ct[l-1][i]);
+        }
+        int split_time = 0;
+        if (rbernoulli1(prob_overhang)) {
+          split_time = sample2(t_max, ct[l-1][i]);
+        } else {
+          split_time = sample2(0, ct[l-1][i]);
+        }
+        
+        // get number of extant lineages k at split_time
+        ct_sort = ct[l-1];
+        sort(ct_sort.begin(), ct_sort.begin()+i);
+        int k = i+1;
+        for (int j=0; j<i; ++j) {
+          if (ct_sort[j] < split_time) {
+            k--;
+          }
+        }
+        
+        // draw time at which lineage rejoins tree
+        coalesce_time = split_time + rgeom1(k/double(N));
+        int j = i+1-k;
+        while (coalesce_time >= ct_sort[j] && k > 1) {
+          j++;
+          k--;
+          while (ct_sort[j] == ct_sort[j-1] && k > 1) {
+            j++;
+            k--;
+          }
+          coalesce_time = ct_sort[j-1] + rgeom1(k/double(N));
+        }
+        
+        // choose random lineage to coalesce with
+        int tmp1 = sample2(0,k-1);
+        coalesce_with = 1;
+        for (int j=0; j<i; ++j) {
+          if (ct[l][j] > coalesce_time) {
+            if (tmp1 == 0) {
+              coalesce_with = j+2;
+              break;
+            }
+            tmp1--;
+          }
+        }
+        
+      }  // end bernoulli prob_recom
+      
+      // update coalescence
+      cw[l][i] = coalesce_with;
+      ct[l][i] = coalesce_time;
+      
+    }  // end loop over loci
+  } // end loop over samples
+  
+  // return list
+  return Rcpp::List::create(Rcpp::Named("coalesced_with") = cw,
+                            Rcpp::Named("coalesced_time") = ct);
 }

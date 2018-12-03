@@ -15,11 +15,10 @@ wrightfisher_SMC(n = 2, loci = seq(0, 1000, 100), N = 100,
 \item{N}{haploid population size.}
 
 \item{rho}{recombination rate.}
-
-\item{generations}{number of generations to simulate. If -1 then run until
-all loci have coalesced (or until hard limit of 1e9 generation is reached).}
 }
 \description{
 Simulate from sequentially Markov coalescent approximation to
-  the full ancestral recombination graph under haploid Wright-Fisher model. Note that because time is implemented as discrete this approximation will break down for large sample sizes,
+  the full ancestral recombination graph under haploid Wright-Fisher model.
+  Note that because time is implemented as discrete this approximation will
+  break down for large sample sizes.
 }

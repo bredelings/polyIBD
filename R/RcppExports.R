@@ -9,6 +9,14 @@ wrightfisher_SMC_cpp <- function(args) {
     .Call(`_polyIBD_wrightfisher_SMC_cpp`, args)
 }
 
+wrightfisher_SMC_naive_cpp <- function(args) {
+    .Call(`_polyIBD_wrightfisher_SMC_naive_cpp`, args)
+}
+
+wrightfisher_SMC_layer_cpp <- function(args) {
+    .Call(`_polyIBD_wrightfisher_SMC_layer_cpp`, args)
+}
+
 runMCMC_cpp <- function(args, args_functions) {
     .Call(`_polyIBD_runMCMC_cpp`, args, args_functions)
 }
