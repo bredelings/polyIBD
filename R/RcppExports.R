@@ -13,8 +13,16 @@ wrightfisher_SMC_naive_cpp <- function(args) {
     .Call(`_polyIBD_wrightfisher_SMC_naive_cpp`, args)
 }
 
-wrightfisher_SMC_layer_cpp <- function(args) {
-    .Call(`_polyIBD_wrightfisher_SMC_layer_cpp`, args)
+wrightfisher_SMC_conditional_cpp <- function(args) {
+    .Call(`_polyIBD_wrightfisher_SMC_conditional_cpp`, args)
+}
+
+continentisland_ARG_cpp <- function(args) {
+    .Call(`_polyIBD_continentisland_ARG_cpp`, args)
+}
+
+continentisland_SMC_conditional_cpp <- function(args) {
+    .Call(`_polyIBD_continentisland_SMC_conditional_cpp`, args)
 }
 
 runMCMC_cpp <- function(args, args_functions) {

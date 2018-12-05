@@ -360,9 +360,9 @@ Rcpp::List wrightfisher_SMC_naive_cpp(Rcpp::List args) {
 }
 
 //------------------------------------------------
-// draw from SMC under wright-fisher model by layering haplotypes one at a time
+// draw from conditional SMC under wright-fisher model
 // [[Rcpp::export]]
-Rcpp::List wrightfisher_SMC_layer_cpp(Rcpp::List args) {
+Rcpp::List wrightfisher_SMC_conditional_cpp(Rcpp::List args) {
   
   // get inputs
   int n = Rcpp_to_int(args["n"]);
@@ -496,4 +496,279 @@ Rcpp::List wrightfisher_SMC_layer_cpp(Rcpp::List args) {
   // return list
   return Rcpp::List::create(Rcpp::Named("coalesced_with") = cw,
                             Rcpp::Named("coalesced_time") = ct);
+}
+
+//------------------------------------------------
+// draw from complete ancestral recombination graph under continent-island model
+// [[Rcpp::export]]
+Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
+  
+  // get inputs
+  int n = Rcpp_to_int(args["n"]);
+  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int L = int(loci.size());
+  int N = Rcpp_to_int(args["N"]);
+  double rho = Rcpp_to_double(args["rho"]);
+  double mu = Rcpp_to_double(args["mu"]);
+  int generations = Rcpp_to_int(args["generations"]);
+  
+  // initialise samples. The value in x[i][j] indicates the member of the
+  // population that the genetic element in sample i at locus j occupies
+  vector<vector<int>> x(n);
+  for (int i=0; i<n; ++i) {
+    x[i] = vector<int>(L, i);
+  }
+  
+  int next_migrant = N;
+  
+  vector<vector<bool>> active(n, vector<bool>(L, true));
+  vector<vector<bool>> coalesced(n, vector<bool>(L, false));
+  vector<vector<bool>> migrated(n, vector<bool>(L, false));
+  vector<vector<int>> cw(n, vector<int>(L));
+  vector<vector<int>> ct(n, vector<int>(L));
+  vector<vector<int>> mt(n, vector<int>(L));
+  
+  // a map is used to keep track of recombination events (see below)
+  map<int, pair<int, int>> recom_map;
+  
+  // loop backwards through time
+  for (int t=0; t<generations; ++t) {
+    
+    // loop through all samples
+    for (int i=0; i<n; ++i) {
+      
+      // clear the recombination map for this sample
+      recom_map.clear();
+      
+      // loop through all loci
+      for (int l=0; l<L; ++l) {
+        
+        // skip if inactive
+        if (!active[i][l]) {
+          continue;
+        }
+        
+        // if first time seeing the value x[i][l] as we scan across loci then we
+        // are essentially jumping to a new host, therefore draw new parent. If
+        // we have seen x[i][l] before then we have already drawn a new parent
+        // for the genetic material in this host which will be stored in the
+        // recom_map. Therefore, draw new or existing parent based on
+        // recombination probability
+        int new_value = 0;
+        if (recom_map.count(x[i][l]) != 1) {  // first time seeing this value
+          
+          // draw new parent
+          if (rbernoulli1(mu)) {
+            active[i][l] = false;
+            migrated[i][l] = true;
+            new_value = next_migrant++;
+            mt[i][l] = t;
+          } else {
+            new_value = sample2(0,N-1);
+          }
+          
+        } else {  // seen before
+          
+          // get probability of recombination
+          int delta = loci[l] - recom_map[x[i][l]].first;  // distance since previous value
+          double prob_break = 1 - exp(-rho*delta);
+          
+          // if recombination then draw new parent, otherwise same parent as
+          // previous locus with this value
+          if (rbernoulli1(prob_break)) {
+            if (rbernoulli1(mu)) {
+              active[i][l] = false;
+              migrated[i][l] = true;
+              new_value = next_migrant++;
+              mt[i][l] = t;
+            } else {
+              new_value = sample2(0,N-1);
+            }
+          } else {
+            new_value = recom_map[x[i][l]].second;  // the stored parent
+            if (migrated[i][l-1]) {
+              active[i][l] = false;
+              migrated[i][l] = true;
+            }
+          }
+          
+        }  // end recom draw
+        
+        // update recom_map and x
+        recom_map[x[i][l]] = {loci[l], new_value};
+        x[i][l] = new_value;
+        
+      }
+    }
+    
+    // check for coalescence
+    for (int i=1; i<n; ++i) {
+      for (int l=0; l<L; ++l) {
+        
+        // skip if i inactive
+        if (!active[i][l]) {
+          continue;
+        }
+        
+        // compare against all other samples
+        for (int j=0; j<i; ++j) {
+          
+          // skip if j inactive
+          if (!active[j][l]) {
+            continue;
+          }
+          
+          if (x[i][l] == x[j][l]) {
+            
+            // register coalescence
+            active[i][l] = false;
+            coalesced[i][l] = true;
+            cw[i][l] = j;
+            ct[i][l] = t;
+          }
+        }
+      }
+    }  // end check for coalescence
+    
+  } // end loop through time
+  
+  // return list
+  return Rcpp::List::create(Rcpp::Named("coalesced") = coalesced,
+                            Rcpp::Named("coalesced_with") = cw,
+                            Rcpp::Named("coalesced_time") = ct,
+                            Rcpp::Named("migrated") = migrated,
+                            Rcpp::Named("migrated_with") = x,
+                            Rcpp::Named("migrated_time") = mt);
+  
+}
+
+//------------------------------------------------
+// draw from conditional SMC under continent-island model
+// [[Rcpp::export]]
+Rcpp::List continentisland_SMC_conditional_cpp(Rcpp::List args) {
+  
+  // get inputs
+  int n = Rcpp_to_int(args["n"]);
+  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int L = int(loci.size());
+  int N = Rcpp_to_int(args["N"]);
+  double rho = Rcpp_to_double(args["rho"]);
+  double mu = Rcpp_to_double(args["mu"]);
+  
+  // get distance between loci
+  vector<int> delta(L);
+  for (int l=1; l<L; ++l) {
+    delta[l] = loci[l] - loci[l-1];
+  }
+  
+  int next_migrant = 0;
+  
+  vector<vector<int>> event_time(L, vector<int>(n,-1));
+  vector<vector<bool>> coalesced(L, vector<bool>(n,false));
+  vector<vector<int>> coalesced_with(L, vector<int>(n,-1));
+  vector<vector<int>> migrated_with(L, vector<int>(n,-1));
+  
+  // loop through samples
+  vector<int> t_sort;
+  for (int i=0; i<n; ++i) {
+    
+    // --- draw first locus from standard coalescent process ---
+    
+    // draw time at which lineage rejoins tree
+    t_sort = event_time[0];
+    sort(t_sort.begin(), t_sort.begin()+i);
+    int new_time = 0;
+    int k = i;
+    for (int j=0; j<(i+1); ++j) {
+      k = i - j;
+      new_time += rgeom1(k/double(N) + mu);
+      if (new_time < t_sort[j] || k == 0) {
+        event_time[0][i] = new_time;
+        double prob_coalesce = k/(k + N*mu);
+        coalesced[0][i] = rbernoulli1(prob_coalesce);
+        break;
+      }
+    }
+    
+    // choose random lineage to coalesce with
+    if (coalesced[0][i]) {
+      int tmp1 = sample2(0,k-1);
+      for (int j=0; j<i; ++j) {
+        if (event_time[0][j] > new_time) {
+          if (tmp1 == 0) {
+            coalesced_with[0][i] = j;
+            break;
+          }
+          tmp1--;
+        }
+      }
+    } else {
+      migrated_with[0][i] = next_migrant++;
+    }
+    
+    // --- draw remaining loci from Markov process ---
+    
+    // loop through remaining loci
+    for (int l=1; l<L; ++l) {
+      
+      // copy over previous locus values
+      event_time[l][i] = event_time[l-1][i];
+      coalesced[l][i] = coalesced[l-1][i];
+      coalesced_with[l][i] = coalesced_with[l-1][i];
+      migrated_with[l][i] = migrated_with[l-1][i];
+      
+      // draw whether there is recombination event since previous locus
+      double prob_recom = 1 - exp(-rho*(event_time[l-1][i] + 1)*delta[l]);
+      if (rbernoulli1(prob_recom)) {
+        
+        // draw recombination split time uniformly over this branch
+        int split_time = sample2(0, event_time[l-1][i]);
+        
+        // draw time at which lineage rejoins tree
+        t_sort = event_time[l];
+        sort(t_sort.begin(), t_sort.begin()+i);
+        int k = i;
+        int new_time = split_time;
+        for (int j=0; j<(i+1); ++j) {
+          if (t_sort[j] < split_time) {
+            continue;
+          }
+          k = i - j;
+          new_time += rgeom1(k/double(N) + mu);
+          if (new_time < t_sort[j] || k == 0) {
+            event_time[l][i] = new_time;
+            double prob_coalesce = k/(k + N*mu);
+            coalesced[l][i] = rbernoulli1(prob_coalesce);
+            break;
+          }
+        }
+        
+        // choose random lineage to coalesce with
+        if (coalesced[l][i]) {
+          int tmp1 = sample2(0,k-1);
+          for (int j=0; j<i; ++j) {
+            if (event_time[l][j] > new_time) {
+              if (tmp1 == 0) {
+                coalesced_with[l][i] = j;
+                break;
+              }
+              tmp1--;
+            }
+          }
+        } else {
+          migrated_with[l][i] = next_migrant++;
+        }
+        
+      }  // end recom prob
+      
+    }  // end loop over loci
+    
+  } // end loop over samples
+  
+  // return list
+  return Rcpp::List::create(Rcpp::Named("event_time") = event_time,
+                            Rcpp::Named("coalesced") = coalesced,
+                            Rcpp::Named("coalesced_with") = coalesced_with,
+                            Rcpp::Named("migrated_with") = migrated_with);
+  
 }
