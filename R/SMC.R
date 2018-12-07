@@ -10,17 +10,17 @@
 #' @param loci genomic positions of loci.
 #' @param N haploid population size.
 #' @param rho recombination rate.
-#' @param mu probability of migration from continent (aka mutation rate).
+#' @param m probability of migration from continent (aka mutation rate).
 #' @param generations number of generations to simulate.
 #'
 #' @export
 
 continentisland_ARG <- function(n = 2,
-                             loci = seq(0,1e3,1e2),
-                             N = 100,
-                             rho = 1e-3,
-                             mu = 1e-2,
-                             generations = 1e2) {
+                                loci = seq(0,1e3,1e2),
+                                N = 100,
+                                rho = 1e-3,
+                                m = 1e-2,
+                                generations = 1e2) {
   
   # checks on inputs
   assert_single_pos_int(n, zero_allowed = FALSE)
@@ -28,50 +28,63 @@ continentisland_ARG <- function(n = 2,
   assert_int(loci)
   assert_single_pos_int(N, zero_allowed = FALSE)
   assert_single_pos(rho)
-  assert_single_pos(mu, zero_allowed = FALSE)
-  assert_bounded(mu, left = 0, right = 1, inclusive_left = FALSE, inclusive_right = FALSE)
-  assert_single_pos_int(generations, zero_allowed = FALSE)
+  assert_single_pos(m, zero_allowed = FALSE)
+  assert_bounded(m, left = 0, right = 1, inclusive_left = FALSE, inclusive_right = FALSE)
+  #assert_single_pos_int(generations, zero_allowed = FALSE)
   
   # define argument list
   args <- list(n = n,
                loci = loci,
                N = N,
                rho = rho,
-               mu = mu,
+               m = m,
                generations = generations)
   
   # run efficient C++ code
   output_raw <- continentisland_ARG_cpp(args)
   
   # process output
-  coalesced <- Rcpp_to_mat(output_raw$coalesced)
-  migrated <- Rcpp_to_mat(output_raw$migrated)
-  coalesced_with <- Rcpp_to_mat(output_raw$coalesced_with) + 1
-  coalesced_with[!coalesced | migrated] <- NA
-  coalesced_time <- Rcpp_to_mat(output_raw$coalesced_time) + 1
-  coalesced_time[!coalesced | migrated] <- NA
-  migrated_with <- Rcpp_to_mat(output_raw$migrated_with)
-  migrated_with[!migrated | coalesced] <- NA
-  migrated_time <- Rcpp_to_mat(output_raw$migrated_time) + 1
-  migrated_time[!migrated | coalesced] <- NA
+  recom <- t(Rcpp_to_mat(output_raw$recom))
+  recom_time <- t(Rcpp_to_mat(output_raw$recom_time))
+  event_time <- t(Rcpp_to_mat(output_raw$event_time))
+  active <- t(Rcpp_to_mat(output_raw$active))
+  coalescence <- t(Rcpp_to_mat(output_raw$coalescence))
+  coalesce_with <- t(Rcpp_to_mat(output_raw$coalesce_with))
+  coalesce_with[active | !coalescence] <- NA
+  migrate_with <- t(Rcpp_to_mat(output_raw$migrate_with))
+  migrate_with[active | coalescence] <- NA
   
-  ancestry <- migrated_with
+  # compute ancestry matrix
+  ancestry <- migrate_with
   for (j in 1:n) {
     for (i in 1:n) {
-      x <- migrated_with[i,]
-      y <- coalesced_with[i,]
-      ancestry[i,!is.na(y)] <- ancestry[cbind(y[!is.na(y)],which(!is.na(y)))]
+      y <- coalesce_with[,i]+1
+      if (any(!is.na(y))) {
+        ancestry[!is.na(y),i] <- ancestry[cbind(which(!is.na(y)), y[!is.na(y)])]
+      }
     }
   }
   
+  # get numbers to be increasing over the matrix
   ancestry <- matrix(match(ancestry, unique(as.vector(ancestry))), nrow(ancestry))
   
+  # get ancestry spectrum matrix
+  ancestry_spectrum <- t(apply(ancestry, 1, function(x) tabulate(match(x, unique(x)), nbins = n)))
+  
+  # get effective number of genotypes at every locus
+  n_genotypes <- rowSums(ancestry_spectrum != 0)
+  
   # return list
-  ret <- list(coalesced_with = coalesced_with,
-              coalesced_time = coalesced_time,
-              migrated_with = migrated_with,
-              migrated_time = migrated_time,
-              ancestry = ancestry)
+  ret <- list(recom = recom,
+              recom_time = recom_time,
+              event_time = event_time,
+              active = active,
+              coalescence = coalescence,
+              coalesce_with = coalesce_with,
+              migrate_with = migrate_with,
+              ancestry = ancestry,
+              ancestry_spectrum = ancestry_spectrum,
+              n_genotypes = n_genotypes)
   return(ret)
 }
 
@@ -182,9 +195,9 @@ continentisland_SMC_conditional <- function(recom = NULL,
   n <- ncol(recom)
   for (j in 1:n) {
     for (i in 1:n) {
-      y <- coalesce_with[,i]
+      y <- coalesce_with[,i]+1
       if (any(!is.na(y))) {
-        ancestry[!is.na(y),i] <- ancestry[cbind(which(!is.na(y)), y[!is.na(y)]+1)]
+        ancestry[!is.na(y),i] <- ancestry[cbind(which(!is.na(y)), y[!is.na(y)])]
       }
     }
   }

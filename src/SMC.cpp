@@ -17,7 +17,7 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
   int L = int(loci.size());
   int N = Rcpp_to_int(args["N"]);
   double rho = Rcpp_to_double(args["rho"]);
-  double mu = Rcpp_to_double(args["mu"]);
+  double m = Rcpp_to_double(args["m"]);
   int generations = Rcpp_to_int(args["generations"]);
   
   // initialise samples. The value in x[i][j] indicates the member of the
@@ -27,14 +27,17 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
     x[i] = vector<int>(L, i);
   }
   
+  // give migrants unique indices, starting with one more than the possible
+  // index of individuals within the subpopulation
   int next_migrant = N;
   
+  vector<vector<bool>> recom(n, vector<bool>(L, false));
+  vector<vector<int>> recom_time(n, vector<int>(L));
   vector<vector<bool>> active(n, vector<bool>(L, true));
-  vector<vector<bool>> coalesced(n, vector<bool>(L, false));
-  vector<vector<bool>> migrated(n, vector<bool>(L, false));
-  vector<vector<int>> cw(n, vector<int>(L));
-  vector<vector<int>> ct(n, vector<int>(L));
-  vector<vector<int>> mt(n, vector<int>(L));
+  vector<vector<bool>> coalescence(n, vector<bool>(L, false));
+  vector<vector<int>> coalesce_with(n, vector<int>(L));
+  vector<vector<int>> migrate_with(n, vector<int>(L));
+  vector<vector<int>> event_time(n, vector<int>(L));
   
   // a map is used to keep track of recombination events (see below)
   map<int, pair<int, int>> recom_map;
@@ -56,23 +59,25 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
           continue;
         }
         
-        // if first time seeing the value x[i][l] as we scan across loci then we
-        // are essentially jumping to a new host, therefore draw new parent. If
-        // we have seen x[i][l] before then we have already drawn a new parent
-        // for the genetic material in this host which will be stored in the
-        // recom_map. Therefore, draw new or existing parent based on
-        // recombination probability
-        int new_value = 0;
+        // if first time seeing the value x[i][l] then we are essentially
+        // jumping to a new host, therefore draw new parent. If we have seen
+        // x[i][l] before then we have already drawn a new parent for this host
+        // which will be stored in the recom_map, therefore draw new or existing
+        // parent based on recombination probability
         if (recom_map.count(x[i][l]) != 1) {  // first time seeing this value
           
           // draw new parent
-          if (rbernoulli1(mu)) {
+          if (rbernoulli1(m)) {
+            event_time[i][l] = t;
             active[i][l] = false;
-            migrated[i][l] = true;
-            new_value = next_migrant++;
-            mt[i][l] = t;
+            migrate_with[i][l] = next_migrant;
+            
+            recom_map[x[i][l]] = {loci[l], next_migrant};
+            x[i][l] = next_migrant++;
           } else {
-            new_value = sample2(0,N-1);
+            int new_parent = sample2(0,N-1);
+            recom_map[x[i][l]] = {loci[l], new_parent};
+            x[i][l] = new_parent;
           }
           
         } else {  // seen before
@@ -83,31 +88,40 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
           
           // if recombination then draw new parent, otherwise same parent as
           // previous locus with this value
-          if (rbernoulli1(prob_break)) {
-            if (rbernoulli1(mu)) {
+          int recom_true = rbernoulli1(prob_break);
+          if (!recom[i][l]) {
+            recom[i][l] = true;
+            recom_time[i][l] = t;
+          }
+          if (recom_true) {
+            if (rbernoulli1(m)) {
+              event_time[i][l] = t;
               active[i][l] = false;
-              migrated[i][l] = true;
-              new_value = next_migrant++;
-              mt[i][l] = t;
+              migrate_with[i][l] = next_migrant;
+              
+              recom_map[x[i][l]] = {loci[l], next_migrant};
+              x[i][l] = next_migrant++;
             } else {
-              new_value = sample2(0,N-1);
+              int new_parent = sample2(0,N-1);
+              recom_map[x[i][l]] = {loci[l], new_parent};
+              x[i][l] = new_parent;
             }
+            
           } else {
-            new_value = recom_map[x[i][l]].second;  // the stored parent
-            if (migrated[i][l-1]) {
+            int new_parent = recom_map[x[i][l]].second;  // the stored parent
+            if (!active[i][l-1] && !coalescence[i][l-1]) {
               active[i][l] = false;
-              migrated[i][l] = true;
+              event_time[i][l] = event_time[i][l-1];
+              migrate_with[i][l] = migrate_with[i][l-1];
             }
+            recom_map[x[i][l]] = {loci[l], new_parent};
+            x[i][l] = new_parent;
           }
           
         }  // end recom draw
         
-        // update recom_map and x
-        recom_map[x[i][l]] = {loci[l], new_value};
-        x[i][l] = new_value;
-        
-      }
-    }
+      }  // end loop through loci
+    }  // end loop through samples
     
     // check for coalescence
     for (int i=1; i<n; ++i) {
@@ -126,13 +140,12 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
             continue;
           }
           
+          // register coalescence
           if (x[i][l] == x[j][l]) {
-            
-            // register coalescence
             active[i][l] = false;
-            coalesced[i][l] = true;
-            cw[i][l] = j;
-            ct[i][l] = t;
+            coalescence[i][l] = true;
+            coalesce_with[i][l] = j;
+            event_time[i][l] = t;
           }
         }
       }
@@ -141,12 +154,13 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
   } // end loop through time
   
   // return list
-  return Rcpp::List::create(Rcpp::Named("coalesced") = coalesced,
-                            Rcpp::Named("coalesced_with") = cw,
-                            Rcpp::Named("coalesced_time") = ct,
-                            Rcpp::Named("migrated") = migrated,
-                            Rcpp::Named("migrated_with") = x,
-                            Rcpp::Named("migrated_time") = mt);
+  return Rcpp::List::create(Rcpp::Named("recom") = recom,
+                            Rcpp::Named("recom_time") = recom_time,
+                            Rcpp::Named("event_time") = event_time,
+                            Rcpp::Named("active") = active,
+                            Rcpp::Named("coalescence") = coalescence,
+                            Rcpp::Named("coalesce_with") = coalesce_with,
+                            Rcpp::Named("migrate_with") = migrate_with);
   
 }
 

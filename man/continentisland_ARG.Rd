@@ -5,7 +5,7 @@
 \title{Simulate ancestral recombination graph under continent-island model}
 \usage{
 continentisland_ARG(n = 2, loci = seq(0, 1000, 100), N = 100,
-  rho = 0.001, mu = 0.01, generations = 100)
+  rho = 0.001, m = 0.01, generations = 100)
 }
 \arguments{
 \item{n}{number of haploid samples.}
@@ -16,7 +16,7 @@ continentisland_ARG(n = 2, loci = seq(0, 1000, 100), N = 100,
 
 \item{rho}{recombination rate.}
 
-\item{mu}{probability of migration from continent (aka mutation rate).}
+\item{m}{probability of migration from continent (aka mutation rate).}
 
 \item{generations}{number of generations to simulate.}
 }
