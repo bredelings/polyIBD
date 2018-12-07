@@ -4,21 +4,35 @@
 \alias{continentisland_SMC_conditional}
 \title{Simulate from conditional SMC under continent-island model}
 \usage{
-continentisland_SMC_conditional(n = 2, loci = seq(0, 1000, 100),
-  N = 100, rho = 0.001, mu = 0.01, generations = -1)
+continentisland_SMC_conditional(recom = NULL, recom_time = NULL,
+  event_time = NULL, coalescence = NULL, coalesce_with = NULL,
+  migrate_with = NULL, loci = seq(0, 1000, 100), N = 100,
+  rho = 0.001, m = 0.01)
 }
 \arguments{
-\item{n}{number of haploid samples.}
+\item{recom}{boolean matrix specifying whether there was a recombination
+between this locus and the previous locus.}
 
-\item{loci}{genomic positions of loci.}
+\item{recom_time}{matrix specifying recombination times.}
+
+\item{event_time}{matrix of event timings.}
+
+\item{coalescence}{boolean matrix specifying whether event is coalescence
+(TRUE) or migration (FALSE).}
+
+\item{coalesce_with}{matrix specifying, in the case of coalescence, which
+other lineage to coalesce to.}
+
+\item{migrate_with}{matrix specifying, in the case of migration, which member
+of the continent population is the original ancestor.}
+
+\item{loci}{vector of genomic positions.}
 
 \item{N}{haploid population size.}
 
 \item{rho}{recombination rate.}
 
-\item{mu}{probability of migration from continent (aka mutation rate).}
-
-\item{generations}{(dummy argument)}
+\item{m}{probability of migration from the continent per generation.}
 }
 \description{
 Simulate from conditional SMC under continent-island model.

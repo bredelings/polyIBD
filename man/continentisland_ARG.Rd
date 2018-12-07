@@ -5,7 +5,7 @@
 \title{Simulate ancestral recombination graph under continent-island model}
 \usage{
 continentisland_ARG(n = 2, loci = seq(0, 1000, 100), N = 100,
-  rho = 0.001, mu = 0.01, generations = -1)
+  rho = 0.001, mu = 0.01, generations = 100)
 }
 \arguments{
 \item{n}{number of haploid samples.}
@@ -18,11 +18,10 @@ continentisland_ARG(n = 2, loci = seq(0, 1000, 100), N = 100,
 
 \item{mu}{probability of migration from continent (aka mutation rate).}
 
-\item{generations}{number of generations to simulate. If -1 then run until
-all loci have coalesced (or until hard limit of 1e9 generation is reached).}
+\item{generations}{number of generations to simulate.}
 }
 \description{
-Simulate ancestral recombination graph under haploid
-  continent-island model, which is equivalent to assuming infinite-alleles
-  mutation.
+Simulate ancestral recombination graph under continent-island
+  model. Assumes N haploid individuals each generation, with a probability m
+  of originating from the continent each generation.
 }

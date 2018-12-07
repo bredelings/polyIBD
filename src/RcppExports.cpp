@@ -5,50 +5,6 @@
 
 using namespace Rcpp;
 
-// wrightfisher_ARG_cpp
-Rcpp::List wrightfisher_ARG_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_wrightfisher_ARG_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(wrightfisher_ARG_cpp(args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// wrightfisher_SMC_cpp
-Rcpp::List wrightfisher_SMC_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_wrightfisher_SMC_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(wrightfisher_SMC_cpp(args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// wrightfisher_SMC_naive_cpp
-Rcpp::List wrightfisher_SMC_naive_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_wrightfisher_SMC_naive_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(wrightfisher_SMC_naive_cpp(args));
-    return rcpp_result_gen;
-END_RCPP
-}
-// wrightfisher_SMC_conditional_cpp
-Rcpp::List wrightfisher_SMC_conditional_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_wrightfisher_SMC_conditional_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(wrightfisher_SMC_conditional_cpp(args));
-    return rcpp_result_gen;
-END_RCPP
-}
 // continentisland_ARG_cpp
 Rcpp::List continentisland_ARG_cpp(Rcpp::List args);
 RcppExport SEXP _polyIBD_continentisland_ARG_cpp(SEXP argsSEXP) {
@@ -71,17 +27,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// continentisland_SMC_conditional2_cpp
-Rcpp::List continentisland_SMC_conditional2_cpp(Rcpp::List args);
-RcppExport SEXP _polyIBD_continentisland_SMC_conditional2_cpp(SEXP argsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(continentisland_SMC_conditional2_cpp(args));
-    return rcpp_result_gen;
-END_RCPP
-}
 // runMCMC_cpp
 Rcpp::List runMCMC_cpp(Rcpp::List args, Rcpp::List args_functions);
 RcppExport SEXP _polyIBD_runMCMC_cpp(SEXP argsSEXP, SEXP args_functionsSEXP) {
@@ -98,15 +43,10 @@ END_RCPP
 RcppExport SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_polyIBD_wrightfisher_ARG_cpp", (DL_FUNC) &_polyIBD_wrightfisher_ARG_cpp, 1},
-    {"_polyIBD_wrightfisher_SMC_cpp", (DL_FUNC) &_polyIBD_wrightfisher_SMC_cpp, 1},
-    {"_polyIBD_wrightfisher_SMC_naive_cpp", (DL_FUNC) &_polyIBD_wrightfisher_SMC_naive_cpp, 1},
-    {"_polyIBD_wrightfisher_SMC_conditional_cpp", (DL_FUNC) &_polyIBD_wrightfisher_SMC_conditional_cpp, 1},
     {"_polyIBD_continentisland_ARG_cpp", (DL_FUNC) &_polyIBD_continentisland_ARG_cpp, 1},
     {"_polyIBD_continentisland_SMC_conditional_cpp", (DL_FUNC) &_polyIBD_continentisland_SMC_conditional_cpp, 1},
-    {"_polyIBD_continentisland_SMC_conditional2_cpp", (DL_FUNC) &_polyIBD_continentisland_SMC_conditional2_cpp, 1},
     {"_polyIBD_runMCMC_cpp", (DL_FUNC) &_polyIBD_runMCMC_cpp, 2},
-    {"run_testthat_tests",                            (DL_FUNC) &run_testthat_tests,                            0},
+    {"run_testthat_tests",                           (DL_FUNC) &run_testthat_tests,                           0},
     {NULL, NULL, 0}
 };
 
