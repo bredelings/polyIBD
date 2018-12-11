@@ -9,7 +9,7 @@ continentisland_SMC_conditional_cpp <- function(args) {
     .Call(`_polyIBD_continentisland_SMC_conditional_cpp`, args)
 }
 
-runMCMC_cpp <- function(args, args_functions) {
-    .Call(`_polyIBD_runMCMC_cpp`, args, args_functions)
+SMC_MCMC_cpp <- function(args) {
+    .Call(`_polyIBD_SMC_MCMC_cpp`, args)
 }
 
