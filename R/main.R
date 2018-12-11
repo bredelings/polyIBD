@@ -282,7 +282,9 @@ SMC_MCMC <- function(x,
                      loci = seq(0,1e3,1e2),
                      N = 1e2,
                      rho = 1e-3,
-                     m = 1e-2) {
+                     m = 1e-2,
+                     burnin = 10,
+                     samples = 10) {
   
   
   # checks on inputs
@@ -296,6 +298,8 @@ SMC_MCMC <- function(x,
   assert_single_pos(rho)
   assert_single_pos(m, zero_allowed = FALSE)
   assert_bounded(m, left = 0, right = 1, inclusive_left = FALSE, inclusive_right = FALSE)
+  assert_single_pos_int(burnin, zero_allowed = FALSE)
+  assert_single_pos_int(samples, zero_allowed = FALSE)
   
   # generate initial sample configuration
   recom <- NULL
@@ -352,7 +356,9 @@ SMC_MCMC <- function(x,
                N = N,
                rho = rho,
                m = m,
-               next_migrant = next_migrant)
+               next_migrant = next_migrant,
+               burnin = burnin,
+               samples = samples)
   
   # run efficient C++ code
   output_raw <- SMC_MCMC_cpp(args)

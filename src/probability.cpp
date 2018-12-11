@@ -95,9 +95,9 @@ double rnorm1_interval(double mean, double sd, double a, double b) {
 
     // don't let ret equal exactly a or b
     if (ret==a) {
-        ret += UNDERFLO;
+        ret += UNDERFLO_DOUBLE;
     } else if (ret==b) {
-        ret -= UNDERFLO;
+        ret -= UNDERFLO_DOUBLE;
     }
 
     return(ret);

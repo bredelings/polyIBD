@@ -1,8 +1,9 @@
 
 #include <chrono>
 #include "main.h"
-#include "misc.h"
+#include "misc_v2.h"
 #include "probability.h"
+#include "MCMC.h"
 
 using namespace std;
 
@@ -12,13 +13,13 @@ using namespace std;
 Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
   
   // get inputs
-  int n = Rcpp_to_int(args["n"]);
-  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  int n = rcpp_to_int(args["n"]);
+  vector<int> loci = rcpp_to_vector_int(args["loci"]);
   int L = int(loci.size());
-  int N = Rcpp_to_int(args["N"]);
-  double rho = Rcpp_to_double(args["rho"]);
-  double m = Rcpp_to_double(args["m"]);
-  int generations = Rcpp_to_int(args["generations"]);
+  int N = rcpp_to_int(args["N"]);
+  double rho = rcpp_to_double(args["rho"]);
+  double m = rcpp_to_double(args["m"]);
+  int generations = rcpp_to_int(args["generations"]);
   
   // initialise samples. The value in x[i][j] indicates the member of the
   // population that the genetic element in sample i at locus j occupies
@@ -178,19 +179,19 @@ Rcpp::List continentisland_ARG_cpp(Rcpp::List args) {
 Rcpp::List continentisland_SMC_conditional_cpp(Rcpp::List args) {
   
   // get inputs
-  bool first_draw = Rcpp_to_bool(args["first_draw"]);
-  vector<vector<bool>> recom = Rcpp_to_mat_bool(args["recom"]);
-  vector<vector<int>> recom_time = Rcpp_to_mat_int(args["recom_time"]);
-  vector<vector<int>> event_time = Rcpp_to_mat_int(args["event_time"]);
-  vector<vector<bool>> coalescence = Rcpp_to_mat_bool(args["coalescence"]);
-  vector<vector<int>> coalesce_target = Rcpp_to_mat_int(args["coalesce_target"]);
-  vector<vector<int>> migrate_target = Rcpp_to_mat_int(args["migrate_target"]);
-  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
+  bool first_draw = rcpp_to_bool(args["first_draw"]);
+  vector<vector<bool>> recom = rcpp_to_matrix_bool(args["recom"]);
+  vector<vector<int>> recom_time = rcpp_to_matrix_int(args["recom_time"]);
+  vector<vector<int>> event_time = rcpp_to_matrix_int(args["event_time"]);
+  vector<vector<bool>> coalescence = rcpp_to_matrix_bool(args["coalescence"]);
+  vector<vector<int>> coalesce_target = rcpp_to_matrix_int(args["coalesce_target"]);
+  vector<vector<int>> migrate_target = rcpp_to_matrix_int(args["migrate_target"]);
+  vector<int> loci = rcpp_to_vector_int(args["loci"]);
   int L = int(loci.size());
-  int N = Rcpp_to_int(args["N"]);
-  double rho = Rcpp_to_double(args["rho"]);
-  double m = Rcpp_to_double(args["m"]);
-  int next_migrant = Rcpp_to_int(args["next_migrant"]);
+  int N = rcpp_to_int(args["N"]);
+  double rho = rcpp_to_double(args["rho"]);
+  double m = rcpp_to_double(args["m"]);
+  int next_migrant = rcpp_to_int(args["next_migrant"]);
   
   // initialize objects for storing new events
   vector<bool> recom_new(L, false);
@@ -366,28 +367,8 @@ Rcpp::List continentisland_SMC_conditional_cpp(Rcpp::List args) {
 // [[Rcpp::export]]
 Rcpp::List SMC_MCMC_cpp(Rcpp::List args) {
   
-  // get inputs
-  vector<int> x = Rcpp_to_vector_int(args["x"]);
-  int n = Rcpp_to_int(args["n"]);
-  vector<vector<bool>> recom = Rcpp_to_mat_bool(args["recom"]);
-  vector<vector<int>> recom_time = Rcpp_to_mat_int(args["recom_time"]);
-  vector<vector<int>> event_time = Rcpp_to_mat_int(args["event_time"]);
-  vector<vector<bool>> coalescence = Rcpp_to_mat_bool(args["coalescence"]);
-  vector<vector<int>> coalesce_target = Rcpp_to_mat_int(args["coalesce_target"]);
-  vector<vector<int>> migrate_target = Rcpp_to_mat_int(args["migrate_target"]);
-  vector<int> loci = Rcpp_to_vector_int(args["loci"]);
-  int L = int(loci.size());
-  int N = Rcpp_to_int(args["N"]);
-  double rho = Rcpp_to_double(args["rho"]);
-  double m = Rcpp_to_double(args["m"]);
-  int next_migrant = Rcpp_to_int(args["next_migrant"]);
-  
-  // get distance between loci
-  vector<int> delta(L);
-  for (int l=1; l<L; ++l) {
-    delta[l] = loci[l] - loci[l-1];
-  }
-  
+  // create MCMC object
+  MCMC mcmc(args);
   
   
   /*
